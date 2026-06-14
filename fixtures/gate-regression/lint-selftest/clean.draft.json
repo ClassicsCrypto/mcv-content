@@ -1,0 +1,11 @@
+{
+  "content_id": "lint-selftest-clean",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "format": "text",
+  "variants": [
+    { "label": "recommended", "text": "The Acme Cosmos beta wrapped with 60 builders shipping live demos this weekend." },
+    { "label": "variant-a", "text": "Sixty builders. One weekend. Every demo went out as a working link people can open." },
+    { "label": "variant-b", "text": "We asked for usable demos and got sixty. Here is exactly what the beta produced." }
+  ]
+}

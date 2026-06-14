@@ -1,0 +1,13 @@
+{
+  "audit_header": {
+    "content_id": "greg-fb-clean",
+    "brand": "acme-cosmos",
+    "platform": "facebook",
+    "mode": "SAFE",
+    "format": "text",
+    "community_bridge": "invites the local builders group to share what they shipped"
+  },
+  "recommended": { "text": "Sixty builders spent the weekend in the Acme Cosmos beta and shipped demos you can open.", "scores": { "brand": 90 }, "rationale": "Recap with a community-bridge field declared." },
+  "variant_a": { "text": "Three days, sixty builders, every demo a link you can open. The beta recap.", "scores": { "brand": 88 }, "rationale": "Recap angle." },
+  "variant_b": { "text": "We asked for working demos. Sixty arrived. Here is the full weekend recap.", "scores": { "brand": 87 }, "rationale": "Ask-and-result." }
+}

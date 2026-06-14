@@ -1,0 +1,5 @@
+{
+  "verdict": "FAIL",
+  "vision_pass": false,
+  "codes": ["VIS.EMBEDDED_TEXT"]
+}

@@ -1,0 +1,11 @@
+{
+  "content_id": "greg-variant-dup",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "format": "text",
+  "variants": [
+    { "label": "recommended", "text": "Sixty builders shipped working demos at the Acme Cosmos beta this weekend together right now." },
+    { "label": "variant-a", "text": "Sixty builders shipped working demos at the Acme Cosmos beta this weekend together right now." },
+    { "label": "variant-b", "text": "We asked for usable demos and got sixty. Here is exactly what the beta produced overall today." }
+  ]
+}

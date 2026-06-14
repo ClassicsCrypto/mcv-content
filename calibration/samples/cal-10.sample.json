@@ -1,0 +1,23 @@
+{
+  "sample_id": "cal-10",
+  "archetype": "visual-spotlight",
+  "command": {
+    "command_family": "RUN_SLOT",
+    "brand": "acme-cosmos",
+    "platform": "twitter",
+    "format": "single-post-image",
+    "mode": "SAFE",
+    "routing_class": "VISUAL_HEAVY",
+    "slot_ref": "cal-extra-visual",
+    "pillar": "product",
+    "theme": "Share a clean render of the planner's launch-window timeline view",
+    "notes": "A visual sample: the caption frames the timeline view's value (read a week of windows at a glance) without describing the image literally. The asset should be on-brand with no baked-in text. Exercises the visual fit dimension and the media-decision lane. Any referenced asset is a synthetic placeholder (no real media ships here)."
+  },
+  "expected_posture": "clean-on-voice-visual",
+  "exercises": [
+    "visual fit: on-brand asset, no embedded text — guards against VIS.OFF_BRAND / VIS.EMBEDDED_TEXT",
+    "media discipline: the caption adds context, it does not narrate the image — guards against FM.IMAGE_DESCRIPTION",
+    "honesty note: in empty-library / no-vision-provider installs the visual gate degrades to skip-with-warning (VIS.SKIPPED_NO_PROVIDER, soft, bars Recommended) — that is expected, not a failure"
+  ],
+  "reviewer_note": "The one visual sample. On a text-only or no-vision-provider instance this judges on caption voice alone and the visual gate skips with a warning; the operator judges the visual dimension only when a vision provider is configured."
+}

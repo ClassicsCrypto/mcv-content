@@ -1,0 +1,11 @@
+{
+  "content_id": "greg-banned-phrase",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "format": "text",
+  "variants": [
+    { "label": "recommended", "text": "Sixty builders shipped working demos at the Acme Cosmos beta this weekend together right now." },
+    { "label": "variant-a", "text": "We asked for usable demos and got sixty. Here is exactly what the beta produced overall today." },
+    { "label": "variant-b", "text": "Every demo went out as a link people can open and try right now this whole weekend for sure." }
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/artifacts/media-decision.schema.json",
+  "title": "Media Decision Record",
+  "description": "The media stage's recorded decision, handed from the media seat to the packager (release-spec.md §9.2 media→packager; §8.5/§8.6). It captures the retrieval query, a reference to the candidate set that produced it, the chosen action (reuse / modify / generate), the chosen asset (for reuse/modify), and a reference to the cooldown evaluation that governed the choice (DD-14). Cooldown is enforced at retrieval, package validation, and the publish executor; this record makes the media decision auditable at the handoff. All asset references are $CONTENT_HOME-relative; absolute paths are forbidden. Structural contract only; instances are instance data and never ship in the repo.",
+  "x-stability": "stable",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "content_id",
+    "query",
+    "action"
+  ],
+  "properties": {
+    "content_id": {
+      "type": "string",
+      "description": "Content identifier shared across artifacts for this item."
+    },
+    "brand": {
+      "type": "string",
+      "description": "Brand id the media is for."
+    },
+    "platform": {
+      "type": "string",
+      "description": "Target platform descriptor id."
+    },
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The retrieval query that drove the decision (mirrors the retrieval-result query block).",
+      "properties": {
+        "brand": { "type": "string" },
+        "theme": { "type": "string" },
+        "archetype": { "type": "string" },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "media_type": {
+          "type": "string",
+          "enum": ["image", "video", "gif", "motion", "animated_image"]
+        }
+      }
+    },
+    "candidates_ref": {
+      "type": "string",
+      "description": "$CONTENT_HOME-relative reference to the retrieval result (schemas/artifacts/retrieval-result.schema.json) the candidates came from."
+    },
+    "action": {
+      "type": "string",
+      "enum": ["reuse", "modify", "generate"],
+      "description": "The chosen media action. reuse: publish an existing asset as-is; modify: crop/edit an owned asset before use; generate: create new media."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Human-readable justification for the chosen action."
+    },
+    "chosen_asset_id": {
+      "type": "string",
+      "description": "Asset selected for reuse or modify. Absent for generate."
+    },
+    "chosen_asset_ref": {
+      "type": "string",
+      "description": "$CONTENT_HOME-relative path to the chosen (or, for modify, base) asset. Absent for generate."
+    },
+    "output_ref": {
+      "type": "string",
+      "description": "$CONTENT_HOME-relative path to the produced media (the modified or generated result). Absent until the media stage produces output."
+    },
+    "cooldown_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Reference to the cooldown evaluation that governed this decision (DD-14; release-spec.md §8.6).",
+      "properties": {
+        "asset_id": {
+          "type": "string",
+          "description": "Asset the cooldown was evaluated for."
+        },
+        "eligible": {
+          "type": "boolean",
+          "description": "Whether the asset cleared the hard cooldown floor at decision time."
+        },
+        "cooldown_blocked": {
+          "type": "boolean",
+          "description": "Whether reuse was blocked by cooldown at decision time."
+        },
+        "cooldown_days": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Hard cooldown floor applied."
+        },
+        "override_applied": {
+          "type": "boolean",
+          "default": false,
+          "description": "True when an explicit human-approved override allowed use inside the cooldown window."
+        }
+      }
+    },
+    "skipped_candidates": {
+      "type": "array",
+      "description": "Higher-ranked candidates that were skipped before the chosen one, with the skip reason.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["asset_id", "reason"],
+        "properties": {
+          "asset_id": { "type": "string" },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "reason": {
+            "type": "string",
+            "enum": ["cooldown", "overuse", "hard_block", "not_selected"],
+            "description": "Why the candidate was not chosen."
+          },
+          "risk_codes": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "decided_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the media decision was recorded."
+    }
+  }
+}

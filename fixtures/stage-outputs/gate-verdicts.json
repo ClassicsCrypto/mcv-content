@@ -1,0 +1,88 @@
+{
+  "recorded_fixture": true,
+  "fixture_note": "RECORDED LLM-gate verdicts for the zero-key `engine fixture-run` (release-spec §5.4). Freshly authored synthetic Acme Cosmos content — never copied from a production run (§18.2(6)). The fixture run REPLAYS these instead of calling an LLM (RD-12 zero-key bar): the deterministic pre-gate (pre-gate-lint) runs LIVE over draft.json and emits its codes; these recorded llm-voice + llm-quality stages are layered on top. Each stage object conforms to schemas/artifacts/validation-result.schema.json (additionalProperties:true, so the recorded_fixture/fixture_note labels are schema-legal here). The bundle DEMONSTRATES the union-of-codes contract (DD-3): the final stage carries forward every earlier detection and the LLM adds (never drops) codes — including one SOFT warn with bars_recommended on an alternate variant.",
+  "content_id": "acme-fixture-0001",
+  "stages": [
+    {
+      "content_id": "acme-fixture-0001",
+      "stage": "lint",
+      "verdict": "PASS",
+      "detected_codes": [],
+      "rationale": "Deterministic pre-gate clean (this stage is produced LIVE by engine/gate/pre-gate-lint.js during the fixture run; recorded here for reference and to anchor the union baseline).",
+      "recorded_reference_only": true
+    },
+    {
+      "content_id": "acme-fixture-0001",
+      "stage": "llm-voice",
+      "verdict": "PASS",
+      "detected_codes": [],
+      "scores": { "brand_score": 90, "humanizer_score": 9 },
+      "rationale": "Voice sub-stage: on-lane builder-recap register, operator-conviction, non-substitutable on the Recommended and Variant A. No voice codes added."
+    },
+    {
+      "content_id": "acme-fixture-0001",
+      "stage": "llm-quality",
+      "verdict": "PASS_ALTERNATE_ONLY",
+      "detected_codes": [
+        {
+          "code": "FM.UNVERIFIED_CAUSAL",
+          "family": "FM",
+          "tier": "soft",
+          "source": "llm-quality",
+          "rule_ref": "rule.core.claims-safety",
+          "disposition": "warn",
+          "advisory": true,
+          "bars_recommended": false,
+          "variant_label": "variant-b",
+          "explanation": "ADVISORY note on Variant B: it asserts the deadline+public-output rule is why builders met both — a causal link between two individually-verified facts. Non-blocking; rides onto the card. Does NOT bar Recommended."
+        },
+        {
+          "code": "FM.STATUS_RECAP",
+          "family": "FM",
+          "tier": "soft",
+          "source": "llm-quality",
+          "rule_ref": "rule.core.structure",
+          "disposition": "warn",
+          "bars_recommended": true,
+          "variant_label": "variant-b",
+          "explanation": "Variant B leans toward a by-the-numbers recap framing rather than leading with the thesis. SOFT/warn; bars Variant B from being the Recommended pick (it remains A/B-eligible). The chosen Recommended variant is code-clean."
+        }
+      ],
+      "scores": { "proof_strength": 8, "fact_safety": 10, "stepps_total": 7, "algorithm_score": 7 },
+      "rationale": "Quality sub-stage: the Recommended variant is code-clean and leads with the thesis its receipts evidence. Variant B picks up one advisory (FM.UNVERIFIED_CAUSAL, non-blocking) and one soft warn (FM.STATUS_RECAP, bars_recommended) — so the union verdict is PASS_ALTERNATE_ONLY at the variant level, but the Recommended pick is clean and Recommended-eligible."
+    }
+  ],
+  "final_verdict": {
+    "content_id": "acme-fixture-0001",
+    "stage": "llm-quality",
+    "verdict": "PASS_ALTERNATE_ONLY",
+    "detected_codes": [
+      {
+        "code": "FM.UNVERIFIED_CAUSAL",
+        "family": "FM",
+        "tier": "soft",
+        "source": "llm-quality",
+        "rule_ref": "rule.core.claims-safety",
+        "disposition": "warn",
+        "advisory": true,
+        "bars_recommended": false,
+        "variant_label": "variant-b",
+        "explanation": "Carried forward (union contract): advisory causal note on Variant B."
+      },
+      {
+        "code": "FM.STATUS_RECAP",
+        "family": "FM",
+        "tier": "soft",
+        "source": "llm-quality",
+        "rule_ref": "rule.core.structure",
+        "disposition": "warn",
+        "bars_recommended": true,
+        "variant_label": "variant-b",
+        "explanation": "Carried forward (union contract): soft warn that bars Variant B from the Recommended slot."
+      }
+    ],
+    "scores": { "proof_strength": 8, "fact_safety": 10, "brand_score": 90, "stepps_total": 7, "algorithm_score": 7, "humanizer_score": 9 },
+    "rationale": "Union of all stages (DD-3): the live pre-gate found no hard codes; the LLM added two SOFT codes on Variant B and dropped none. Verdict PASS_ALTERNATE_ONLY — a soft code bars one alternate, but the Recommended pick is code-clean, so the package proceeds with Recommended as the named pick.",
+    "recommended_variant": "recommended"
+  }
+}

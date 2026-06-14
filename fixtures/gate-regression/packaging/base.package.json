@@ -1,0 +1,12 @@
+{
+  "audit_header": {
+    "content_id": "greg-packaging-pkg",
+    "brand": "acme-cosmos",
+    "platform": "twitter",
+    "mode": "SAFE",
+    "format": "text"
+  },
+  "recommended": { "text": "The Acme Cosmos beta wrapped with sixty builders shipping live demos you can open.", "scores": { "brand": 90, "stepps": 7 }, "rationale": "Leads with the concrete anchor and the openable-demo proof." },
+  "variant_a": { "text": "Sixty builders. One weekend. Every demo went out as a working link people can open.", "scores": { "brand": 88, "stepps": 6 }, "rationale": "Staccato cadence, same proof, different angle." },
+  "variant_b": { "text": "We asked for usable demos and got sixty. Here is what the beta produced this weekend.", "scores": { "brand": 87, "stepps": 6 }, "rationale": "Frames the ask-and-result." }
+}

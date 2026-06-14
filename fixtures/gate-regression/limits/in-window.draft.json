@@ -1,0 +1,11 @@
+{
+  "content_id": "greg-limits-in-window",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "format": "text",
+  "variants": [
+    { "label": "recommended", "text": "Sixty builders spent the weekend in the Acme Cosmos beta and shipped demos you can open." },
+    { "label": "variant-a", "text": "Sixty builders showed up and every single demo went out as a usable link people can open here." },
+    { "label": "variant-b", "text": "We asked for working demos. Sixty arrived. Here is the complete weekend project recap for all." }
+  ]
+}

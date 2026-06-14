@@ -1,0 +1,11 @@
+{
+  "kind": "provider-state",
+  "verdict": "PASS_PENDING_MEDIA",
+  "vision_pass": null,
+  "codes": ["VIS.SKIPPED_NO_PROVIDER"],
+  "code_tier": "soft",
+  "code_disposition": "warn",
+  "bars_recommended": true,
+  "provider": null,
+  "notes": "No vision provider configured (§12.5 block absent). The gate degrades to skip-with-warning: PASS_PENDING_MEDIA + a SOFT VIS.SKIPPED_NO_PROVIDER that bars the Recommended slot for visual formats (§3.1, §15.2). Never a crash, never an auto-pass. There is no *.answer.json — the case is driven by provider absence, not a vision answer; the runner calls visualCheck with provider:null."
+}

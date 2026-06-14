@@ -1,0 +1,15 @@
+{
+  "audit_header": {
+    "content_id": "greg-yt-clean",
+    "brand": "acme-cosmos",
+    "platform": "youtube",
+    "mode": "SAFE",
+    "format": "video",
+    "visual_state": "reuse",
+    "media": ["library/media/clip-02.mp4"],
+    "source_sense_check": "title and description match the actual footage"
+  },
+  "recommended": { "text": "Inside the Acme Cosmos beta: how sixty builders shipped openable demos in one weekend.", "scores": { "brand": 90 }, "rationale": "Title/description with a source-sense note present." },
+  "variant_a": { "text": "Sixty builders, three days, demos you can open. The full beta recap.", "scores": { "brand": 88 }, "rationale": "Recap angle." },
+  "variant_b": { "text": "We ran a weekend beta and asked for working demos. Here is what landed.", "scores": { "brand": 87 }, "rationale": "Teaser angle." }
+}

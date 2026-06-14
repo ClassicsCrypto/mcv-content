@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/artifacts/package.schema.json",
+  "title": "Package",
+  "description": "The platform-final artifact the reviewer sees, produced after gating (spec §7.4; model §4 invariant). Grounded in the deterministic package gate's required structural fields. Markdown package files carry these as an audit header plus named sections; this schema is the field contract.",
+  "x-stability": "stable",
+  "type": "object",
+  "properties": {
+    "audit_header": {
+      "type": "object",
+      "description": "Identity + state block at the top of the package.",
+      "properties": {
+        "content_id": { "type": "string" },
+        "brand": {
+          "type": "string",
+          "description": "Brand id (de-localized from the production 'account' field, spec §0.3 rule 6)."
+        },
+        "platform": { "type": "string" },
+        "mode": {
+          "type": "string",
+          "enum": ["SAFE", "LIVE_PREVIEW", "LIVE"]
+        },
+        "format": { "type": "string" },
+        "content_form": {
+          "type": "string",
+          "enum": ["standalone", "quote-retweet"],
+          "default": "standalone"
+        },
+        "schedule_time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Scheduled publish time from the calendar slot (DD-22)."
+        },
+        "media": {
+          "type": "array",
+          "description": "CONTENT_HOME-relative references to media assets bound to this package.",
+          "items": { "type": "string" }
+        },
+        "visual_state": {
+          "type": "string",
+          "description": "Visual decision/state for visual or video formats (e.g. reuse, modify, generate, none)."
+        },
+        "package_status": {
+          "type": "string",
+          "description": "Package readiness state.",
+          "enum": ["draft", "ready", "revision_requested", "blocked"]
+        },
+        "publish_state": {
+          "type": "string",
+          "description": "Publish readiness state mirrored on the package."
+        },
+        "gate_verdict": {
+          "type": "string",
+          "description": "For LIVE packages, the explicit gate verdict; MUST begin PASS for a LIVE package to proceed (deterministic gate requirement). De-localized from the production persona-named verdict field per spec §0.3 rule 6."
+        }
+      },
+      "required": ["content_id", "brand", "platform", "mode", "format"],
+      "additionalProperties": true
+    },
+    "recommended": {
+      "$ref": "#/$defs/variant",
+      "description": "The Recommended pick (DD-11 named ranking)."
+    },
+    "variant_a": { "$ref": "#/$defs/variant" },
+    "variant_b": { "$ref": "#/$defs/variant" },
+    "source_stack": {
+      "type": "array",
+      "description": "Citations backing factual claims in the copy; required when a winner/comparator/recycle source was used.",
+      "items": { "type": "string" }
+    },
+    "warnings": {
+      "type": "array",
+      "description": "Soft codes traveling with the item (model §2 Content Item invariant).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string" },
+          "explanation": { "type": "string" }
+        },
+        "required": ["code"],
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": ["audit_header", "recommended", "variant_a", "variant_b"],
+  "additionalProperties": true,
+  "$defs": {
+    "variant": {
+      "type": "object",
+      "description": "One labeled copy variant with its per-variant scores and strength rationale.",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The variant body. For threads, a multi-segment body per the platform packaging rules."
+        },
+        "scores": {
+          "type": "object",
+          "description": "Per-variant rubric scores (e.g. brand, stepps, algorithm).",
+          "additionalProperties": true
+        },
+        "rationale": {
+          "type": "string",
+          "description": "Why this variant is strong (the 'why it's strong' rationale shown on the card)."
+        }
+      },
+      "required": ["text"],
+      "additionalProperties": true
+    }
+  }
+}

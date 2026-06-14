@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/artifacts/scores-log.schema.json",
+  "title": "Scores Log Row",
+  "description": "One row in the append-only calibration ledger (spec §7.7). Grounded in the production scores-log field set, de-localized (production 'account' becomes 'brand', spec §0.3 rule 6). Feeds the learning loop as aggregate signal.",
+  "x-stability": "stable",
+  "type": "object",
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the row was written."
+    },
+    "content_id": { "type": "string" },
+    "brand": {
+      "type": "string",
+      "description": "Brand id (de-localized from the production 'account' field)."
+    },
+    "platform": { "type": "string" },
+    "format": { "type": "string" },
+    "mode": {
+      "type": "string",
+      "enum": ["SAFE", "LIVE_PREVIEW", "LIVE"]
+    },
+    "content_class": {
+      "type": "string",
+      "description": "Content classification used by the rubric (e.g. evergreen, campaign, ritual, historical-proof)."
+    },
+    "proof_strength": {
+      "type": "number",
+      "description": "Proof/source strength rubric score."
+    },
+    "fact_safety": {
+      "type": "number",
+      "description": "Fabrication/fact-safety rubric score."
+    },
+    "brand_score": {
+      "type": "number",
+      "description": "Brand-voice rubric score."
+    },
+    "stepps_total": {
+      "type": "number",
+      "description": "STEPPS virality rubric total."
+    },
+    "algorithm_score": {
+      "type": "number",
+      "description": "Platform-algorithm fit rubric score."
+    },
+    "humanizer_score": {
+      "type": "number",
+      "description": "Humanizer/style rubric score."
+    },
+    "visual_state": {
+      "type": "string",
+      "description": "Visual decision/state at scoring time (e.g. reuse, modify, generate, none)."
+    },
+    "verdict_state": {
+      "type": "string",
+      "description": "Gate verdict state recorded for this item.",
+      "enum": [
+        "PASS",
+        "PASS_ALTERNATE_ONLY",
+        "PASS_PENDING_MEDIA",
+        "FAIL",
+        "MANUAL_REVIEW"
+      ]
+    },
+    "strongest_variant": {
+      "type": "string",
+      "description": "Which variant ranked strongest.",
+      "enum": ["recommended", "a", "b"]
+    },
+    "pending_media": {
+      "type": "boolean",
+      "description": "Whether the item is awaiting media at scoring time."
+    },
+    "retry_needed": {
+      "type": "boolean",
+      "description": "Whether the item was routed back for a retry."
+    }
+  },
+  "required": ["timestamp", "content_id", "brand", "platform", "verdict_state"],
+  "additionalProperties": true
+}

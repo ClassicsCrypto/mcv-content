@@ -1,0 +1,22 @@
+{
+  "sample_id": "cal-06",
+  "archetype": "behind-the-scenes",
+  "command": {
+    "command_family": "RUN_SLOT",
+    "brand": "acme-cosmos",
+    "platform": "twitter",
+    "format": "single-post",
+    "mode": "SAFE",
+    "routing_class": "TEXT_HEAVY",
+    "slot_ref": "cal-sat-bts",
+    "pillar": "process",
+    "theme": "What broke during the offline-mode rewrite, and the fix",
+    "notes": "An honest behind-the-scenes: the offline solver first shipped with a caching bug that returned stale windows; the post names the bug, the fix, and the lesson. Candid, not self-flagellating; no hype, no spin."
+  },
+  "expected_posture": "clean-on-voice",
+  "exercises": [
+    "on-voice: candid builder register, owns a mistake without spin",
+    "fact-safety: the bug and fix are described as a (synthetic) verified event, not embellished"
+  ],
+  "reviewer_note": "Behind-the-scenes posts test whether the brand can be honest in its own voice. On-voice = candid and specific; off-voice = either glossed PR or performative self-criticism."
+}

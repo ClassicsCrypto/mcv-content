@@ -1,0 +1,14 @@
+{
+  "content_id": "acme-fixture-0001",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "format": "text",
+  "mode": "SAFE",
+  "variants": [
+    { "label": "recommended", "text": "We gave sixty builders a three-day window and one rule: every demo ships as a link anyone can open. By Sunday the room was full of things you could click.", "hook_strength_score": "high" },
+    { "label": "variant-a", "text": "Three days. Sixty builders. One rule: ship a demo anyone can open. The constraint did all the real work here.", "hook_strength_score": "medium" },
+    { "label": "variant-b", "text": "Our beta had a deadline and a public-output rule. Sixty builders met both, and every demo is a link you can open right now.", "hook_strength_score": "medium" }
+  ],
+  "strongest_variant": "recommended",
+  "notes": "Recorded writer output for the fixture run. Three distinct angles on the same verified anchor (the three-day window, the openable-demo rule, the count). No em dash, no inflation, no financial register, no placeholder, no banned pattern — passes the live deterministic pre-gate."
+}

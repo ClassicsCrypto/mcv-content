@@ -1,0 +1,17 @@
+{
+  "content_id": "greg-sys-interrupted-01",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "format": "text",
+  "mode": "LIVE",
+  "created_at": "2026-01-01T09:00:00.000Z",
+  "state": "interrupted_hold",
+  "state_updated_at": "2026-01-01T09:08:00.000Z",
+  "approved_by": "reviewer-1",
+  "approved_variant": "recommended",
+  "approved_at": "2026-01-01T09:05:00.000Z",
+  "package_ref": "workspaces/packaged/greg-sys-interrupted-01.package.json",
+  "attempt_count": 1,
+  "publish_intent": "intent-greg-sys-interrupted-01",
+  "hold_reason": "executor interrupted mid-publish (crash) with write-ahead intent persisted; held for crash-safe replay"
+}

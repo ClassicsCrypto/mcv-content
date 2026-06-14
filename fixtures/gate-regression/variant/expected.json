@@ -1,0 +1,74 @@
+{
+  "rule_ref": "rule.core.variant",
+  "gate": "lint",
+  "executed_in_ci": true,
+  "fixture_kind": "mixed",
+  "notes": "rule.core.variant spans both deterministic gates: count/distinctness at layer 1 (LINT.VARIANT_COUNT, LINT.VARIANT_DUP via engine/gate/pre-gate-lint.js over draft inputs) and presence at the publish edge (PKG.RECOMMENDED_MISSING / PKG.VARIANT_A_MISSING / PKG.VARIANT_B_MISSING via engine/gate/validate-package.js over a package input). The presence positives apply an 'omit' to base.package.json (mirroring the live validate-package test's field deletion) so the on-disk base stays schema-valid; the schema-validation CI job validates base.package.json, not the mutated forms. LINT.VARIANT_COUNT's positive sets rules.variant_count:4 against a 3-variant (schema-valid) draft rather than shipping an off-count draft that would fail draft.schema.json's minItems:3.",
+  "cases": [
+    {
+      "name": "variant-count",
+      "kind": "positive",
+      "gate": "lint",
+      "input": "variant-count.draft.json",
+      "rules": { "variant_count": 4 },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["LINT.VARIANT_COUNT"],
+      "notes": "Expected count 4, draft carries 3 — deterministic, hard. (Production default is N=3; the override drives a count mismatch from a schema-valid draft.)"
+    },
+    {
+      "name": "variant-dup",
+      "kind": "positive",
+      "gate": "lint",
+      "input": "variant-dup.draft.json",
+      "expected_verdict": "FAIL",
+      "expected_codes": ["LINT.VARIANT_DUP"],
+      "notes": "Recommended and Variant A are identical (one pairwise dup) — deterministic, hard."
+    },
+    {
+      "name": "recommended-missing",
+      "kind": "positive",
+      "gate": "package",
+      "input": "base.package.json",
+      "omit": ["recommended"],
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.RECOMMENDED_MISSING"],
+      "notes": "Package with no Recommended variant — deterministic publish-edge, hard."
+    },
+    {
+      "name": "variant-a-missing",
+      "kind": "positive",
+      "gate": "package",
+      "input": "base.package.json",
+      "omit": ["variant_a"],
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.VARIANT_A_MISSING"]
+    },
+    {
+      "name": "variant-b-missing",
+      "kind": "positive",
+      "gate": "package",
+      "input": "base.package.json",
+      "omit": ["variant_b"],
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.VARIANT_B_MISSING"]
+    },
+    {
+      "name": "clean-draft",
+      "kind": "negative",
+      "gate": "lint",
+      "input": "clean.draft.json",
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "Three distinct variants, default count — no LINT.VARIANT_* code."
+    },
+    {
+      "name": "clean-package",
+      "kind": "negative",
+      "gate": "package",
+      "input": "base.package.json",
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "Complete package with all three variants present — no PKG.*_MISSING code."
+    }
+  ]
+}

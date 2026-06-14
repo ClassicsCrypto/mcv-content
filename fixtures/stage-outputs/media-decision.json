@@ -1,0 +1,33 @@
+{
+  "content_id": "acme-fixture-0001",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "query": {
+    "brand": "acme-cosmos",
+    "theme": "the weekend builder beta",
+    "archetype": "builder-recap",
+    "tags": ["beta", "builders", "demos"],
+    "media_type": "image"
+  },
+  "candidates_ref": "workspaces/media/acme-fixture-0001.retrieval.json",
+  "action": "reuse",
+  "reason": "A library hero still of the beta wall is on-theme and past its cooldown floor; reuse beats spend for a text-led recap that only needs a confirming image.",
+  "chosen_asset_id": "library/media/beta-wall-overview.png",
+  "chosen_asset_ref": "library/media/beta-wall-overview.png",
+  "cooldown_ref": {
+    "asset_id": "library/media/beta-wall-overview.png",
+    "eligible": true,
+    "cooldown_blocked": false,
+    "cooldown_days": 14,
+    "override_applied": false
+  },
+  "skipped_candidates": [
+    {
+      "asset_id": "library/media/beta-hero-closeup.png",
+      "score": 0.91,
+      "reason": "cooldown",
+      "risk_codes": ["PKG.MEDIA_COOLDOWN_BLOCKED"]
+    }
+  ],
+  "decided_at": "2026-01-05T09:02:00.000Z"
+}

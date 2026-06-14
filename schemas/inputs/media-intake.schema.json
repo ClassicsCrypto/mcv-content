@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/inputs/media-intake.schema.json",
+  "title": "Media Intake",
+  "description": "Reviewer-attached or operator-staged media entering the pipeline (spec §6.6). Attached media re-enters the deterministic gate subset before publish (DD-12, §14.5): limits, formatting, platform gates, cooldown. Carries the declared rights/source class needed by the media cooldown and visual gate.",
+  "x-stability": "stable",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "file_ref",
+    "brand",
+    "source_class"
+  ],
+  "properties": {
+    "file_ref": {
+      "description": "CONTENT_HOME-relative reference to the media file. Absolute paths are forbidden in any artifact.",
+      "type": "string",
+      "minLength": 1
+    },
+    "brand": {
+      "description": "Brand id the media is intended for.",
+      "type": "string",
+      "minLength": 1
+    },
+    "media_type": {
+      "description": "Media kind.",
+      "type": "string",
+      "enum": [
+        "image",
+        "video",
+        "gif"
+      ]
+    },
+    "source_class": {
+      "description": "Declared rights/source class for the asset, driving cooldown identity and rights handling.",
+      "type": "string",
+      "enum": [
+        "library",
+        "generated",
+        "modified",
+        "user-attached"
+      ]
+    },
+    "rights_declaration": {
+      "description": "Optional freeform statement of the rights/provenance the operator declares for the asset.",
+      "type": "string"
+    },
+    "slot_ref": {
+      "description": "Optional binding to a calendar slot.",
+      "type": "string"
+    },
+    "content_id": {
+      "description": "Optional binding to an in-flight content id (e.g. attaching media to a card awaiting media).",
+      "type": "string"
+    },
+    "alt_text": {
+      "description": "Optional alt text supplied with the media.",
+      "type": "string"
+    },
+    "attached_by": {
+      "description": "Optional identifier of the reviewer/operator who staged or attached the media.",
+      "type": "string"
+    },
+    "attached_at": {
+      "description": "When the media was staged or attached.",
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

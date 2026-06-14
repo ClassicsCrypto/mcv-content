@@ -1,0 +1,11 @@
+{
+  "command_family": "RUN_BATCH",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "format": "single tweet",
+  "mode": "SAFE",
+  "routing_class": "TEXT_HEAVY",
+  "batch_date": "2099-04-07",
+  "max": 3,
+  "notes": "Fixture sample for the morning-kickoff batch unit; bounded to 3 slot runs."
+}

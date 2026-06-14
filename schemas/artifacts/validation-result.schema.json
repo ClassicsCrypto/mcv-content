@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/artifacts/validation-result.schema.json",
+  "title": "Validation Result / Gate Report",
+  "description": "The result of a single gate layer over a content item (spec §7.2). Union contract: downstream verdicts MUST carry forward every deterministic detection; an LLM layer may add codes but never drop one (DD-3).",
+  "x-stability": "stable",
+  "type": "object",
+  "properties": {
+    "content_id": {
+      "type": "string",
+      "description": "The content item this result is for."
+    },
+    "stage": {
+      "type": "string",
+      "description": "Which gate layer produced this result.",
+      "enum": ["lint", "llm-voice", "llm-quality", "package", "platform", "visual"]
+    },
+    "verdict": {
+      "type": "string",
+      "description": "Normalized gate verdict vocabulary (spec §7.2).",
+      "enum": [
+        "PASS",
+        "PASS_ALTERNATE_ONLY",
+        "PASS_PENDING_MEDIA",
+        "FAIL",
+        "MANUAL_REVIEW"
+      ]
+    },
+    "detected_codes": {
+      "type": "array",
+      "description": "All failure codes detected at this stage. Each carries forward unchanged into downstream layers (union contract, DD-3).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Registry code (e.g. LINT.EM_DASH, FM.HOOK_WEAK, PKG.RECOMMENDED_MISSING)."
+          },
+          "family": {
+            "type": "string",
+            "description": "Namespaced family the code belongs to (spec §10.2).",
+            "enum": ["LINT", "FM", "PKG", "PLAT", "VIS", "SYS"]
+          },
+          "tier": {
+            "type": "string",
+            "description": "Severity tier.",
+            "enum": ["hard", "soft"]
+          },
+          "source": {
+            "type": "string",
+            "description": "Which layer emitted the code.",
+            "enum": ["lint", "llm-voice", "llm-quality", "package", "platform", "visual"]
+          },
+          "rule_ref": {
+            "type": "string",
+            "description": "Id of the rule that defines this code (registry/rule contract, spec §10.1)."
+          },
+          "explanation": {
+            "type": "string",
+            "description": "Human-readable reason the code fired."
+          },
+          "disposition": {
+            "type": "string",
+            "description": "Consequence of the code (DD-20; hard ⇒ block).",
+            "enum": ["block", "correct", "warn"]
+          },
+          "correction_record": {
+            "type": "object",
+            "description": "Optional record of an applied correction when disposition is 'correct'.",
+            "additionalProperties": true
+          },
+          "bars_recommended": {
+            "type": "boolean",
+            "description": "Whether this code bars the affected variant from being the Recommended pick (§14.4)."
+          }
+        },
+        "required": ["code", "family", "tier", "source", "disposition"],
+        "additionalProperties": true
+      }
+    },
+    "scores": {
+      "type": "object",
+      "description": "Rubric score block produced by this stage (free-form rubric keys; see scores-log for the canonical aggregate row).",
+      "additionalProperties": true
+    },
+    "rationale": {
+      "type": "string",
+      "description": "Stage-level narrative explaining the verdict."
+    }
+  },
+  "required": ["content_id", "stage", "verdict", "detected_codes"],
+  "additionalProperties": true
+}

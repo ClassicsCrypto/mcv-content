@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/config/brand.schema.json",
+  "title": "Brand Configuration",
+  "description": "Brand-scope configuration (brands/<brand-id>/brand.json). The brand-keyed structured-config layer (DD-10 / RD-5). One file per brand. Replaces production live-config files by generalizing their shapes; only the template ships, with NO real brand values. Spec ref: release-spec.md §11.3.",
+  "x-stability": "stable",
+  "x-schema-version": "1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "display_name", "account_class", "platforms"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Version of this config shape, for migration handling (§11.1).",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "id": {
+      "type": "string",
+      "description": "Stable brand id. Matches the brands/<brand-id>/ directory name and the 'brand' key used across artifacts.",
+      "minLength": 1,
+      "examples": ["acme-cosmos"]
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Human-readable brand name.",
+      "minLength": 1,
+      "examples": ["Acme Cosmos"]
+    },
+    "account_class": {
+      "description": "operator (a founder/operator-owned account, looser media strictness) vs brand (a brand/project account).",
+      "type": "string",
+      "enum": ["operator", "brand"]
+    },
+    "platforms": {
+      "description": "Per-platform publishing configuration for this brand.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/platform_binding" }
+    },
+    "cooldown_overrides": {
+      "description": "Per-brand override of the system cooldown defaults (§8.6). Absent means inherit system.json cooldown.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hard_days": { "type": "integer", "minimum": 0 },
+        "target_days": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "drama_dial": {
+      "description": "Per-brand dramatization stance consumed by the voice/style rules. The brand-DNA authoring template carries the matching preference question.",
+      "type": "string",
+      "enum": ["low", "medium", "high"],
+      "default": "medium"
+    },
+    "paths": {
+      "description": "CONTENT_HOME-relative locations of this brand's authored assets. Absolute paths are forbidden.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dna": {
+          "$ref": "#/$defs/relative_path",
+          "description": "Brand DNA document."
+        },
+        "archetypes": {
+          "$ref": "#/$defs/relative_path",
+          "description": "Archetype catalog directory."
+        },
+        "corpora": {
+          "$ref": "#/$defs/relative_path",
+          "description": "Ingested corpora directory for this brand."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "platform_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "publisher"],
+      "properties": {
+        "platform": {
+          "type": "string",
+          "description": "Platform descriptor id (see platform-descriptor.schema.json).",
+          "minLength": 1,
+          "examples": ["twitter", "giphy", "instagram", "facebook", "youtube", "tiktok"]
+        },
+        "publisher": {
+          "description": "Which publisher adapter carries this platform for this brand.",
+          "type": "string",
+          "enum": ["postiz", "giphy", "manual"]
+        },
+        "integration_ref": {
+          "description": "The integration id the publisher shows in its settings for the connected account, recorded at account-connection time. For Postiz-backed lanes this is the Postiz integration id. Giphy lanes leave it null and use the Giphy credentials/username instead. Null until the account is connected (deferrable until LIVE).",
+          "type": ["string", "null"],
+          "default": null
+        },
+        "handle_placeholder": {
+          "type": ["string", "null"],
+          "description": "Display handle for this account. Synthetic placeholder in shipped templates (e.g. @acmecosmos).",
+          "default": null
+        },
+        "rate_limit_per_day": {
+          "type": "integer",
+          "description": "Maximum posts per day for this brand×platform. Enforced by the publish gate.",
+          "minimum": 0
+        },
+        "publish_windows": {
+          "description": "Allowed local-time publish windows. Outside these windows the publish gate fails unless the queue entry is marked publish-immediately. Empty/absent means no window restriction.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/publish_window" }
+        },
+        "auto_publish": {
+          "$ref": "#/$defs/auto_publish_state",
+          "description": "RD-10 auto-publish trust-state block — engine-maintained per brand×platform."
+        }
+      }
+    },
+    "publish_window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["days", "start", "end"],
+      "properties": {
+        "days": {
+          "type": "array",
+          "description": "Days the window applies to.",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+          }
+        },
+        "start": {
+          "$ref": "#/$defs/clock_time",
+          "description": "Window start, local HH:MM 24h."
+        },
+        "end": {
+          "$ref": "#/$defs/clock_time",
+          "description": "Window end, local HH:MM 24h. May be earlier than start to express a window that crosses midnight."
+        }
+      }
+    },
+    "auto_publish_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Auto-publish removes the publisher second gate for this lane (never the human approval). Entry/revocation are enforced mechanically by the engine (§15.5); operators set 'enabled', the engine maintains the rest.",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Operator opt-in. The engine still requires the trust criteria to be met before publishing automatically.",
+          "default": false
+        },
+        "qualifying_streak": {
+          "type": "integer",
+          "description": "Consecutive qualifying publishes on this lane (engine-maintained). Reset to 0 on revocation.",
+          "minimum": 0,
+          "default": 0
+        },
+        "last_revocation": {
+          "type": ["string", "null"],
+          "description": "Timestamp of the most recent automatic revocation, or null.",
+          "format": "date-time",
+          "default": null
+        },
+        "revocation_reason": {
+          "type": ["string", "null"],
+          "description": "Reason for the most recent revocation, or null.",
+          "default": null
+        }
+      }
+    },
+    "clock_time": {
+      "type": "string",
+      "description": "Local clock time, 24-hour HH:MM.",
+      "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+    },
+    "relative_path": {
+      "type": "string",
+      "description": "CONTENT_HOME-relative path. Absolute paths and drive letters are forbidden.",
+      "minLength": 1,
+      "pattern": "^(?![A-Za-z]:)(?!/)(?!.*\\.\\.).+$"
+    }
+  }
+}

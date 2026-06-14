@@ -1,0 +1,28 @@
+{
+  "name": "Acme Explorer #14",
+  "description": "Synthetic fixture token for the open-content-engine trait-index build path. Not a real NFT, collection, or asset; authored for this repository. See fixtures/PROVENANCE.md.",
+  "image": "ipfs://example-placeholder/acme-explorers/14.png",
+  "edition": 14,
+  "attributes": [
+    {
+      "trait_type": "Suit",
+      "value": "Deep Space Black"
+    },
+    {
+      "trait_type": "Helmet",
+      "value": "Standard Dome"
+    },
+    {
+      "trait_type": "Tool",
+      "value": "Star Chart"
+    },
+    {
+      "trait_type": "Backdrop",
+      "value": "Mountain Ridge"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    }
+  ]
+}

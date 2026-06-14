@@ -1,0 +1,25 @@
+token_id,trait_type,value
+1,Rarity,Common
+1,Orbit Band,Inner
+1,Finish,Matte
+2,Rarity,Common
+2,Orbit Band,Inner
+2,Finish,Gloss
+3,Rarity,Uncommon
+3,Orbit Band,Mid
+3,Finish,Matte
+4,Rarity,Rare
+4,Orbit Band,Outer
+4,Finish,Chrome
+5,Rarity,Common
+5,Orbit Band,Mid
+5,Finish,Gloss
+6,Rarity,Uncommon
+6,Orbit Band,Outer
+6,Finish,Matte
+7,Rarity,Common
+7,Orbit Band,Inner
+7,Finish,Chrome
+8,Rarity,Legendary
+8,Orbit Band,Outer
+8,Finish,Gloss

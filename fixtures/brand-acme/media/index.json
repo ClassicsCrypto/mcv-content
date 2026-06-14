@@ -1,0 +1,58 @@
+{
+  "assets": [
+    {
+      "asset_id": "acme-moon-first-quarter",
+      "path": "library/media/acme-cosmos/moon-first-quarter.png",
+      "type": "image",
+      "description": "First-quarter Moon, craters sharp along the terminator, black sky background. Synthetic placeholder asset.",
+      "tags": ["moon", "first-quarter", "terminator", "craters", "how-to"],
+      "source_class": "library",
+      "character_refs": []
+    },
+    {
+      "asset_id": "acme-jupiter-moons-line",
+      "path": "library/media/acme-cosmos/jupiter-moons-line.png",
+      "type": "image",
+      "description": "Jupiter as a bright disk with four small moons in a line beside it, eyepiece view framing. Synthetic placeholder asset.",
+      "tags": ["jupiter", "galilean-moons", "planet", "sky-tonight"],
+      "source_class": "library",
+      "character_refs": []
+    },
+    {
+      "asset_id": "acme-orion-nebula-wide",
+      "path": "library/media/acme-cosmos/orion-nebula-wide.png",
+      "type": "image",
+      "description": "Wide low-power view of the Orion Nebula in the sword of Orion, faint greenish glow. Synthetic placeholder asset.",
+      "tags": ["orion-nebula", "m42", "deep-sky", "field-notes"],
+      "source_class": "library",
+      "character_refs": []
+    },
+    {
+      "asset_id": "acme-pleiades-cluster",
+      "path": "library/media/acme-cosmos/pleiades-cluster.png",
+      "type": "image",
+      "description": "The Pleiades open cluster, a tight dipper of blue-white stars filling a low-power field. Synthetic placeholder asset.",
+      "tags": ["pleiades", "m45", "star-cluster", "sky-tonight"],
+      "source_class": "library",
+      "character_refs": []
+    },
+    {
+      "asset_id": "acme-st1-on-table",
+      "path": "library/media/acme-cosmos/st1-on-table.png",
+      "type": "image",
+      "description": "The Acme Cosmos ST-1 tabletop reflector set up on a picnic table at dusk, red-dot finder visible. Synthetic product placeholder asset.",
+      "tags": ["product", "st-1", "tabletop", "setup", "behind-the-glass"],
+      "source_class": "library",
+      "character_refs": []
+    },
+    {
+      "asset_id": "acme-app-tonight-card",
+      "path": "library/media/acme-cosmos/app-tonight-card.png",
+      "type": "image",
+      "description": "App screenshot mock of the 'tonight' feed top card suggesting one object to point at. Synthetic placeholder asset; no embedded marketing copy baked into the frame.",
+      "tags": ["app", "tonight-feed", "ui", "how-to"],
+      "source_class": "library",
+      "character_refs": []
+    }
+  ]
+}

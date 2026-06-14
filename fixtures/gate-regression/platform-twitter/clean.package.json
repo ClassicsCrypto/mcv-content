@@ -1,0 +1,12 @@
+{
+  "audit_header": {
+    "content_id": "greg-plat-twitter-clean",
+    "brand": "acme-cosmos",
+    "platform": "twitter",
+    "mode": "SAFE",
+    "format": "text"
+  },
+  "recommended": { "text": "Sixty builders shipped openable demos at the Acme Cosmos beta this weekend, all live now.", "scores": { "brand": 90 }, "rationale": "Recap with no hashtags." },
+  "variant_a": { "text": "Sixty builders. One weekend. Every demo went out as a working link people can open.", "scores": { "brand": 88 }, "rationale": "Clean angle." },
+  "variant_b": { "text": "We asked for usable demos and got sixty. Here is what the beta produced this weekend.", "scores": { "brand": 87 }, "rationale": "Ask-and-result." }
+}

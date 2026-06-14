@@ -1,0 +1,14 @@
+{
+  "audit_header": {
+    "content_id": "greg-plat-ig-over",
+    "brand": "acme-cosmos",
+    "platform": "instagram",
+    "mode": "SAFE",
+    "format": "image",
+    "visual_state": "reuse",
+    "media": ["library/media/hero-01.png"]
+  },
+  "recommended": { "text": "Sixty builders shipped openable demos at the Acme Cosmos beta this weekend. #tag0 #tag1 #tag2 #tag3 #tag4 #tag5 #tag6 #tag7 #tag8 #tag9 #tag10 #tag11 #tag12 #tag13 #tag14 #tag15 #tag16 #tag17 #tag18 #tag19 #tag20 #tag21 #tag22 #tag23 #tag24 #tag25 #tag26 #tag27 #tag28 #tag29 #tag30", "scores": { "brand": 90 }, "rationale": "Recap caption, but 31 hashtags exceed the limit." },
+  "variant_a": { "text": "The Acme Cosmos beta in one frame: sixty builders and a wall of openable demos.", "scores": { "brand": 88 }, "rationale": "Single-frame summary." },
+  "variant_b": { "text": "What a weekend of building looks like at Acme Cosmos. Sixty demos, all openable.", "scores": { "brand": 87 }, "rationale": "Scene-setting caption." }
+}

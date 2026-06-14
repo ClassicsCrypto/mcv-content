@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/artifacts/approval-card.schema.json",
+  "title": "Approval Card (surface-neutral)",
+  "description": "Surface-neutral abstraction of the human approval surface (release-spec.md §7.5; model §10 #4 / DD-10). The card is what a reviewer sees before deciding; it carries the Recommended + two alternates, any warnings traveling with the item, media references, scheduling, provenance, a TTL, and the bounded action set. The surface adapter (Discord reference implementation lives in engine/shared/components-v2.js + pipelines/ docs) renders this shape; the schema deliberately holds NO surface-specific fields (no component trees, no reaction emoji, no channel/message IDs). All resource references are $CONTENT_HOME-relative strings; absolute paths are forbidden. Structural contract only; instances are instance data and never ship in the repo.",
+  "x-stability": "stable",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "content_id",
+    "title",
+    "variants",
+    "actions",
+    "status"
+  ],
+  "properties": {
+    "content_id": {
+      "type": "string",
+      "description": "Stable content identifier shared across all artifacts for this item."
+    },
+    "title": {
+      "type": "string",
+      "description": "Short human-facing heading for the card."
+    },
+    "brand": {
+      "type": "string",
+      "description": "Brand id this card belongs to."
+    },
+    "platform": {
+      "type": "string",
+      "description": "Target platform descriptor id (schemas/config/platform-descriptor.schema.json)."
+    },
+    "format": {
+      "type": "string",
+      "description": "Content format/shape (e.g. single, thread, image, video) as declared by the package."
+    },
+    "content_form": {
+      "type": "string",
+      "enum": ["standalone", "quote-retweet"],
+      "default": "standalone",
+      "description": "Item form (model §3 rule 8); trend-derived items may be quote-retweet."
+    },
+    "variants": {
+      "type": "array",
+      "minItems": 1,
+      "description": "The candidate texts shown to the reviewer. By the N=3 contract (DD-11) the chain emits a Recommended plus two alternates; the card carries them in ranked order with the strongest first.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "text"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "enum": ["recommended", "a", "b"],
+            "description": "Variant slot label; 'recommended' is the ranked-strongest candidate."
+          },
+          "text": {
+            "type": "string",
+            "description": "Platform-final text for this variant."
+          },
+          "score": {
+            "type": "number",
+            "description": "Aggregate rubric score for this variant (display signal)."
+          },
+          "delta": {
+            "type": "number",
+            "description": "Score delta versus the Recommended variant (0 for the Recommended itself)."
+          },
+          "bars_recommended": {
+            "type": "boolean",
+            "default": false,
+            "description": "True when a warn-disposition code prevents this variant from occupying the Recommended slot (release-spec.md §14.4)."
+          },
+          "rationale": {
+            "type": "string",
+            "description": "Per-variant 'why it is strong' note."
+          }
+        }
+      }
+    },
+    "media": {
+      "type": "array",
+      "description": "Media references attached to the card, $CONTENT_HOME-relative.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ref"],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "$CONTENT_HOME-relative media path or asset id."
+          },
+          "media_type": {
+            "type": "string",
+            "enum": ["image", "video", "gif", "animated_image"],
+            "description": "Kind of media."
+          },
+          "source_class": {
+            "type": "string",
+            "enum": ["library", "generated", "modified", "user-attached"],
+            "description": "Provenance class of this media (mirrors index-entry source_class)."
+          },
+          "alt_text": {
+            "type": "string",
+            "description": "Accessibility/alt text for the media."
+          }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "description": "Soft codes traveling with the item to the reviewer (model §2 Content Item invariant). Each references a registry code in rules/codes.md.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code"],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Registry failure code (e.g. namespaced family.symbol)."
+          },
+          "family": {
+            "type": "string",
+            "enum": ["LINT", "FM", "PKG", "PLAT", "VIS", "SYS"],
+            "description": "Code family (release-spec.md §10.2)."
+          },
+          "explanation": {
+            "type": "string",
+            "description": "Plain-language reviewer-facing explanation."
+          },
+          "bars_recommended": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether this warn code demotes its variant out of the Recommended slot."
+          }
+        }
+      }
+    },
+    "scheduled_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Intended publish time inherited from the slot (DD-22)."
+    },
+    "provenance": {
+      "type": "string",
+      "description": "How the item was created and why it is strong (release-spec.md §2.4)."
+    },
+    "ttl": {
+      "type": "string",
+      "description": "Time-to-live as an ISO-8601 duration; card expiry + slot disposition driven by the TTL sweep (DD-15)."
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Absolute expiry instant for the card (DD-15)."
+    },
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Bounded set of decisions the reviewer may take. Surface-neutral action verbs; the adapter binds them to its own controls. attach_media routes through the DD-12 re-gate; edit counts as approval (release-spec.md §2.4).",
+      "items": {
+        "type": "string",
+        "enum": [
+          "approve_recommended",
+          "approve_a",
+          "approve_b",
+          "edit",
+          "attach_media",
+          "reject"
+        ]
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "decided", "expired"],
+      "description": "Lifecycle of the card itself (distinct from the queue entry state)."
+    },
+    "package_ref": {
+      "type": "string",
+      "description": "$CONTENT_HOME-relative reference to the source package (schemas/artifacts/package.schema.json)."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the card was constructed (persisted before posting, DD-4)."
+    }
+  }
+}

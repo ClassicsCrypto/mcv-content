@@ -1,0 +1,9 @@
+{
+  "matches_brief_subject": false,
+  "is_generic_stock_filler": true,
+  "contains_brand_identity_signal": false,
+  "contains_unrelated_humans": false,
+  "contains_forbidden_prompt_detail": false,
+  "embedded_text_dates_logos": "none",
+  "main_subject_one_line": "A generic glossy 3D planet with no brand cues."
+}

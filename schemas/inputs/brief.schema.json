@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/inputs/brief.schema.json",
+  "title": "Brief",
+  "description": "The matcher -> writer handoff artifact (spec §9.2): slot ref, matched archetype, deterministic pre-seed, target length/format, and writing-framework reference. The optional enrichment field-set (enricher -> writer, RD-13) rides on the same brief; its ABSENCE must validate — the matcher -> writer contract works without it.",
+  "x-stability": "stable",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "content_id",
+    "brand",
+    "platform",
+    "format",
+    "slot_ref",
+    "archetype",
+    "pre_seed"
+  ],
+  "properties": {
+    "content_id": {
+      "description": "Content id this brief belongs to (keys the per-stage workspace artifacts).",
+      "type": "string",
+      "minLength": 1
+    },
+    "brand": {
+      "description": "Brand id this brief targets.",
+      "type": "string",
+      "minLength": 1
+    },
+    "platform": {
+      "description": "Target platform descriptor id.",
+      "type": "string",
+      "minLength": 1
+    },
+    "format": {
+      "description": "Content format within the platform (platform-descriptor-defined set).",
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "description": "Publish posture inherited from the originating operator command.",
+      "type": "string",
+      "enum": [
+        "SAFE",
+        "LIVE_PREVIEW",
+        "LIVE"
+      ]
+    },
+    "slot_ref": {
+      "description": "Calendar slot this brief produces for (a calendar slot_id).",
+      "type": "string",
+      "minLength": 1
+    },
+    "archetype": {
+      "description": "Matched content archetype id (matcher's slot->archetype decision).",
+      "type": "string",
+      "minLength": 1
+    },
+    "pillar": {
+      "description": "Content pillar / strategic lane (freeform plain text).",
+      "type": "string"
+    },
+    "theme": {
+      "description": "Theme or topic for the content (freeform plain text).",
+      "type": "string"
+    },
+    "pre_seed": {
+      "description": "The deterministic pre-seed: the angle plus drafting direction the matcher hands the writer.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "angle"
+      ],
+      "properties": {
+        "angle": {
+          "description": "The core argument / angle for the content.",
+          "type": "string",
+          "minLength": 1
+        },
+        "hook_direction": {
+          "description": "Direction for the opening hook.",
+          "type": "string"
+        },
+        "must_include": {
+          "description": "Elements the draft must include.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "must_not_include": {
+          "description": "Elements the draft must avoid (e.g. emojis, hashtags, links, CTA).",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tone": {
+          "description": "Tone direction for the draft.",
+          "type": "string"
+        }
+      }
+    },
+    "target_length": {
+      "description": "Target length guidance for the draft (e.g. a character range or word band). Freeform; the platform gate enforces hard limits.",
+      "type": "string"
+    },
+    "framework_ref": {
+      "description": "Repo-relative reference to the per-length writing framework the writer seat boot-reads for this brief (spec §9.3).",
+      "type": "string"
+    },
+    "media_decision_hint": {
+      "description": "Optional pre-seed media sourcing hint (e.g. reuse / modify / generate / capture-needed). The media seat owns the final decision.",
+      "type": "string"
+    },
+    "enrichment": {
+      "description": "OPTIONAL enricher -> writer field-set (RD-13). Absence validates: the matcher -> writer contract does not require it. When present, carries the enrichment packet that sits between matcher and writer.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summary": {
+          "description": "Enrichment summary: the strongest framing for the content.",
+          "type": "string"
+        },
+        "proof_stack": {
+          "description": "Supporting proof for the argument, separated into primary, supporting, and fact-safety guidance.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "primary": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "supporting": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "fact_safety": {
+              "description": "Claims the draft must not make (unverified facts, private details).",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "core_tension": {
+          "description": "The central tension the content plays on.",
+          "type": "string"
+        },
+        "reader_takeaway": {
+          "description": "What the reader should take away.",
+          "type": "string"
+        },
+        "variant_lanes": {
+          "description": "Distinct argument lanes for the writer's variants. Each lane is a separate argument, not a rewrite.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "direction"
+            ],
+            "properties": {
+              "label": {
+                "description": "Lane label (e.g. recommended, variant-a, variant-b).",
+                "type": "string"
+              },
+              "direction": {
+                "description": "The framing/direction for this lane.",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "comparator_transfer": {
+          "description": "A comparator reference and the mechanic to borrow, with explicit do-not-copy guardrails. The comparator ref is a Zone-U reference id and carries no drafted text.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "comparator_ref": {
+              "type": "string"
+            },
+            "borrowed_mechanic": {
+              "type": "string"
+            },
+            "do_not_copy": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "humanizer_notes": {
+          "description": "Style/anti-pattern guidance to keep the copy human (e.g. avoid filler, forced slogans).",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

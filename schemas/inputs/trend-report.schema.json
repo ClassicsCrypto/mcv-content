@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/inputs/trend-report.schema.json",
+  "title": "Trend Report",
+  "description": "A trend report fed into a trend-reserved calendar slot (spec §6.7). Defined in v1 even though automated trend polling is roadmap: manual submission through this schema is the supported v1 trend input. Always Zone U. Topics carry suggested angles but NO drafted comment text — authentic engagement is suggested as angles, never drafted. The freshness_window feeds the trend-card TTL (DD-15).",
+  "x-stability": "experimental",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "period",
+    "platform",
+    "topics",
+    "provenance"
+  ],
+  "properties": {
+    "period": {
+      "description": "The reporting period this report covers (the window the trends were observed in).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start",
+        "end"
+      ],
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "platform": {
+      "description": "Platform descriptor id the trends were observed on.",
+      "type": "string",
+      "minLength": 1
+    },
+    "topics": {
+      "description": "The trending topics. Each topic supplies suggested angles only; no drafted comment text is permitted.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "topic"
+        ],
+        "properties": {
+          "topic": {
+            "description": "The trending topic / subject.",
+            "type": "string",
+            "minLength": 1
+          },
+          "source_links": {
+            "description": "Source links backing the trend observation.",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "suggested_angles": {
+            "description": "Angles the brand could take on the topic. Angles only — never drafted comment/reply text.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "freshness_window": {
+      "description": "How long the trend stays actionable. Inherited by trend-derived content as expires-basis and drives the trend-card TTL (DD-15).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "duration": {
+          "description": "Duration the trend remains fresh, as an ISO 8601 duration (e.g. PT12H, P2D).",
+          "type": "string"
+        },
+        "expires_at": {
+          "description": "Absolute time the trend window closes.",
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "provenance": {
+      "description": "How this report was produced. Always Zone U (untrusted external input), whether manually submitted or adapter-fetched.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trust_zone",
+        "method"
+      ],
+      "properties": {
+        "trust_zone": {
+          "description": "Trust zone. Always U for trend reports.",
+          "type": "string",
+          "const": "U"
+        },
+        "method": {
+          "description": "How the report was produced.",
+          "type": "string",
+          "enum": [
+            "manual",
+            "adapter"
+          ]
+        },
+        "submitted_by": {
+          "description": "Optional identifier of the operator who submitted a manual report.",
+          "type": "string"
+        },
+        "submitted_at": {
+          "description": "When the report was submitted/produced.",
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

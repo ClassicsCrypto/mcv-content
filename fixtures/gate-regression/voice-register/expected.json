@@ -1,0 +1,70 @@
+{
+  "rule_ref": "rule.core.voice-register",
+  "gate": "lint",
+  "executed_in_ci": true,
+  "fixture_kind": "draft",
+  "notes": "rule.core.voice-register spans one deterministic LINT.* code (LINT.FINANCIAL, executed live) and three LLM-judged FM.* codes (prose, structural-only in CI). FM.LANE_DRIFT is HARD and routes back to the matcher; FM.POSTER_REGISTER / FM.SUBSTITUTABLE are SOFT/warn and bar the Recommended slot.",
+  "cases": [
+    {
+      "name": "financial",
+      "kind": "positive",
+      "input": "financial.draft.json",
+      "expected_verdict": "FAIL",
+      "expected_codes": ["LINT.FINANCIAL"],
+      "notes": "Floor-price / market-cap talk in a non-financial brand voice — deterministic, hard."
+    },
+    {
+      "name": "clean",
+      "kind": "negative",
+      "input": "clean.draft.json",
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "No price/floor/market register."
+    },
+    {
+      "name": "poster-register",
+      "kind": "positive",
+      "input": "poster-register.copy.md",
+      "executed_in_ci": false,
+      "expected_verdict": "PASS_ALTERNATE_ONLY",
+      "expected_codes": ["FM.POSTER_REGISTER"],
+      "code_tier": "soft",
+      "code_disposition": "warn",
+      "bars_recommended": true,
+      "notes": "Closing line reads as a motivational-poster maxim, not grounded operator-conviction."
+    },
+    {
+      "name": "substitutable",
+      "kind": "positive",
+      "input": "substitutable.copy.md",
+      "executed_in_ci": false,
+      "expected_verdict": "PASS_ALTERNATE_ONLY",
+      "expected_codes": ["FM.SUBSTITUTABLE"],
+      "code_tier": "soft",
+      "code_disposition": "warn",
+      "bars_recommended": true,
+      "notes": "Generic enough that an unrelated brand could post it verbatim — no brand-specific anchor."
+    },
+    {
+      "name": "lane-drift",
+      "kind": "positive",
+      "input": "lane-drift.copy.md",
+      "executed_in_ci": false,
+      "expected_verdict": "FAIL",
+      "expected_codes": ["FM.LANE_DRIFT"],
+      "code_tier": "hard",
+      "code_disposition": "block",
+      "route": "matcher",
+      "notes": "Off-lane generic category copy with no operator override — HARD, routes to the matcher."
+    },
+    {
+      "name": "on-voice",
+      "kind": "negative",
+      "input": "on-voice.copy.md",
+      "executed_in_ci": false,
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "Clean control: on-lane, non-substitutable, grounded conviction, no financial register."
+    }
+  ]
+}

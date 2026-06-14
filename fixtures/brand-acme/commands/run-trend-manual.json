@@ -1,0 +1,12 @@
+{
+  "command_family": "RUN_TREND_MANUAL",
+  "brand": "acme-cosmos",
+  "platform": "giphy",
+  "format": "reaction gif",
+  "mode": "SAFE",
+  "routing_class": "VISUAL_HEAVY",
+  "slot_ref": "acme-wed-02",
+  "trend_report_ref": "trends/acme-cosmos/2099-04-08-clear-sky-window.json",
+  "media_source": "library/media/acme-cosmos/orion-nebula-wide.png",
+  "notes": "Fixture sample: a trend-reserved giphy slot fed by a manually submitted trend report."
+}

@@ -1,0 +1,102 @@
+# Deny-by-default hygiene.
+#
+# This repository holds SOURCE, TEMPLATES, SCHEMAS, DOCS, and FIXTURES only.
+# All mutable instance state lives OUTSIDE the checkout, in the instance directory
+# located by the CONTENT_HOME environment variable. Nothing the engine writes at
+# runtime is ever tracked here. The patterns below are defense-in-depth: even if an
+# instance path is misconfigured, `git add -A` inside this checkout must stay safe.
+
+# --- Secrets (never commit; the only secrets file is $CONTENT_HOME/.env) ---
+.env
+.env.*
+*.env
+*.env.*
+!.env.example
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_rsa.*
+*.token
+
+# --- Instance directory (in case it is ever placed inside the checkout by mistake) ---
+# The instance directory is located by $CONTENT_HOME and must live outside any repo
+# with a remote. These guards catch a misplaced instance dir or its contents.
+CONTENT_HOME/
+content_home/
+/instance/
+/queue/
+/corpora/
+/brands/
+/campaigns/
+/workspaces/
+/library/
+/analytics/
+/learning/
+/ledger/
+/setup-state.json
+PAUSED
+
+# --- Dependencies / build ---
+node_modules/
+dist/
+build/
+coverage/
+.nyc_output/
+
+# --- Logs ---
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Backups and pre-change snapshots (never tracked) ---
+*.bak
+*.bak.*
+*.pre-*
+*.orig
+*.tmp
+*.swp
+tmp/
+
+# --- Media binaries (the repo ships no media except declared fixture/doc assets) ---
+# Deny media everywhere, then re-allow ONLY image/video/audio assets under the
+# fixtures/ and docs/ trees (which are provenance-checked). The re-allow is scoped to
+# media extensions so secrets, logs, and backups under those dirs stay denied above.
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.gif
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.mp3
+*.wav
+*.m4a
+!fixtures/**/*.mp4
+!fixtures/**/*.mov
+!fixtures/**/*.webm
+!fixtures/**/*.gif
+!fixtures/**/*.png
+!fixtures/**/*.jpg
+!fixtures/**/*.jpeg
+!fixtures/**/*.webp
+!docs/**/*.gif
+!docs/**/*.png
+!docs/**/*.jpg
+!docs/**/*.jpeg
+!docs/**/*.webp
+
+# --- OS / editor cruft ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.iml

@@ -1,0 +1,12 @@
+{
+  "command_family": "RUN_SLOT",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "format": "single tweet",
+  "mode": "SAFE",
+  "routing_class": "TEXT_HEAVY",
+  "slot_ref": "acme-mon-01",
+  "pillar": "sky-tonight",
+  "theme": "One findable object for tonight: Jupiter low in the east after 9pm.",
+  "notes": "Fixture sample for engine run-slot; defaults to SAFE (artifacts only, no publish)."
+}

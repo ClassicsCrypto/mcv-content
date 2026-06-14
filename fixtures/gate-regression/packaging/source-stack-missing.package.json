@@ -1,0 +1,12 @@
+{
+  "audit_header": {
+    "content_id": "greg-packaging-source",
+    "brand": "acme-cosmos",
+    "platform": "twitter",
+    "mode": "SAFE",
+    "format": "text"
+  },
+  "recommended": { "text": "The Acme Cosmos beta hit its weekend goal, per the source stack item_id: beta-recap-01.", "scores": { "brand": 90 }, "rationale": "Cites a source for the claim." },
+  "variant_a": { "text": "Sixty builders. One weekend. Every demo went out as a working link people can open.", "scores": { "brand": 88 }, "rationale": "Same proof, different angle." },
+  "variant_b": { "text": "We asked for usable demos and got sixty. Here is what the beta produced this weekend.", "scores": { "brand": 87 }, "rationale": "Frames the ask-and-result." }
+}

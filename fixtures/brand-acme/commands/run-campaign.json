@@ -1,0 +1,11 @@
+{
+  "command_family": "RUN_CAMPAIGN",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "format": "single tweet",
+  "mode": "SAFE",
+  "routing_class": "TEXT_HEAVY",
+  "campaign_ref": "acme-first-light-week",
+  "max": 1,
+  "notes": "Fixture sample: produce for the campaign's claimed slots (acme-fri-*) during its window."
+}

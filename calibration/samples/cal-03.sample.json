@@ -1,0 +1,22 @@
+{
+  "sample_id": "cal-03",
+  "archetype": "thesis",
+  "command": {
+    "command_family": "RUN_SLOT",
+    "brand": "acme-cosmos",
+    "platform": "twitter",
+    "format": "thread",
+    "mode": "SAFE",
+    "routing_class": "TEXT_HEAVY",
+    "slot_ref": "cal-wed-thesis",
+    "pillar": "point-of-view",
+    "theme": "Why mission-planning tools should run offline first",
+    "notes": "An opinion thread with a real argument spine: claim (offline-first), mechanism (field teams lose connectivity), verified anchor (our solver runs offline as of this beta), stake (a dropped link can scrub a window). Reframe, not assertion-stacking."
+  },
+  "expected_posture": "clean-on-voice",
+  "exercises": [
+    "structure: complete argument spine (claim, mechanism, anchor, stake) — guards against FM.WEAK_ARG",
+    "fact-safety: the anchor (offline solver) traces to project context; the rest is clearly interpretation"
+  ],
+  "reviewer_note": "A thesis piece that argues rather than asserts. The one interpretive causal link ('offline-first is why field teams trust us') is advisory at most — both endpoints are verified."
+}

@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/artifacts/queue-entry.schema.json",
+  "title": "Queue Entry",
+  "description": "The durable publish-queue record (one '## Entry' block in publish-queue.md). Grounded in the canonical queue field order; this is the v1 documented baseline and MAY change between minor versions with migration notes (spec §7.1, §11.1). Field VALUES are instance data and live only under $CONTENT_HOME; artifact-reference fields are CONTENT_HOME-relative (absolute paths are forbidden).",
+  "x-stability": "stable",
+  "type": "object",
+  "properties": {
+    "content_id": {
+      "type": "string",
+      "description": "Stable identifier for the content item; also the queue entry header."
+    },
+    "brand": {
+      "type": "string",
+      "description": "Brand id this item belongs to (de-localized from the production 'account' field, spec §0.3 rule 6)."
+    },
+    "platform": {
+      "type": "string",
+      "description": "Platform descriptor id (e.g. twitter, giphy, instagram, facebook, youtube)."
+    },
+    "format": {
+      "type": "string",
+      "description": "Content format (e.g. text, thread, image, video, reel, short, carousel, gif)."
+    },
+    "mode": {
+      "type": "string",
+      "description": "Pipeline mode the item was produced under.",
+      "enum": ["SAFE", "LIVE_PREVIEW", "LIVE"]
+    },
+    "content_form": {
+      "type": "string",
+      "description": "Content form (DD-15/DD-16; spec §7.1). Defaults to standalone for non-trend items.",
+      "enum": ["standalone", "quote-retweet"],
+      "default": "standalone"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the entry was created."
+    },
+    "state": {
+      "type": "string",
+      "description": "Queue lifecycle state (durable store authoritative from packaging onward; spec §8.2).",
+      "enum": [
+        "awaiting_approval",
+        "approved",
+        "approved_pending_media",
+        "edited_approved",
+        "rejected",
+        "expired",
+        "publish_intent",
+        "handed_off",
+        "published",
+        "archived",
+        "measured",
+        "interrupted_hold",
+        "manual_review",
+        "dead_lettered",
+        "failed_handoff",
+        "skipped_on_overlap"
+      ]
+    },
+    "state_updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the last state transition."
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Reviewer id from the allowlist that recorded the approval decision (DD-17)."
+    },
+    "approved_variant": {
+      "type": "string",
+      "description": "Which variant the reviewer approved.",
+      "enum": ["recommended", "a", "b", "edited"]
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the approval decision was recorded."
+    },
+    "decision_message_ref": {
+      "type": "string",
+      "description": "Reference to the approval-surface message carrying the decision (placeholder id; not an absolute path)."
+    },
+    "package_ref": {
+      "type": "string",
+      "description": "CONTENT_HOME-relative reference to the package artifact (spec §7.4)."
+    },
+    "media_refs": {
+      "type": "array",
+      "description": "CONTENT_HOME-relative references to the selected media assets.",
+      "items": { "type": "string" }
+    },
+    "preview_message_ref": {
+      "type": "string",
+      "description": "Reference to the posted approval-card message (placeholder id; not an absolute path)."
+    },
+    "gates": {
+      "type": "object",
+      "description": "Per-gate result block carrying detected codes from the unified registry (spec §7.2, §7.3, §10.2).",
+      "additionalProperties": true
+    },
+    "validation_ref": {
+      "type": "string",
+      "description": "CONTENT_HOME-relative reference to the validation-result artifact (spec §7.2)."
+    },
+    "trend_source_ref": {
+      "type": "string",
+      "description": "For trend-derived items: reference to the source Trend Report (spec §6.7, §7.1). Absent for non-trend items."
+    },
+    "freshness_window": {
+      "type": "string",
+      "description": "Inherited freshness window for trend-derived items; drives the approval-card TTL (DD-15). Absent for non-trend items."
+    },
+    "expires_basis": {
+      "type": "string",
+      "description": "What the expiry/TTL is computed from for trend-derived items (e.g. the trend report's freshness window).",
+      "enum": ["freshness_window", "evergreen_escalation", "none"]
+    },
+    "attempt_count": {
+      "type": "integer",
+      "description": "Publish attempt counter, durably incremented BEFORE retry spend (DD-13).",
+      "minimum": 0
+    },
+    "publish_intent": {
+      "type": "string",
+      "description": "Write-ahead intent marker recorded before the external publisher call (DD-4)."
+    },
+    "external_post_ref": {
+      "type": "string",
+      "description": "Publisher-assigned reference (post/draft id) returned by the publisher adapter."
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the item was confirmed published."
+    },
+    "schedule_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Scheduled publish time inherited from the calendar slot (DD-22)."
+    },
+    "error": {
+      "type": "string",
+      "description": "Last executor error string, when in a failure/hold state."
+    },
+    "hold_reason": {
+      "type": "string",
+      "description": "Reason the item is held (e.g. crash quarantine, retry exhaustion)."
+    }
+  },
+  "required": [
+    "content_id",
+    "brand",
+    "platform",
+    "format",
+    "mode",
+    "created_at",
+    "state",
+    "state_updated_at"
+  ],
+  "additionalProperties": true
+}

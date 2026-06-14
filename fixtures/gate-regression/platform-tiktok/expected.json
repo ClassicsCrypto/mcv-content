@@ -1,0 +1,28 @@
+{
+  "rule_ref": "rule.platform.tiktok",
+  "gate": "platform",
+  "executed_in_ci": true,
+  "fixture_kind": "package",
+  "requires_content_home": true,
+  "notes": "PLAT.TIKTOK_HOOK_3S_MISSING + PLAT.TIKTOK_COVER_FRAME_MISSING. TikTok is out of v1 for publishing (RD-7, documented manual path) but the platform gate ships. The clean package declares first_3s_hook_pass + cover_frame_timestamp in the audit_header (the gate's hasField reads header keys). Video packages need a temp CONTENT_HOME for the cooldown lookup (empty ⇒ clean).",
+  "cases": [
+    {
+      "name": "missing-hook-and-cover",
+      "kind": "positive",
+      "input": "missing-hook-and-cover.package.json",
+      "call": { "platform": "tiktok" },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PLAT.TIKTOK_HOOK_3S_MISSING", "PLAT.TIKTOK_COVER_FRAME_MISSING"],
+      "notes": "Neither the first-3s hook field nor the cover-frame field is present (order-stable: hook before cover, per the gate)."
+    },
+    {
+      "name": "clean",
+      "kind": "negative",
+      "input": "clean.package.json",
+      "call": { "platform": "tiktok" },
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "Both first_3s_hook_pass and cover_frame_timestamp declared."
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "rule_ref": "rule.core.packaging",
+  "gate": "package",
+  "executed_in_ci": true,
+  "fixture_kind": "package",
+  "notes": "The PKG.* package-integrity family, all deterministic (engine/gate/validate-package.js) and all HARD. Positives apply an 'override' (deep-merge onto base.package.json) and/or 'omit' (dotted-path field deletion) so base.package.json stays schema-valid for the schema-validation CI job; the runner mutates an in-memory clone, mirroring the live validate-package test. PKG.PACKAGE_INVALID is registered in rules/codes.md but has NO deterministic emit path in the shipped validate-package.js (a malformed package surfaces as the specific structural codes below, e.g. AUDIT_HEADER_MISSING + the *_MISSING set), so it ships as a contract-only entry with no live-executed case.",
+  "cases": [
+    {
+      "name": "audit-header-missing",
+      "kind": "positive",
+      "input": "base.package.json",
+      "omit": ["audit_header"],
+      "call": { "platform": "twitter", "contentId": "greg-packaging-pkg" },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.AUDIT_HEADER_MISSING"]
+    },
+    {
+      "name": "gate-verdict-missing-for-live",
+      "kind": "positive",
+      "input": "base.package.json",
+      "override": { "audit_header": { "mode": "LIVE" } },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.GATE_VERDICT_MISSING_FOR_LIVE"],
+      "notes": "A LIVE-bound package with no explicit gate verdict."
+    },
+    {
+      "name": "gate-verdict-not-passing-for-live",
+      "kind": "positive",
+      "input": "base.package.json",
+      "override": { "audit_header": { "mode": "LIVE", "gate_verdict": "FAIL" } },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.GATE_VERDICT_NOT_PASSING_FOR_LIVE"]
+    },
+    {
+      "name": "package-status-not-ready",
+      "kind": "positive",
+      "input": "base.package.json",
+      "override": { "audit_header": { "package_status": "revision_requested" } },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.PACKAGE_STATUS_NOT_READY"]
+    },
+    {
+      "name": "publish-state-not-ready",
+      "kind": "positive",
+      "input": "base.package.json",
+      "override": { "audit_header": { "publish_state": "blocked" } },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.PUBLISH_STATE_NOT_READY"]
+    },
+    {
+      "name": "ready-for-preview-not-ready",
+      "kind": "positive",
+      "input": "base.package.json",
+      "override": { "audit_header": { "ready_for_preview": "revision_requested" } },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.READY_FOR_PREVIEW_NOT_READY"]
+    },
+    {
+      "name": "ready-for-publish-not-ready",
+      "kind": "positive",
+      "input": "base.package.json",
+      "override": { "audit_header": { "ready_for_publish": "blocked" } },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.READY_FOR_PUBLISH_NOT_READY"]
+    },
+    {
+      "name": "enrichment-packet-leak",
+      "kind": "positive",
+      "input": "base.package.json",
+      "override": { "recommended": { "text": "thesis: builders ship\nThe Acme Cosmos beta wrapped this weekend with sixty demos." } },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.ENRICHMENT_PACKET_LEAK"],
+      "notes": "An internal enrichment-packet marker ('thesis:') leaked into the public Recommended copy."
+    },
+    {
+      "name": "scores-missing",
+      "kind": "positive",
+      "input": "base.package.json",
+      "omit": ["recommended.scores", "variant_a.scores", "variant_b.scores"],
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.SCORES_MISSING"]
+    },
+    {
+      "name": "source-stack-missing",
+      "kind": "positive",
+      "input": "source-stack-missing.package.json",
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.SOURCE_STACK_MISSING"],
+      "notes": "Copy cites a source (item_id) but the package carries no Source Stack."
+    },
+    {
+      "name": "package-invalid-contract-only",
+      "kind": "positive",
+      "input": null,
+      "executed_in_ci": false,
+      "contract_only": true,
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.PACKAGE_INVALID"],
+      "notes": "Registry-defined (rules/codes.md) but NOT emitted by the shipped validate-package.js — a malformed package surfaces as the specific structural codes instead. Pinned here for registry-integrity coverage only; the runner skips execution (executed_in_ci:false)."
+    },
+    {
+      "name": "clean",
+      "kind": "negative",
+      "input": "base.package.json",
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "Complete, ready, SAFE-mode text package with scores and no cited source — no PKG.* code."
+    }
+  ]
+}

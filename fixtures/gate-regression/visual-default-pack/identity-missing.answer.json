@@ -1,0 +1,9 @@
+{
+  "matches_brief_subject": true,
+  "is_generic_stock_filler": false,
+  "contains_brand_identity_signal": false,
+  "contains_unrelated_humans": false,
+  "contains_forbidden_prompt_detail": false,
+  "embedded_text_dates_logos": "none",
+  "main_subject_one_line": "A ridge-line landscape with no recognizable brand mascot."
+}

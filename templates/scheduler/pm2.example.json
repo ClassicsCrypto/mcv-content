@@ -1,0 +1,21 @@
+{
+  "//": "PM2 ecosystem recipe for the daily kickoff. PM2 runs the kickoff as a process",
+  "//2": "restarted on a cron schedule, then exits (autorestart:false). Install with:",
+  "//3": "  pm2 start pm2.example.json   then   pm2 save",
+  "//4": "Replace <CONTENT_HOME>, <ENGINE_DIR>, and cron_restart. CONTENT_HOME is set in",
+  "//5": "env here (the section 4.1 placement rule), NOT in $CONTENT_HOME/.env.",
+  "apps": [
+    {
+      "name": "content-engine-kickoff",
+      "script": "bin/engine.js",
+      "args": "kickoff",
+      "cwd": "<ENGINE_DIR>",
+      "interpreter": "node",
+      "autorestart": false,
+      "cron_restart": "30 8 * * *",
+      "env": {
+        "CONTENT_HOME": "<CONTENT_HOME>"
+      }
+    }
+  ]
+}

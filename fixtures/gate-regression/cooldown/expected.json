@@ -1,0 +1,31 @@
+{
+  "rule_ref": "rule.core.cooldown",
+  "gate": "package",
+  "executed_in_ci": true,
+  "fixture_kind": "package",
+  "notes": "PKG.MEDIA_COOLDOWN_BLOCKED is enforcement point 2 of the three §8.6 points (DD-14), deterministic in engine/gate/validate-package.js against the canonical usage-log ledger. cooldownStatus uses Date.now(), so each case's 'usage_history' is expressed as RELATIVE offsets (used_days_ago) the runner converts to used_at and seeds into a temp CONTENT_HOME — keeping the verdict byte-stable across CI runs. The default hard floor is 14 days (config: cooldown.hard_days; per-brand cooldown_overrides).",
+  "cases": [
+    {
+      "name": "in-cooldown",
+      "kind": "positive",
+      "input": "reused-image.package.json",
+      "usage_history": [
+        { "asset_id": "library/media/hero-01.png", "content_id": "greg-cooldown-prev", "used_days_ago": 3 }
+      ],
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.MEDIA_COOLDOWN_BLOCKED"],
+      "notes": "The bound image was used 3 days ago — inside the 14-day hard floor."
+    },
+    {
+      "name": "past-cooldown",
+      "kind": "negative",
+      "input": "reused-image.package.json",
+      "usage_history": [
+        { "asset_id": "library/media/hero-01.png", "content_id": "greg-cooldown-prev", "used_days_ago": 20 }
+      ],
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "The same asset used 20 days ago is past the 14-day floor — cooldown clears."
+    }
+  ]
+}

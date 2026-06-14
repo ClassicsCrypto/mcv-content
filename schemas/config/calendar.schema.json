@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/config/calendar.schema.json",
+  "title": "Calendar Slot Table",
+  "description": "The calendar slot-table contract (RD-5 / DD-22). The calendar ships as markdown with a schema'd slot-row contract; this schema defines one calendar's metadata plus its array of recurring weekly slots. Calendar owns the clock time assigned to each slot. Grounded in the production slot-table columns. Spec ref: release-spec.md §6.5.",
+  "x-stability": "stable",
+  "x-schema-version": "1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "slots"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Calendar shape version, for migration handling (§11.1).",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "timezone": {
+      "type": "string",
+      "description": "IANA timezone the slot 'time' values are expressed in (timezone-explicit; the production time_et column generalized). Defaults to UTC when absent.",
+      "default": "UTC",
+      "examples": ["UTC", "America/New_York", "Europe/London"]
+    },
+    "slots": {
+      "type": "array",
+      "description": "Recurring weekly slots. Each row is one scheduled cadence entry.",
+      "items": { "$ref": "#/$defs/slot" }
+    }
+  },
+  "$defs": {
+    "slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slot_id",
+        "brand",
+        "platform",
+        "day",
+        "time",
+        "content_type",
+        "command_family",
+        "format",
+        "slot_type",
+        "state"
+      ],
+      "properties": {
+        "slot_id": {
+          "type": "string",
+          "description": "Unique, stable, human-readable id used for weekly dedup. Convention: <brand>-<day>-<pos>.",
+          "minLength": 1,
+          "examples": ["acme-mon-01"]
+        },
+        "brand": {
+          "type": "string",
+          "description": "Brand id this slot belongs to (the production 'account' column, generalized to the brand-keyed model).",
+          "minLength": 1,
+          "examples": ["acme-cosmos"]
+        },
+        "platform": {
+          "type": "string",
+          "description": "Platform descriptor id (see platform-descriptor.schema.json).",
+          "minLength": 1,
+          "examples": ["twitter", "instagram", "giphy", "tiktok", "youtube", "facebook"]
+        },
+        "day": {
+          "type": "string",
+          "description": "Day of week the slot recurs.",
+          "enum": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+        },
+        "time": {
+          "type": "string",
+          "description": "Clock time the slot fires, 24-hour HH:MM, in the calendar 'timezone' (DD-22: the calendar owns clock time).",
+          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+        },
+        "pillar": {
+          "type": ["string", "null"],
+          "description": "Content pillar / theme lane label (operator-defined taxonomy). Optional.",
+          "default": null
+        },
+        "theme": {
+          "type": ["string", "null"],
+          "description": "Optional explicit theme for this slot, overriding the pillar default.",
+          "default": null
+        },
+        "content_type": {
+          "type": "string",
+          "description": "Content-type label for the slot (operator/platform vocabulary, e.g. tweet-text, thread, feed-single, reel, short-clip, reaction-gif).",
+          "minLength": 1
+        },
+        "command_family": {
+          "description": "Operator-command family this slot dispatches (see operator-command schema; aligned with campaign.schema.json command_families).",
+          "type": "string",
+          "enum": ["RUN_SLOT", "RUN_BATCH", "RUN_CAMPAIGN", "RUN_TREND_MANUAL"]
+        },
+        "format": {
+          "type": "string",
+          "description": "The FORMAT value passed to the operator command (e.g. 'single tweet', 'thread', 'feed single', 'reel', 'short clip', 'reaction gif').",
+          "minLength": 1
+        },
+        "slot_type": {
+          "description": "Slot category. trend slots are reserved for trend passes; campaign slots are claimable by a campaign's slot_pattern; regular is the default pillar-driven slot.",
+          "type": "string",
+          "enum": ["regular", "trend", "campaign"],
+          "default": "regular"
+        },
+        "state": {
+          "description": "active means the scheduler fires this slot; dormant means it is skipped (reason belongs in notes).",
+          "type": "string",
+          "enum": ["active", "dormant"],
+          "default": "active"
+        },
+        "notes": {
+          "type": ["string", "null"],
+          "description": "Free text: theme hint, constraint, or reason for dormancy.",
+          "default": null
+        }
+      }
+    }
+  }
+}

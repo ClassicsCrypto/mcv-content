@@ -1,0 +1,66 @@
+{
+  "rule_ref": "rule.core.humanizer",
+  "gate": "lint",
+  "executed_in_ci": true,
+  "fixture_kind": "draft",
+  "notes": "rule.core.humanizer spans two deterministic LINT.* codes (executed live) and two LLM-judged FM.* codes (prose cases, structural-only in CI). The deterministic cases run through engine/gate/pre-gate-lint.js; the prose cases (executed_in_ci:false) are validated structurally + diffed by a keyed maintainer.",
+  "cases": [
+    {
+      "name": "inflation",
+      "kind": "positive",
+      "input": "inflation.draft.json",
+      "expected_verdict": "FAIL",
+      "expected_codes": ["LINT.INFLATION"],
+      "notes": "Significance-inflation phrasing ('pivotal', 'underscores') — deterministic, hard."
+    },
+    {
+      "name": "negpar",
+      "kind": "positive",
+      "input": "negpar.draft.json",
+      "expected_verdict": "PASS",
+      "expected_codes": ["LINT.NEGPAR"],
+      "notes": "Negated-parallelism tell (\"isn't just X, it's Y\") — deterministic, SOFT/warn. Alone it does NOT bar the Recommended slot, so the pre-gate verdict is PASS (§14.2)."
+    },
+    {
+      "name": "clean",
+      "kind": "negative",
+      "input": "clean.draft.json",
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "No inflation phrasing, no negated parallelism."
+    },
+    {
+      "name": "hype-voice",
+      "kind": "positive",
+      "input": "hype-voice.copy.md",
+      "executed_in_ci": false,
+      "expected_verdict": "PASS_ALTERNATE_ONLY",
+      "expected_codes": ["FM.HYPE_VOICE"],
+      "code_tier": "soft",
+      "code_disposition": "warn",
+      "bars_recommended": true,
+      "notes": "LLM-judged hype/significance-inflation VOICE register. Bars Recommended (RD-21)."
+    },
+    {
+      "name": "humanizer-tell",
+      "kind": "positive",
+      "input": "humanizer-tell.copy.md",
+      "executed_in_ci": false,
+      "expected_verdict": "PASS_ALTERNATE_ONLY",
+      "expected_codes": ["FM.HUMANIZER"],
+      "code_tier": "soft",
+      "code_disposition": "warn",
+      "bars_recommended": true,
+      "notes": "LLM-judged residual machine-writing tells (rule-of-three, parrot, signposting, follow-trap)."
+    },
+    {
+      "name": "on-voice",
+      "kind": "negative",
+      "input": "on-voice.copy.md",
+      "executed_in_ci": false,
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "Clean control for the FM.* prose cases: grounded operator-conviction, no tells."
+    }
+  ]
+}

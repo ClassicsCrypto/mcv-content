@@ -1,0 +1,14 @@
+{
+  "content_id": "test-greg-sys-fixture-01",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "format": "text",
+  "mode": "LIVE",
+  "created_at": "2026-01-01T09:00:00.000Z",
+  "state": "approved",
+  "state_updated_at": "2026-01-01T09:05:00.000Z",
+  "approved_by": "reviewer-1",
+  "approved_variant": "recommended",
+  "approved_at": "2026-01-01T09:05:00.000Z",
+  "package_ref": "workspaces/packaged/test-greg-sys-fixture-01.package.json"
+}

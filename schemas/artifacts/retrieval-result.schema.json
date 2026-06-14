@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/artifacts/retrieval-result.schema.json",
+  "title": "Retrieval Query and Result",
+  "description": "The library retrieval contract (release-spec.md §7.8; model §2 Retrieval Query/Result; model §10 #5). A query against the archive index returns ranked candidates, each scored with a cooldown status and any retrieval risk codes, plus the media decision (reuse / modify / generate) the candidate set implies. This is the public anchor for retrieval-accuracy work; private judges and ground truth do NOT ship (DD-9). All asset references are $CONTENT_HOME-relative; absolute paths are forbidden. Structural contract only; instances are instance data and never ship in the repo.",
+  "x-stability": "stable",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["query", "candidates"],
+  "properties": {
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The retrieval query (release-spec.md §7.8).",
+      "properties": {
+        "brand": {
+          "type": "string",
+          "description": "Brand id scoping the search."
+        },
+        "theme": {
+          "type": "string",
+          "description": "Theme/topic the media should support."
+        },
+        "archetype": {
+          "type": "string",
+          "description": "Content archetype the media should fit."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tag/keyword filters."
+        },
+        "media_type": {
+          "type": "string",
+          "enum": ["image", "video", "gif", "motion", "animated_image"],
+          "description": "Requested media kind."
+        }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "description": "Ranked candidate assets, strongest first.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["asset_id", "score"],
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "description": "Candidate asset id."
+          },
+          "path": {
+            "type": "string",
+            "description": "$CONTENT_HOME-relative path to the candidate asset."
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Normalized retrieval similarity (0..1)."
+          },
+          "rationale": {
+            "type": "string",
+            "description": "Why this candidate matched (matched terms / evidence summary)."
+          },
+          "cooldown_status": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Cooldown evaluation for the candidate against the usage ledger (DD-14; release-spec.md §8.6).",
+            "required": ["eligible", "cooldown_blocked"],
+            "properties": {
+              "eligible": {
+                "type": "boolean",
+                "description": "True when the asset clears the hard cooldown floor (default 14 days) and is not a byte-duplicate of a recently used asset."
+              },
+              "cooldown_blocked": {
+                "type": "boolean",
+                "description": "True when reuse is currently blocked by cooldown."
+              },
+              "cooldown_days": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Hard cooldown floor applied (brand default 14)."
+              },
+              "recent_use_count": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Number of uses inside the cooldown window."
+              },
+              "days_since_last_use": {
+                "type": ["integer", "null"],
+                "description": "Whole days since last use, or null if never used."
+              },
+              "duplicate_of_recent_use": {
+                "type": "boolean",
+                "description": "True when the candidate is a byte-identical duplicate of a recently used asset under a different path."
+              },
+              "last_use": {
+                "type": ["object", "null"],
+                "additionalProperties": false,
+                "description": "Most recent matching use, or null.",
+                "properties": {
+                  "content_id": { "type": "string" },
+                  "platform": { "type": "string" },
+                  "used_at": { "type": "string", "format": "date-time" },
+                  "match_reason": {
+                    "type": "string",
+                    "enum": ["asset_path", "base_asset_path", "asset_family", "base_asset_family", "duplicate"],
+                    "description": "How the use was matched to the candidate."
+                  }
+                }
+              }
+            }
+          },
+          "risk_codes": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Retrieval risk codes flagged for the candidate (e.g. wrong-brand, stale-text, requires-modification). The retrieval-lab code set lives in the calibration harness, not the runtime registry (DD-9)."
+          },
+          "hard_blocks": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Subset of risk_codes that hard-block direct reuse of the candidate."
+          },
+          "reuse_requires_modification": {
+            "type": "boolean",
+            "description": "True when the candidate may only be used after modification (crop/edit), not direct reuse."
+          }
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The media decision the candidate set implies (mirrors schemas/artifacts/media-decision.schema.json; release-spec.md §8.5/§8.6).",
+      "required": ["action"],
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": ["reuse", "modify", "generate"],
+          "description": "Chosen media action."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Human-readable justification for the action."
+        },
+        "chosen_asset_id": {
+          "type": "string",
+          "description": "The candidate selected for reuse/modify (absent for generate)."
+        }
+      }
+    },
+    "total_matches": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total assets that matched before the candidate list was truncated to the limit."
+    }
+  }
+}

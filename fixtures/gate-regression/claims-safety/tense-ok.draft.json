@@ -1,0 +1,11 @@
+{
+  "content_id": "greg-claims-tense-ok",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "format": "text",
+  "variants": [
+    { "label": "recommended", "text": "Season One was a record-setting run that wrapped earlier this year for everyone involved." },
+    { "label": "variant-a", "text": "Sixty builders showed up and every single demo went out as a usable link people can open." },
+    { "label": "variant-b", "text": "We asked for working demos. Sixty arrived. Here is the complete weekend recap for all." }
+  ]
+}

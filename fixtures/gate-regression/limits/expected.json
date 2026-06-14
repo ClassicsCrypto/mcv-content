@@ -1,0 +1,27 @@
+{
+  "rule_ref": "rule.platform.limits",
+  "gate": "lint",
+  "executed_in_ci": true,
+  "fixture_kind": "draft",
+  "notes": "LINT.LENGTH fires when a variant is outside the brief's target character window for its platform/format. The window is threaded into the gate via the case 'rules.target_chars' block; both cases use the generic Twitter window [1, 280].",
+  "cases": [
+    {
+      "name": "over-limit",
+      "kind": "positive",
+      "input": "over-limit.draft.json",
+      "rules": { "target_chars": [1, 280] },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["LINT.LENGTH"],
+      "notes": "The Recommended variant is 332 chars, over the 280-char window — deterministic, hard."
+    },
+    {
+      "name": "in-window",
+      "kind": "negative",
+      "input": "in-window.draft.json",
+      "rules": { "target_chars": [1, 280] },
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "All three variants sit inside the 280-char window."
+    }
+  ]
+}

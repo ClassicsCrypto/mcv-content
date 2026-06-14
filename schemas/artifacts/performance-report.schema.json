@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/artifacts/performance-report.schema.json",
+  "title": "Performance Report",
+  "description": "Analytics output of the engagement loop (release-spec.md §7.9; model §2 Performance Report). Carries three parts: raw per-content engagement checkpoints captured at fixed intervals, rolling baselines the checkpoints are compared against, and the weekly summary with aggregates and recommendations. The weekly summary is a REQUIRED output of the analytics loop. All external post references are publisher ids (not URLs); no signed/credential-bearing URLs appear in any artifact. Structural contract only; instances are instance data and never ship in the repo.",
+  "x-stability": "experimental",
+  "type": "object",
+  "additionalProperties": false,
+  "minProperties": 1,
+  "properties": {
+    "checkpoints": {
+      "type": "array",
+      "description": "Raw engagement checkpoints; one per content item per measurement interval.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["content_id", "platform", "captured_at", "checkpoint", "metrics"],
+        "properties": {
+          "content_id": {
+            "type": "string",
+            "description": "Content identifier the checkpoint is for."
+          },
+          "brand": {
+            "type": "string",
+            "description": "Brand id."
+          },
+          "platform": {
+            "type": "string",
+            "description": "Platform descriptor id."
+          },
+          "external_post_ref": {
+            "type": "string",
+            "description": "Publisher-side post id (never a URL)."
+          },
+          "captured_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the metrics were captured."
+          },
+          "checkpoint": {
+            "type": "string",
+            "enum": ["1h", "24h", "7d"],
+            "description": "Measurement interval since publish."
+          },
+          "metrics": {
+            "type": "object",
+            "description": "Provider-reported engagement metrics for the interval. Field set is provider-dependent and open.",
+            "additionalProperties": { "type": "number" }
+          },
+          "partial": {
+            "type": "boolean",
+            "default": false,
+            "description": "True when the pull was partial (provider degraded); partial inputs are flagged, never silently consumed (release-spec.md §15.1 analytics row)."
+          }
+        }
+      }
+    },
+    "baselines": {
+      "type": "array",
+      "description": "Rolling baselines metrics are compared against.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["dimension", "key", "metrics"],
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "enum": ["type", "theme", "format", "hook", "platform", "overall"],
+            "description": "What the baseline is grouped by."
+          },
+          "key": {
+            "type": "string",
+            "description": "The dimension value the baseline is for (e.g. a specific format), or 'overall'."
+          },
+          "window": {
+            "type": "string",
+            "description": "Rolling window for the baseline as an ISO-8601 duration."
+          },
+          "metrics": {
+            "type": "object",
+            "description": "Baseline metric values.",
+            "additionalProperties": { "type": "number" }
+          }
+        }
+      }
+    },
+    "weekly_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The required weekly performance summary.",
+      "required": ["period"],
+      "properties": {
+        "period": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start", "end"],
+          "description": "The week the summary covers.",
+          "properties": {
+            "start": { "type": "string", "format": "date" },
+            "end": { "type": "string", "format": "date" }
+          }
+        },
+        "brand": {
+          "type": "string",
+          "description": "Brand id the summary is for."
+        },
+        "aggregates": {
+          "type": "array",
+          "description": "Aggregated performance by dimension (type / theme / format / hook).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["dimension", "key", "metrics"],
+            "properties": {
+              "dimension": {
+                "type": "string",
+                "enum": ["type", "theme", "format", "hook"],
+                "description": "Grouping dimension."
+              },
+              "key": {
+                "type": "string",
+                "description": "The dimension value."
+              },
+              "sample_size": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Number of items in the aggregate."
+              },
+              "metrics": {
+                "type": "object",
+                "description": "Aggregated metric values plus comparison to baseline.",
+                "additionalProperties": { "type": "number" }
+              }
+            }
+          }
+        },
+        "recommendations": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Human-facing recommendations derived from the aggregates; an input to learning records, never auto-applied (release-spec.md §8.9)."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+# Unix / Linux / macOS crontab recipe for the daily kickoff.
+#
+# Install with:  crontab -e   (then paste an edited copy of the line below)
+# List with:     crontab -l
+#
+# Requirements (see ../README.md):
+#   - CONTENT_HOME must be set for the command (cron does NOT load your shell profile,
+#     so set it inline on the line — that is what the leading assignment does).
+#   - Replace <CONTENT_HOME>, <NODE_BIN>, <ENGINE_DIR>, and the HH:MM time.
+#
+# Fields:  minute hour day-of-month month day-of-week  command
+# Example below runs every day at 08:30 host-local time.
+
+30 8 * * *  CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js kickoff >> <CONTENT_HOME>/logs/kickoff.cron.log 2>&1
+
+# Notes:
+#   - Logs append to $CONTENT_HOME/logs/kickoff.cron.log; the engine redacts secrets at
+#     write time, but rotate/secure this file like any operational log.
+#   - Drop `--now` for the scheduled morning-kickoff trigger; add it only for an
+#     on-demand manual run.
+#   - cron uses the system timezone; align HH:MM with your calendar's scheduler.timezone.

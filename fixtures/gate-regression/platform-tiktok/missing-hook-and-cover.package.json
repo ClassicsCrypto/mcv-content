@@ -1,0 +1,14 @@
+{
+  "audit_header": {
+    "content_id": "greg-plat-tt-missing",
+    "brand": "acme-cosmos",
+    "platform": "tiktok",
+    "mode": "SAFE",
+    "format": "video",
+    "visual_state": "reuse",
+    "media": ["library/media/clip-01.mp4"]
+  },
+  "recommended": { "text": "How sixty builders turned one weekend into a wall of openable demos at the Acme Cosmos beta.", "scores": { "brand": 90 }, "rationale": "Video recap caption; no first-3s hook or cover frame declared." },
+  "variant_a": { "text": "Three days. Sixty builders. Every demo a link you can open. Here is the run.", "scores": { "brand": 88 }, "rationale": "Punchy caption." },
+  "variant_b": { "text": "We gave them a weekend and asked for working demos. Watch what came back.", "scores": { "brand": 87 }, "rationale": "Teaser caption." }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "Acme Explorer #10",
+  "description": "Synthetic fixture token for the open-content-engine trait-index build path. Not a real NFT, collection, or asset; authored for this repository. See fixtures/PROVENANCE.md.",
+  "image": "ipfs://example-placeholder/acme-explorers/10.png",
+  "edition": 10,
+  "attributes": [
+    {
+      "trait_type": "Suit",
+      "value": "Nebula Violet"
+    },
+    {
+      "trait_type": "Helmet",
+      "value": "Standard Dome"
+    },
+    {
+      "trait_type": "Tool",
+      "value": "Field Notebook"
+    },
+    {
+      "trait_type": "Backdrop",
+      "value": "Mountain Ridge"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    }
+  ]
+}

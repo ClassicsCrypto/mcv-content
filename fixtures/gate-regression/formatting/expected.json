@@ -1,0 +1,24 @@
+{
+  "rule_ref": "rule.core.formatting",
+  "gate": "lint",
+  "executed_in_ci": true,
+  "fixture_kind": "draft",
+  "cases": [
+    {
+      "name": "em-dash",
+      "kind": "positive",
+      "input": "em-dash.draft.json",
+      "expected_verdict": "FAIL",
+      "expected_codes": ["LINT.EM_DASH"],
+      "notes": "A mid-sentence em dash in the Recommended variant — the machine-writing tell rule.core.formatting bans."
+    },
+    {
+      "name": "clean",
+      "kind": "negative",
+      "input": "clean.draft.json",
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "Same copy with the em dash replaced by 'and'; clean punctuation register, no LINT.EM_DASH."
+    }
+  ]
+}

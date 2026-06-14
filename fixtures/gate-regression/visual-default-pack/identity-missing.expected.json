@@ -1,0 +1,6 @@
+{
+  "verdict": "FAIL",
+  "vision_pass": false,
+  "identity_required": true,
+  "codes": ["VIS.IDENTITY_MISSING"]
+}

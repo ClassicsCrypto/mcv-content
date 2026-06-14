@@ -1,0 +1,16 @@
+# GitHub issue chooser config.
+# - blank_issues_enabled: false forces every issue through a template (bug_report / feature_request).
+# - contact_links require absolute URLs (the chooser does not resolve repo-relative paths). Replace
+#   <OWNER>/<REPO> below with this repository's path before publishing; the security link should
+#   point operators at private reporting, NOT a public issue (see SECURITY.md).
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability (private — never a public issue)
+    url: https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability
+    about: Vulnerabilities must be reported privately per SECURITY.md, not in a public issue.
+  - name: Contributing guide (read before opening a PR)
+    url: https://github.com/<OWNER>/<REPO>/blob/main/CONTRIBUTING.md
+    about: The DCO sign-off and the never-accepted list are hard requirements.
+  - name: Questions & discussion
+    url: https://github.com/<OWNER>/<REPO>/discussions
+    about: For usage questions and open-ended discussion (not bug reports).

@@ -1,0 +1,21 @@
+{
+  "$comment": "Calibration sample manifest (release-spec §2.5, §16.4; DD-9 public half). Synthetic Acme Cosmos content world only — see PROVENANCE.md. Each entry points at a per-sample spec file under this dir; every spec's `command` block conforms to schemas/inputs/operator-command.schema.json. The `expected_posture` is the designed intent: most samples are clean on-voice pieces; a few are seeded to surface a specific weakness so the harness exercises the gate's and the rubric's discrimination. The battery as authored still clears pass-criteria.md (>=8/10 gate-clear, >=6/10 on-voice, 0 fabrication).",
+  "version": "1.0.0",
+  "brand": "acme-cosmos",
+  "sample_count": 10,
+  "default_platform": "twitter",
+  "rubric": "../rubric.md",
+  "pass_criteria": "../pass-criteria.md",
+  "samples": [
+    { "id": "cal-01", "file": "cal-01.sample.json", "archetype": "build-update",        "expected_posture": "clean-on-voice" },
+    { "id": "cal-02", "file": "cal-02.sample.json", "archetype": "announcement",         "expected_posture": "clean-on-voice" },
+    { "id": "cal-03", "file": "cal-03.sample.json", "archetype": "thesis",               "expected_posture": "clean-on-voice" },
+    { "id": "cal-04", "file": "cal-04.sample.json", "archetype": "community-spotlight",   "expected_posture": "clean-on-voice" },
+    { "id": "cal-05", "file": "cal-05.sample.json", "archetype": "teaching",             "expected_posture": "clean-on-voice" },
+    { "id": "cal-06", "file": "cal-06.sample.json", "archetype": "behind-the-scenes",    "expected_posture": "clean-on-voice" },
+    { "id": "cal-07", "file": "cal-07.sample.json", "archetype": "milestone",            "expected_posture": "clean-on-voice" },
+    { "id": "cal-08", "file": "cal-08.sample.json", "archetype": "announcement",         "expected_posture": "weak-hook-risk" },
+    { "id": "cal-09", "file": "cal-09.sample.json", "archetype": "thesis",               "expected_posture": "substitutable-risk" },
+    { "id": "cal-10", "file": "cal-10.sample.json", "archetype": "visual-spotlight",     "expected_posture": "clean-on-voice-visual" }
+  ]
+}

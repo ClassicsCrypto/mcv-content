@@ -1,0 +1,34 @@
+# systemd recipe for the daily kickoff (Linux).
+#
+# Two units: a oneshot SERVICE that runs the kickoff, and a TIMER that fires it daily.
+# Install (user scope shown; drop --user for system scope and use /etc/systemd/system):
+#   mkdir -p ~/.config/systemd/user
+#   cp content-engine-kickoff.service ~/.config/systemd/user/
+#   cp content-engine-kickoff.timer   ~/.config/systemd/user/
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now content-engine-kickoff.timer
+#   systemctl --user list-timers          # verify next run
+#
+# Replace <CONTENT_HOME>, <NODE_BIN>, <ENGINE_DIR>, and OnCalendar time.
+
+# ===== content-engine-kickoff.service =====
+[Unit]
+Description=Open Content Engine daily kickoff
+
+[Service]
+Type=oneshot
+# CONTENT_HOME is set here (the §4.1 placement rule) — not in $CONTENT_HOME/.env.
+Environment=CONTENT_HOME=<CONTENT_HOME>
+ExecStart=<NODE_BIN> <ENGINE_DIR>/bin/engine.js kickoff
+
+# ===== content-engine-kickoff.timer =====
+[Unit]
+Description=Run the Open Content Engine kickoff daily
+
+[Timer]
+# Daily at 08:30 host-local time; align with your calendar scheduler.timezone.
+OnCalendar=*-*-* 08:30:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

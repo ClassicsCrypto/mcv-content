@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/config/campaign.schema.json",
+  "title": "Campaign",
+  "description": "A named, time-bounded content sequence that claims matching calendar slots during its window and overrides their default theme (§8.7). A campaign claims a slot when today is within [start_date, end_date], the slot's brand and platform match, and the slot_id matches slot_pattern. On conflict, the campaign with the earliest start_date wins. No out-of-calendar publishing. Spec ref: release-spec.md §6.5, §8.7.",
+  "x-stability": "stable",
+  "x-schema-version": "1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "start_date",
+    "end_date",
+    "brands",
+    "platforms",
+    "slot_pattern",
+    "state"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Campaign shape version, for migration handling (§11.1).",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "name": {
+      "type": "string",
+      "description": "Unique campaign id / human-readable name.",
+      "minLength": 1,
+      "examples": ["acme-launch-week-1"]
+    },
+    "start_date": {
+      "type": "string",
+      "description": "Campaign window start (inclusive), ISO 8601 date.",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "description": "Campaign window end (inclusive), ISO 8601 date. MUST be on or after start_date.",
+      "format": "date"
+    },
+    "brands": {
+      "type": "array",
+      "description": "Brand ids the campaign applies to.",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 },
+      "examples": [["acme-cosmos"]]
+    },
+    "platforms": {
+      "type": "array",
+      "description": "Platform descriptor ids the campaign applies to.",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 },
+      "examples": [["twitter"]]
+    },
+    "slot_pattern": {
+      "type": "string",
+      "description": "Glob (supports '*') matched against slot_id to select which calendar slots the campaign claims. E.g. 'acme-*' for all of a brand's slots, 'acme-tue-*' for Tuesdays, 'acme-tue-01' for an exact match.",
+      "minLength": 1,
+      "examples": ["acme-*", "acme-tue-*"]
+    },
+    "messaging_goals": {
+      "description": "Per-day theme/messaging that replaces the slot's default pillar theme for that date. Keyed by ISO date; the value is the theme text injected as the slot's THEME (pre-seed input to the brief).",
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "propertyNames": {
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      },
+      "examples": [
+        { "2099-01-01": "Launch announcement: name the offer in plain language; no hype." }
+      ]
+    },
+    "voice_notes": {
+      "type": ["string", "null"],
+      "description": "Optional campaign-specific voice/tone notes that override defaults during the window.",
+      "default": null
+    },
+    "assets": {
+      "type": "array",
+      "description": "Optional CONTENT_HOME-relative library references the campaign should reuse/modify.",
+      "items": { "$ref": "#/$defs/relative_path" },
+      "default": []
+    },
+    "success_signals": {
+      "type": ["string", "null"],
+      "description": "Optional free text describing what to watch for in post-campaign analytics.",
+      "default": null
+    },
+    "state": {
+      "description": "active means the campaign claims slots during its window; draft means it is parked until ready to fire.",
+      "type": "string",
+      "enum": ["active", "draft"],
+      "default": "draft"
+    },
+    "claim_percentage": {
+      "type": ["integer", "null"],
+      "description": "Documented, NOT enforced in v1: intended fraction (1-100) of matching slots claimed per day, leaving the rest to default rotation. v1 behavior: every match is claimed regardless of this value.",
+      "minimum": 1,
+      "maximum": 100,
+      "default": null
+    },
+    "priority": {
+      "type": ["string", "null"],
+      "description": "Documented, NOT enforced in v1: conflict-resolution hint when multiple campaigns overlap. v1 behavior: earliest start_date wins regardless of this value.",
+      "enum": ["high", "normal", null],
+      "default": null
+    }
+  },
+  "$defs": {
+    "relative_path": {
+      "type": "string",
+      "description": "CONTENT_HOME-relative path. Absolute paths and drive letters are forbidden.",
+      "minLength": 1,
+      "pattern": "^(?![A-Za-z]:)(?!/)(?!.*\\.\\.).+$"
+    }
+  }
+}

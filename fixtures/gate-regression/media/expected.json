@@ -1,0 +1,73 @@
+{
+  "rule_ref": "rule.core.media",
+  "gate": "package",
+  "executed_in_ci": true,
+  "fixture_kind": "package",
+  "notes": "rule.core.media governs PRESENCE and STATE at the publish edge. The PKG.* codes are deterministic (engine/gate/validate-package.js over an image package): VISUAL_STATE_MISSING / MEDIA_MISSING from omitted header fields; VISUAL_CHECK_MISSING / VISUAL_CHECK_NOT_PASSING when the runner threads a visual-check result via the case 'visual_check' block (the gate only inspects it for image refs when one is supplied — the visual-check ENGINE is exercised in visual-default-pack/). The image package needs a temp CONTENT_HOME so the cooldown ledger lookup resolves; it returns empty (clean cooldown). FM.IMAGE_DESCRIPTION is the LLM-judged copy-vs-image code (prose, structural-only).",
+  "cases": [
+    {
+      "name": "visual-state-missing",
+      "kind": "positive",
+      "input": "image.package.json",
+      "omit": ["audit_header.visual_state"],
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.VISUAL_STATE_MISSING"]
+    },
+    {
+      "name": "media-missing",
+      "kind": "positive",
+      "input": "image.package.json",
+      "omit": ["audit_header.media"],
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.MEDIA_MISSING"]
+    },
+    {
+      "name": "visual-check-missing",
+      "kind": "positive",
+      "input": "image.package.json",
+      "visual_check": { "exists": false },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.VISUAL_CHECK_MISSING"],
+      "notes": "Image package with no visual-check result attached."
+    },
+    {
+      "name": "visual-check-not-passing",
+      "kind": "positive",
+      "input": "image.package.json",
+      "visual_check": { "exists": true, "pass": false, "rejection_code": "VIS.OFF_BRAND" },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PKG.VISUAL_CHECK_NOT_PASSING"],
+      "notes": "Visual-check result present but not passing."
+    },
+    {
+      "name": "image-description",
+      "kind": "positive",
+      "input": "image-description.copy.md",
+      "executed_in_ci": false,
+      "expected_verdict": "PASS_ALTERNATE_ONLY",
+      "expected_codes": ["FM.IMAGE_DESCRIPTION"],
+      "code_tier": "soft",
+      "code_disposition": "warn",
+      "bars_recommended": true,
+      "notes": "Copy narrates the image literally instead of adding context. LLM-judged."
+    },
+    {
+      "name": "clean",
+      "kind": "negative",
+      "input": "image.package.json",
+      "visual_check": { "exists": true, "pass": true },
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "Complete image package: visual_state + bound media + a passing visual check, asset not in cooldown."
+    },
+    {
+      "name": "caption-clean",
+      "kind": "negative",
+      "input": "caption-clean.copy.md",
+      "executed_in_ci": false,
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "Clean control for FM.IMAGE_DESCRIPTION: the caption adds story/context, not a literal description."
+    }
+  ]
+}

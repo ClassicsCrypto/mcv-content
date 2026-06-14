@@ -1,0 +1,27 @@
+{
+  "rule_ref": "rule.platform.youtube",
+  "gate": "platform",
+  "executed_in_ci": true,
+  "fixture_kind": "package",
+  "requires_content_home": true,
+  "notes": "PLAT.YOUTUBE_SOURCE_SENSE_MISSING fires when a YouTube package has no source-sense note tying the title/description to the actual footage. The clean package declares source_sense_check in the audit_header. Video format ⇒ temp CONTENT_HOME for the cooldown lookup (empty ⇒ clean).",
+  "cases": [
+    {
+      "name": "missing-source-sense",
+      "kind": "positive",
+      "input": "missing-source-sense.package.json",
+      "call": { "platform": "youtube" },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PLAT.YOUTUBE_SOURCE_SENSE_MISSING"]
+    },
+    {
+      "name": "clean",
+      "kind": "negative",
+      "input": "clean.package.json",
+      "call": { "platform": "youtube" },
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "source_sense_check present."
+    }
+  ]
+}

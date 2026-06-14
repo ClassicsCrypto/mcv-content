@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/artifacts/archive-index-entry.schema.json",
+  "title": "Archive Index Entry",
+  "description": "One entry in the media archive index (release-spec.md §7.8; model §2 Media Asset / Archive Index Entry). Describes a library asset, its visual-model description and tags, its source provenance, and its usage history + approval lineage. Approved content auto-indexes back with approval lineage (release-spec.md §8.6); usage is written back to the single canonical cooldown ledger (library/usage-log.jsonl) on confirmed publish (DD-14). All paths are $CONTENT_HOME-relative; absolute paths are forbidden. Structural contract only; instances are instance data and never ship in the repo.",
+  "x-stability": "stable",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asset_id",
+    "path",
+    "type",
+    "source_class"
+  ],
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "description": "Stable identifier for the asset."
+    },
+    "path": {
+      "type": "string",
+      "description": "$CONTENT_HOME-relative path to the asset file."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["image", "video", "gif", "animated_image"],
+      "description": "Media kind."
+    },
+    "description": {
+      "type": "string",
+      "description": "Visual-model description of the asset content."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Searchable tags/keywords for retrieval matching."
+    },
+    "duration": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Duration in seconds for time-based media; omitted for stills."
+    },
+    "source_class": {
+      "type": "string",
+      "enum": ["library", "generated", "modified", "user-attached"],
+      "description": "Provenance class of the asset."
+    },
+    "character_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional references to character sheets depicted in the asset."
+    },
+    "usage_history": {
+      "type": "array",
+      "description": "Records of confirmed publishes that used this asset; feeds the cooldown ledger (DD-14).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["content_id", "used_at"],
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "description": "Asset id used (may differ from the entry id for family/derivative matches)."
+          },
+          "content_id": {
+            "type": "string",
+            "description": "Content item that used the asset."
+          },
+          "used_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the asset was used in a confirmed publish."
+          },
+          "platform": {
+            "type": "string",
+            "description": "Platform descriptor id the asset published to."
+          }
+        }
+      }
+    },
+    "approval_lineage": {
+      "type": "array",
+      "description": "Approval-decision references establishing how this (re-indexed) asset was approved (release-spec.md §8.6).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["content_id"],
+        "properties": {
+          "content_id": {
+            "type": "string",
+            "description": "Content item whose approval brought this asset into the archive."
+          },
+          "decision_ref": {
+            "type": "string",
+            "description": "$CONTENT_HOME-relative reference to the approval decision (schemas/artifacts/approval-decision.schema.json)."
+          },
+          "approved_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the lineage approval was recorded."
+          }
+        }
+      }
+    }
+  }
+}

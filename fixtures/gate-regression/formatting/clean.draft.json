@@ -1,0 +1,11 @@
+{
+  "content_id": "greg-formatting-clean",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "format": "text",
+  "variants": [
+    { "label": "recommended", "text": "The beta wrapped and the demos shipped live for everyone to open and use today." },
+    { "label": "variant-a", "text": "Sixty builders showed up and every single demo went out as a usable link people can open." },
+    { "label": "variant-b", "text": "We asked for working demos. Sixty arrived. Here is the complete weekend recap for all." }
+  ]
+}

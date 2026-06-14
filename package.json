@@ -1,0 +1,25 @@
+{
+  "name": "open-content-engine",
+  "version": "0.0.0",
+  "description": "A multi-agent brand content production system: a kit plus a thin runner, executed by an operator-supplied AI runtime.",
+  "license": "Apache-2.0",
+  "private": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "engine": "bin/engine.js"
+  },
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.js\" \"engine/**/__tests__/**/*.test.js\" \"pipelines/**/__tests__/**/*.test.js\"",
+    "test:fixture-run": "node bin/engine.js fixture-run",
+    "fixture-run": "node bin/engine.js fixture-run",
+    "gate-regression": "node scripts/gate-regression.js",
+    "validate-schemas": "node scripts/validate-schemas.js",
+    "hygiene": "node scripts/hygiene-scan.js",
+    "lint": "node --check bin/engine.js && node -e \"const{execFileSync}=require('child_process'),fs=require('fs'),p=require('path');for(const d of['engine/cli','scripts'])for(const f of fs.readdirSync(d))if(f.endsWith('.js'))execFileSync(process.execPath,['--check',p.join(d,f)])\"",
+    "ci": "npm run lint && npm test && npm run fixture-run && npm run gate-regression && npm run validate-schemas && npm run hygiene"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

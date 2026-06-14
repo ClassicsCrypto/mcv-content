@@ -1,0 +1,27 @@
+{
+  "rule_ref": "rule.platform.twitter",
+  "gate": "platform",
+  "executed_in_ci": true,
+  "fixture_kind": "package",
+  "notes": "PLAT.TWITTER_HASHTAG_PRESENT: the flagship Twitter/X lane bans hashtags in any variant body. Deterministic (engine/gate/platform-gates.js, run via validate-package over a twitter package). Text format, so no CONTENT_HOME needed.",
+  "cases": [
+    {
+      "name": "hashtag-present",
+      "kind": "positive",
+      "input": "hashtag.package.json",
+      "call": { "platform": "twitter" },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PLAT.TWITTER_HASHTAG_PRESENT"],
+      "notes": "The Recommended variant carries '#web3 #buidl'."
+    },
+    {
+      "name": "clean",
+      "kind": "negative",
+      "input": "clean.package.json",
+      "call": { "platform": "twitter" },
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "No hashtag in any variant body."
+    }
+  ]
+}

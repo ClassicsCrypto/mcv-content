@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "name": "acme-first-light-week",
+  "start_date": "2099-04-06",
+  "end_date": "2099-04-12",
+  "brands": ["acme-cosmos"],
+  "platforms": ["twitter"],
+  "slot_pattern": "acme-fri-*",
+  "messaging_goals": {
+    "2099-04-10": "First Light Week: name the one object a brand-new owner can find on their first clear night. No discount language; the payoff is the object, not a sale."
+  },
+  "voice_notes": "Keep the low drama dial. The campaign celebrates a beginner's first real object, not a promotion. Every claim stays verifiable at the eyepiece.",
+  "assets": [
+    "library/media/acme-cosmos/jupiter-moons-line.png",
+    "library/media/acme-cosmos/moon-first-quarter.png"
+  ],
+  "success_signals": "Replies describing a first object found; saves of the 'tonight' card. Watch reply sentiment over raw reach.",
+  "state": "active",
+  "claim_percentage": 100,
+  "priority": "normal"
+}

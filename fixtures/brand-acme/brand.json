@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0.0",
+  "id": "acme-cosmos",
+  "display_name": "Acme Cosmos",
+  "account_class": "brand",
+  "drama_dial": "low",
+  "cooldown_overrides": {
+    "hard_days": 14,
+    "target_days": 30
+  },
+  "paths": {
+    "dna": "brands/acme-cosmos/brand-dna.md",
+    "archetypes": "brands/acme-cosmos/archetypes",
+    "corpora": "corpora/acme-cosmos"
+  },
+  "platforms": [
+    {
+      "platform": "twitter",
+      "publisher": "postiz",
+      "integration_ref": null,
+      "handle_placeholder": "@acmecosmos",
+      "rate_limit_per_day": 4,
+      "publish_windows": [
+        { "days": ["mon", "tue", "wed", "thu", "fri"], "start": "09:00", "end": "21:00" },
+        { "days": ["sat", "sun"], "start": "11:00", "end": "18:00" }
+      ],
+      "auto_publish": {
+        "enabled": false,
+        "qualifying_streak": 0,
+        "last_revocation": null,
+        "revocation_reason": null
+      }
+    },
+    {
+      "platform": "instagram",
+      "publisher": "postiz",
+      "integration_ref": null,
+      "handle_placeholder": "@acme.cosmos",
+      "rate_limit_per_day": 2,
+      "publish_windows": [
+        { "days": ["mon", "wed", "fri"], "start": "12:00", "end": "20:00" }
+      ],
+      "auto_publish": {
+        "enabled": false,
+        "qualifying_streak": 0,
+        "last_revocation": null,
+        "revocation_reason": null
+      }
+    },
+    {
+      "platform": "giphy",
+      "publisher": "giphy",
+      "integration_ref": null,
+      "handle_placeholder": "acmecosmos",
+      "rate_limit_per_day": 3,
+      "publish_windows": [],
+      "auto_publish": {
+        "enabled": false,
+        "qualifying_streak": 0,
+        "last_revocation": null,
+        "revocation_reason": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "rule_ref": "rule.core.claims-safety",
+  "gate": "lint",
+  "executed_in_ci": true,
+  "fixture_kind": "draft",
+  "notes": "rule.core.claims-safety spans the deterministic tense check (LINT.TENSE_SLIP, executed live in pre-gate-lint) and the LLM fact-firewall codes (FM.FABRICATION / FM.SUPERLATIVE_UNBACKED / FM.COMPARATOR_RESKIN are HARD; FM.UNVERIFIED_CAUSAL is the one ADVISORY code — non-blocking, Recommended-eligible). The tense cases thread historical_entities into the gate via the case 'rules' block.",
+  "cases": [
+    {
+      "name": "tense-slip",
+      "kind": "positive",
+      "input": "tense-slip.draft.json",
+      "rules": { "historical_entities": ["Season One"] },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["LINT.TENSE_SLIP"],
+      "notes": "A [HISTORICAL] entity ('Season One') framed in present-continuous ('is still smashing records right now'). Deterministic, hard. Requires the historical_entities rules input."
+    },
+    {
+      "name": "tense-ok",
+      "kind": "negative",
+      "input": "tense-ok.draft.json",
+      "rules": { "historical_entities": ["Season One"] },
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "Same entity framed in the past ('was', 'wrapped earlier this year') — the past-tense saver suppresses the slip."
+    },
+    {
+      "name": "fabrication",
+      "kind": "positive",
+      "input": "fabrication.copy.md",
+      "executed_in_ci": false,
+      "expected_verdict": "FAIL",
+      "expected_codes": ["FM.FABRICATION"],
+      "code_tier": "hard",
+      "code_disposition": "block",
+      "notes": "Invented falsifiable metrics with no project-context trace."
+    },
+    {
+      "name": "superlative-unbacked",
+      "kind": "positive",
+      "input": "superlative-unbacked.copy.md",
+      "executed_in_ci": false,
+      "expected_verdict": "FAIL",
+      "expected_codes": ["FM.SUPERLATIVE_UNBACKED"],
+      "code_tier": "hard",
+      "code_disposition": "block",
+      "notes": "Biggest/best/first/only uniqueness claims with no receipt."
+    },
+    {
+      "name": "comparator-reskin",
+      "kind": "positive",
+      "input": "comparator-reskin.copy.md",
+      "executed_in_ci": false,
+      "expected_verdict": "FAIL",
+      "expected_codes": ["FM.COMPARATOR_RESKIN"],
+      "code_tier": "hard",
+      "code_disposition": "block",
+      "notes": "Comparator proper nouns / campaign pressure copied in as Acme's own."
+    },
+    {
+      "name": "unverified-causal",
+      "kind": "positive",
+      "input": "unverified-causal.copy.md",
+      "executed_in_ci": false,
+      "expected_verdict": "PASS",
+      "expected_codes": ["FM.UNVERIFIED_CAUSAL"],
+      "code_tier": "soft",
+      "code_disposition": "warn",
+      "advisory": true,
+      "bars_recommended": false,
+      "notes": "ADVISORY: a causal link between two individually-verified facts. Non-blocking, rides onto the card, does NOT bar Recommended ⇒ verdict PASS (§14.4 advisory carve-out)."
+    },
+    {
+      "name": "fact-safe",
+      "kind": "negative",
+      "input": "fact-safe.copy.md",
+      "executed_in_ci": false,
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "Clean control: every claim traces to project-context; no superlative, comparator, or causal overreach."
+    }
+  ]
+}

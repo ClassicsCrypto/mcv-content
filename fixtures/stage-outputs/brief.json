@@ -1,0 +1,21 @@
+{
+  "content_id": "acme-fixture-0001",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "format": "text",
+  "mode": "SAFE",
+  "slot_ref": "acme-mon-0900-twitter",
+  "archetype": "builder-recap",
+  "pillar": "community-proof",
+  "theme": "the weekend builder beta",
+  "pre_seed": {
+    "angle": "A three-day window plus a public-output rule produced sixty openable demos; the constraint, not the hype, is the story.",
+    "hook_direction": "Lead with the concrete result, not an adjective.",
+    "must_include": ["the three-day window", "demos are openable links"],
+    "must_not_include": ["emojis", "hashtags", "links", "price talk"],
+    "tone": "plain, operator-conviction, no hype"
+  },
+  "target_length": "100-280 characters",
+  "framework_ref": "rules/core/frameworks/x-short-standard.md",
+  "media_decision_hint": "reuse"
+}

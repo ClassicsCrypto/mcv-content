@@ -1,0 +1,22 @@
+{
+  "sample_id": "cal-05",
+  "archetype": "teaching",
+  "command": {
+    "command_family": "RUN_SLOT",
+    "brand": "acme-cosmos",
+    "platform": "twitter",
+    "format": "thread",
+    "mode": "SAFE",
+    "routing_class": "TEXT_HEAVY",
+    "slot_ref": "cal-fri-teach",
+    "pillar": "education",
+    "theme": "How to read a launch window in three steps",
+    "notes": "A short teaching thread that translates the jargon: explain 'launch window', 'delta-v budget', and 'scrub' in plain terms an informed outsider can parse. No IYKYK shorthand left untranslated."
+  },
+  "expected_posture": "clean-on-voice",
+  "exercises": [
+    "legibility: insider terms are translated — guards against FM.ESOTERIC",
+    "structure: a genuine step-by-step that teaches, not a signposted tutorial shell"
+  ],
+  "reviewer_note": "Teaching content is where esoteric jargon creeps in. On-voice means an outsider finishes it understanding launch windows, not nodding along to acronyms."
+}

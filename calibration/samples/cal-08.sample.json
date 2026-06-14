@@ -1,0 +1,22 @@
+{
+  "sample_id": "cal-08",
+  "archetype": "announcement",
+  "command": {
+    "command_family": "RUN_SLOT",
+    "brand": "acme-cosmos",
+    "platform": "twitter",
+    "format": "single-post",
+    "mode": "SAFE",
+    "routing_class": "TEXT_HEAVY",
+    "slot_ref": "cal-extra-tease",
+    "pillar": "launch",
+    "theme": "Something big is coming for the planner (no date, no spec)",
+    "notes": "DELIBERATELY UNDER-SPECIFIED: a vague teaser with no date, no concrete spec, and no CTA. Authored to exercise the gate's weak-hook detection and the rubric's structure dimension. The remediation is to add a concrete actionable anchor (as cal-02 has)."
+  },
+  "expected_posture": "weak-hook-risk",
+  "exercises": [
+    "structure: an announcement with no concrete anchor SHOULD surface FM.WEAK_HOOK (soft, bars Recommended)",
+    "rubric: a reviewer should judge this OFF-voice on the structure dimension until it gets an anchor"
+  ],
+  "reviewer_note": "A seeded weak sample. It is fine for one or two samples in the battery to read off-voice or carry soft warnings — the bar is >=6/10 on-voice and >=8/10 gate-clear, not perfection. This sample shows the harness what 'not yet' looks like."
+}

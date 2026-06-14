@@ -1,0 +1,350 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/config/system.schema.json",
+  "title": "System Configuration",
+  "description": "System-scope configuration (config/system.json). The system-wide layer of the layered configuration model (RD-5): structured JSON validated by this published schema. All Tier-3 instance constants (reviewer ids, channel-role bindings) land here, never in code. Spec ref: release-spec.md §11.2.",
+  "x-stability": "stable",
+  "x-schema-version": "1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mode",
+    "reviewers",
+    "budget",
+    "publish",
+    "approval_surface",
+    "scheduler"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Version of this config shape, for migration handling (§11.1).",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "mode": {
+      "description": "Publish posture ladder. Fresh installs default to SAFE (fail-closed). LIVE requires an operational project plus an explicit config change.",
+      "type": "string",
+      "enum": ["SAFE", "LIVE_PREVIEW", "LIVE"],
+      "default": "SAFE"
+    },
+    "reviewers": {
+      "description": "The approval allowlist (DD-17). MUST be non-empty with at least one reviewer holding approve rights. Every approval/edit decision is attributed to an entry here; edits require the same rights as approvals.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/reviewer" },
+      "examples": [
+        [
+          {
+            "id": "<REVIEWER_ID>",
+            "name": "Lead Reviewer",
+            "rights": ["approve", "edit"]
+          }
+        ]
+      ]
+    },
+    "budget": {
+      "description": "Spend governance (DD-18). REQUIRED: the engine refuses LIVE mode without it. Caps bind engine-metered spend and run dispatch only; chain-seat LLM spend is capped at the host runtime (see docs/cost.md). A cap breach forces the project to paused (§15.4).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "monthly_cap",
+        "daily_cap",
+        "per_item_generation_limit",
+        "indexing_requires_estimate"
+      ],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "description": "ISO 4217 currency code for all cap values.",
+          "default": "USD",
+          "minLength": 3,
+          "maxLength": 3
+        },
+        "monthly_cap": {
+          "type": "number",
+          "description": "Hard monthly ceiling on engine-metered spend. NOT a whole-system ceiling unless the host runtime reports chain spend.",
+          "exclusiveMinimum": 0
+        },
+        "daily_cap": {
+          "type": "number",
+          "description": "Hard daily ceiling on engine-metered spend.",
+          "exclusiveMinimum": 0
+        },
+        "per_item_generation_limit": {
+          "type": "number",
+          "description": "Maximum engine-metered spend permitted producing a single content item.",
+          "exclusiveMinimum": 0
+        },
+        "indexing_requires_estimate": {
+          "type": "boolean",
+          "description": "When true (required), engine index-library and engine calibrate MUST present a pre-run cost estimate and require confirmation before spending.",
+          "const": true
+        }
+      }
+    },
+    "publish": {
+      "description": "Publish posture (the canonical home of the diagnostic publish-flag overrides). draft_only true means approved posts land as drafts the operator publishes manually (the second gate).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["draft_only", "auto_publish_allowed"],
+      "properties": {
+        "draft_only": {
+          "type": "boolean",
+          "description": "When true (default), publisher handoff creates a draft; the operator publishes it manually.",
+          "default": true
+        },
+        "auto_publish_allowed": {
+          "type": "boolean",
+          "description": "Global gate for per-brand auto-publish. Even when true, each brand×platform must independently earn the trust state in brand.json (§15.5).",
+          "default": false
+        }
+      }
+    },
+    "approval_surface": {
+      "description": "The approval surface adapter and its channel-role bindings. Channel ids are Tier-3 instance constants supplied by the operator; templates ship placeholders only.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adapter", "channels"],
+      "properties": {
+        "adapter": {
+          "type": "string",
+          "description": "Approval-surface adapter id. v1 reference implementation is discord.",
+          "enum": ["discord"],
+          "default": "discord"
+        },
+        "channels": {
+          "description": "Channel-role bindings by id. Required roles: content-review, content-published, content-ops, media-bank. trend-readout is optional.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "content-review",
+            "content-published",
+            "content-ops",
+            "media-bank"
+          ],
+          "properties": {
+            "content-review": { "$ref": "#/$defs/channel_id" },
+            "content-published": { "$ref": "#/$defs/channel_id" },
+            "content-ops": { "$ref": "#/$defs/channel_id" },
+            "media-bank": { "$ref": "#/$defs/channel_id" },
+            "trend-readout": { "$ref": "#/$defs/channel_id" }
+          }
+        }
+      }
+    },
+    "scheduler": {
+      "description": "Trigger schedule. Safety posture never lives in scheduler wrappers; it lives here in declared config.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kickoff_time"],
+      "properties": {
+        "kickoff_time": {
+          "description": "Daily kickoff clock time (local), HH:MM 24h.",
+          "$ref": "#/$defs/clock_time"
+        },
+        "executor_interval_minutes": {
+          "type": "integer",
+          "description": "Publish-executor run interval in minutes.",
+          "minimum": 1,
+          "default": 5
+        },
+        "analytics_interval_minutes": {
+          "type": "integer",
+          "description": "Engagement-analytics run interval in minutes.",
+          "minimum": 1,
+          "default": 240
+        },
+        "ttl_sweep_interval_minutes": {
+          "type": "integer",
+          "description": "Approval-card TTL sweep interval in minutes.",
+          "minimum": 1,
+          "default": 60
+        },
+        "tick_enabled": {
+          "type": "boolean",
+          "description": "Enable the optional fine-grained calendar-tick trigger. Ships off by default; the daily kickoff is the canonical trigger.",
+          "default": false
+        }
+      }
+    },
+    "cooldown": {
+      "description": "Media reuse cooldown defaults (per-brand overridable in brand.json).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hard_days", "target_days"],
+      "properties": {
+        "hard_days": {
+          "type": "integer",
+          "description": "Hard floor: an asset or its derivatives MUST NOT be reused more often than this.",
+          "minimum": 0,
+          "default": 14
+        },
+        "target_days": {
+          "type": "integer",
+          "description": "Target reuse window.",
+          "minimum": 0,
+          "default": 30
+        }
+      }
+    },
+    "gate": {
+      "description": "Deterministic-gate tunables. The engine ships generic day-one defaults in code (engine/gate/pre-gate-lint.js, §10.3); the operator/maintainer's calibrated values live here and are NOT shipped (DD-9).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "variant_distinctness": {
+          "description": "Variant-duplication thresholds (rule.core.variant). Two variants fire LINT.VARIANT_DUP when their n-gram body similarity reaches jaccard_threshold or they share the opener window. Shipped defaults are generic starting points, not calibrated values.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "shingle_n": {
+              "type": "integer",
+              "description": "Word n-gram (shingle) size for body-overlap similarity.",
+              "minimum": 1,
+              "default": 5
+            },
+            "jaccard_threshold": {
+              "type": "number",
+              "description": "Body-overlap similarity at/above which two variants are too similar. Generic default; tune per brand voice.",
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "default": 0.45
+            },
+            "opener_chars": {
+              "type": "integer",
+              "description": "Leading-character window compared for identical openers.",
+              "minimum": 1,
+              "default": 30
+            }
+          }
+        }
+      }
+    },
+    "card_ttl": {
+      "description": "Approval-card time-to-live per slot type (DD-15).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "trend": {
+          "type": "string",
+          "description": "Trend-card TTL. The token 'freshness-window-bound' means TTL is inherited from the originating trend report's freshness window.",
+          "default": "freshness-window-bound"
+        },
+        "evergreen_escalate_after": {
+          "description": "Age after which an evergreen card escalates rather than silently expiring.",
+          "$ref": "#/$defs/duration",
+          "default": "72h"
+        }
+      }
+    },
+    "retention": {
+      "description": "Corpus retention windows + purge schedule (RD-9). The operator is the data controller; engine purge-corpora honors retention_class.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "raw_corpus_days": {
+          "type": "integer",
+          "description": "Default retention (days) for retention_class:standard / untagged raw third-party corpora before purge eligibility.",
+          "minimum": 0,
+          "default": 90
+        },
+        "transient_days": {
+          "type": "integer",
+          "description": "Retention (days) for retention_class:transient corpus items (the shortest window). engine purge-corpora purges transient items older than this.",
+          "minimum": 0,
+          "default": 7
+        },
+        "purge_schedule": {
+          "type": "string",
+          "description": "Cadence at which engine purge-corpora is expected to run (e.g. daily, weekly).",
+          "enum": ["daily", "weekly", "monthly", "manual"],
+          "default": "weekly"
+        }
+      }
+    },
+    "observability": {
+      "description": "Health-surface configuration: digest timing and stall thresholds (§13).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "digest_time": {
+          "description": "Daily-digest clock time (local), HH:MM 24h.",
+          "$ref": "#/$defs/clock_time"
+        },
+        "stall_thresholds": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Thresholds that drive heartbeat/stall alerts. Silent death MUST NOT be the failure presentation.",
+          "properties": {
+            "no_content_produced_hours": {
+              "type": "integer",
+              "description": "Alert if no content has been produced within this many hours.",
+              "minimum": 1,
+              "default": 24
+            },
+            "queue_age_alert_hours": {
+              "type": "integer",
+              "description": "Alert if cards remain pending past this age.",
+              "minimum": 1,
+              "default": 24
+            },
+            "undelivered_card_backlog": {
+              "type": "integer",
+              "description": "When undelivered-card backlog exceeds this count, new generation pauses (degraded-mode guard).",
+              "minimum": 1,
+              "default": 10
+            }
+          }
+        }
+      }
+    },
+    "paused": {
+      "type": "boolean",
+      "description": "Mirror of the PAUSED sentinel. When true, all autonomous loops are paused (kill switch, §15.4).",
+      "default": false
+    }
+  },
+  "$defs": {
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "rights"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Reviewer identity on the approval surface (Tier-3). Resolvable by the surface adapter.",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable label."
+        },
+        "rights": {
+          "type": "array",
+          "description": "Granted rights. At least one reviewer in the allowlist MUST have 'approve'.",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["approve", "edit"]
+          }
+        }
+      }
+    },
+    "channel_id": {
+      "type": "string",
+      "description": "Approval-surface channel identifier (Tier-3 instance constant). Operator-supplied; templates use placeholders such as <CHANNEL_ID>.",
+      "minLength": 1
+    },
+    "clock_time": {
+      "type": "string",
+      "description": "Local clock time, 24-hour HH:MM.",
+      "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+    },
+    "duration": {
+      "type": "string",
+      "description": "Duration token, an integer followed by a unit (h hours, d days, m minutes).",
+      "pattern": "^\\d+[mhd]$"
+    }
+  }
+}

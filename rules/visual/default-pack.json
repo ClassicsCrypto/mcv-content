@@ -1,0 +1,47 @@
+{
+  "id": "default",
+  "description": "Brand-NEUTRAL default visual-check question pack (release-spec §10.3 'visual-check default question pack'; §1 tree 'question packs live in rules/, not code'). Ships zero brand specifics: operators copy this to $CONTENT_HOME/brands/<brand>/visual-pack.json and replace the questions/pass logic with their own brand-fidelity checks. The engine (engine/gate/visual-check/) authors no brand content; it consumes a pack as data. Pass logic is declarative (no code): all_false/all_true booleans, no_embedded_text, and an optional require_identity gate.",
+  "questions": [
+    {
+      "key": "matches_brief_subject",
+      "prompt": "boolean — true if the main subject of the image matches the subject the brief describes"
+    },
+    {
+      "key": "is_generic_stock_filler",
+      "prompt": "boolean — true if the image looks like generic AI/stock filler with no brand identity cues"
+    },
+    {
+      "key": "contains_brand_identity_signal",
+      "prompt": "boolean — true if the image carries an unmistakable brand identity cue (logo, mascot, owned art style, named character) per the brief"
+    },
+    {
+      "key": "contains_unrelated_humans",
+      "prompt": "boolean — true if foreground humans appear that the brief did not call for"
+    },
+    {
+      "key": "contains_forbidden_prompt_detail",
+      "prompt": "boolean — true if the brief used a control (no/avoid/without/plain/unmarked/exactly one) and the image visibly violates it"
+    },
+    {
+      "key": "embedded_text_dates_logos",
+      "prompt": "string — list any readable text, dates, logos, signage, or pseudo-glyph markings baked into the frame, or \"none\""
+    },
+    {
+      "key": "main_subject_one_line",
+      "prompt": "string — one-sentence neutral description of the main subject"
+    }
+  ],
+  "pass": {
+    "all_true": ["matches_brief_subject"],
+    "all_false": [
+      "is_generic_stock_filler",
+      "contains_unrelated_humans",
+      "contains_forbidden_prompt_detail"
+    ],
+    "no_embedded_text": "embedded_text_dates_logos",
+    "require_identity": {
+      "key": "contains_brand_identity_signal",
+      "when_required": true
+    }
+  }
+}

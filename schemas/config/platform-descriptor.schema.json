@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/config/platform-descriptor.schema.json",
+  "title": "Platform Descriptor",
+  "description": "A registered platform in the platform-descriptor registry (§12.6). Adding a platform is one descriptor + one packager template + one gate module + an adapter binding. v1 ships six descriptors (the RD-7 set, including the TikTok manual descriptor). Spec ref: release-spec.md §12.6.",
+  "x-stability": "stable",
+  "x-schema-version": "1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "workflow_class", "publisher"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Descriptor shape version, for migration handling (§11.1).",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "id": {
+      "type": "string",
+      "description": "Canonical platform id, referenced by brand.json platforms[].platform and by calendar slots.",
+      "minLength": 1,
+      "examples": ["twitter", "giphy", "instagram", "facebook", "youtube", "tiktok"]
+    },
+    "aliases": {
+      "type": "array",
+      "description": "Alternate names that resolve to this descriptor (e.g. 'x', 'twitter/x').",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 },
+      "default": []
+    },
+    "workflow_class": {
+      "description": "Which of the two lanes this platform routes through. TEXT_HEAVY drafts first; VISUAL_HEAVY sources media first.",
+      "type": "string",
+      "enum": ["TEXT_HEAVY", "VISUAL_HEAVY"]
+    },
+    "packager_contract_ref": {
+      "type": ["string", "null"],
+      "description": "Repo-relative reference to the packager template/contract for this platform's final formatting.",
+      "$ref": "#/$defs/repo_ref_or_null"
+    },
+    "gates_ref": {
+      "type": ["string", "null"],
+      "description": "Repo-relative reference to the per-platform deterministic gate module/rules.",
+      "$ref": "#/$defs/repo_ref_or_null"
+    },
+    "publisher": {
+      "description": "Which publisher adapter carries this platform. 'manual' marks a documented manual-only path (e.g. the TikTok descriptor in v1).",
+      "type": "string",
+      "enum": ["postiz", "giphy", "manual"]
+    },
+    "support_status": {
+      "description": "Release support tier for this platform lane.",
+      "type": "string",
+      "enum": ["supported", "beta", "manual"],
+      "default": "beta"
+    },
+    "limits": {
+      "description": "Platform packaging/publishing limits enforced by the per-platform gate. All fields optional; absent means no declared limit on that dimension.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_text_chars": {
+          "type": "integer",
+          "description": "Maximum text length per post.",
+          "minimum": 0
+        },
+        "max_media_items": {
+          "type": "integer",
+          "description": "Maximum number of media attachments per post.",
+          "minimum": 0
+        },
+        "media_types": {
+          "type": "array",
+          "description": "Accepted media MIME-class tokens (e.g. image, video, gif).",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "max_media_mb": {
+          "type": "number",
+          "description": "Maximum media file size in megabytes.",
+          "exclusiveMinimum": 0
+        },
+        "max_video_seconds": {
+          "type": "integer",
+          "description": "Maximum video/loop duration in seconds.",
+          "minimum": 0
+        },
+        "min_media_width_px": {
+          "type": "integer",
+          "description": "Minimum media width in pixels.",
+          "minimum": 0
+        }
+      }
+    }
+  },
+  "$defs": {
+    "repo_ref_or_null": {
+      "type": ["string", "null"],
+      "description": "A repo-relative path/reference, or null when not applicable. Absolute paths and drive letters are forbidden.",
+      "default": null
+    }
+  }
+}

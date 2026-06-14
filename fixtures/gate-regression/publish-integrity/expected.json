@@ -1,0 +1,64 @@
+{
+  "rule_ref": "rule.sys.publish-integrity",
+  "gate": "sys",
+  "executed_in_ci": false,
+  "fixture_kind": "queue-entry",
+  "notes": "SYS.* are publish-EDGE runtime/integrity codes emitted by engine/orchestrator/publish-executor.js (and the readback verifier) onto the queue entry / event ledger — NOT content-gate detections over a draft/package, so the gate-regression runner does not replay them through a content gate (executed_in_ci:false). Each case is a queue-entry-shaped fixture (schema-valid against queue-entry.schema.json) capturing the post-trigger state, plus the executor condition that emits the code. The live crash-safety scenarios are exercised by the executor coverage suite (plan P4-COV-ORCH); here they pin the SYS.* contract and give registry-integrity coverage of every SYS code. All SYS.* are HARD/block, route publisher-liaison.",
+  "cases": [
+    {
+      "name": "test-publish-blocked",
+      "kind": "positive",
+      "input": "test-publish-blocked.entry.json",
+      "trigger": "A content item whose id marks it a test fixture (content_id begins 'test-') reaches the publish edge.",
+      "expected_codes": ["SYS.TEST_PUBLISH_BLOCKED"],
+      "code_tier": "hard",
+      "code_disposition": "block",
+      "route": "publisher-liaison",
+      "notes": "Fail-closed test guard: the executor refuses to publish a test-id item."
+    },
+    {
+      "name": "retry-exhausted",
+      "kind": "positive",
+      "input": "retry-exhausted.entry.json",
+      "trigger": "The hard-fail retry bound (3, DD-13) is exhausted; attempt_count reached 3.",
+      "expected_codes": ["SYS.RETRY_EXHAUSTED"],
+      "code_tier": "hard",
+      "code_disposition": "block",
+      "route": "publisher-liaison",
+      "notes": "Item dead-letters; an 'unfilled slot' notice is emitted. Attempt counter durably incremented before each retry's spend."
+    },
+    {
+      "name": "handoff-failed",
+      "kind": "positive",
+      "input": "handoff-failed.entry.json",
+      "trigger": "The publisher adapter handoff errored (external publish call failed); within the retry bound.",
+      "expected_codes": ["SYS.HANDOFF_FAILED"],
+      "code_tier": "hard",
+      "code_disposition": "block",
+      "route": "publisher-liaison",
+      "notes": "Idempotent retry within the bound applies; on exhaustion becomes SYS.RETRY_EXHAUSTED."
+    },
+    {
+      "name": "interrupted-mid-publish",
+      "kind": "positive",
+      "input": "interrupted-mid-publish.entry.json",
+      "trigger": "The executor was interrupted mid-publish (crash/timeout) with a write-ahead intent persisted.",
+      "expected_codes": ["SYS.INTERRUPTED_MID_PUBLISH"],
+      "code_tier": "hard",
+      "code_disposition": "block",
+      "route": "publisher-liaison",
+      "notes": "Entry enters interrupted_hold for crash-safe replay rather than risking a double-post."
+    },
+    {
+      "name": "readback-fail",
+      "kind": "positive",
+      "input": "readback-fail.entry.json",
+      "trigger": "The live approval card read back does not match the card the engine built (foreign edit / render corruption).",
+      "expected_codes": ["SYS.READBACK_FAIL"],
+      "code_tier": "hard",
+      "code_disposition": "block",
+      "route": "publisher-liaison",
+      "notes": "Integrity check fails closed — the item does not advance."
+    }
+  ]
+}

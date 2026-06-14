@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/inputs/corpus-item.schema.json",
+  "title": "Corpus Item",
+  "description": "A single ingested corpus item (own-account or competitor). First-class manual-submission shape (spec §6.2). Every corpus item is trust-class-tagged at write time; scraped material — including the operator's own scraped corpus — enters as Zone-U untrusted-scraped (RD-8) and only an explicit operator attestation may promote a curated subset.",
+  "x-stability": "stable",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "captured_at",
+    "text",
+    "trust_class",
+    "retention_class"
+  ],
+  "properties": {
+    "source": {
+      "description": "How this item entered the corpus.",
+      "type": "string",
+      "enum": [
+        "platform",
+        "manual",
+        "export"
+      ]
+    },
+    "captured_at": {
+      "description": "When this item was captured / observed.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "author": {
+      "description": "Optional author identifier, minimized per the data-minimization posture (RD-9). Omit when not needed.",
+      "type": "string"
+    },
+    "text": {
+      "description": "The item's textual content. As Zone-U input it is wrapped in the data fence before ever entering a prompt.",
+      "type": "string"
+    },
+    "url": {
+      "description": "Optional source URL.",
+      "type": "string",
+      "format": "uri"
+    },
+    "media_refs": {
+      "description": "Optional CONTENT_HOME-relative references to media attached to the item.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "trust_class": {
+      "description": "Trust zone of the item (RD-8). untrusted-scraped is Zone U (the default for anything scraped or third-party); operator-curated is the promoted class and requires an attestation.",
+      "type": "string",
+      "enum": [
+        "untrusted-scraped",
+        "operator-curated"
+      ]
+    },
+    "attestation": {
+      "description": "Operator attestation recording the U->S promotion. REQUIRED when trust_class is operator-curated; absent otherwise.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "promoted_by",
+        "promoted_at",
+        "reason"
+      ],
+      "properties": {
+        "promoted_by": {
+          "description": "Identifier of the operator who promoted the item.",
+          "type": "string",
+          "minLength": 1
+        },
+        "promoted_at": {
+          "description": "When the promotion was made.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "reason": {
+          "description": "Why the item was promoted to operator-curated.",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "retention_class": {
+      "description": "Retention/purge policy class for the item (RD-9). Drives corpus retention windows and purge scheduling.",
+      "type": "string",
+      "enum": [
+        "transient",
+        "standard",
+        "retained"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "trust_class": {
+            "const": "operator-curated"
+          }
+        },
+        "required": [
+          "trust_class"
+        ]
+      },
+      "then": {
+        "required": [
+          "attestation"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/artifacts/approval-decision.schema.json",
+  "title": "Approval Decision",
+  "description": "The attributed human decision captured against an approval card (release-spec.md §7.6; model §2 Approval Decision; DD-17). Invariant: no item reaches the publish handoff without exactly one recorded decision (enforced by the executor's approver gate). The reviewer must be a config allowlist member; edits require the same rights as approvals and count as approval (release-spec.md §2.4); reviewer-attached media re-enters the deterministic gate subset (DD-12). All refs are $CONTENT_HOME-relative; absolute paths are forbidden. Structural contract only; instances are instance data and never ship in the repo.",
+  "x-stability": "stable",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "card_ref",
+    "content_id",
+    "reviewer_id",
+    "timestamp",
+    "action"
+  ],
+  "properties": {
+    "card_ref": {
+      "type": "string",
+      "description": "$CONTENT_HOME-relative reference to the approval card this decision answers."
+    },
+    "content_id": {
+      "type": "string",
+      "description": "Content identifier shared across artifacts for this item."
+    },
+    "reviewer_id": {
+      "type": "string",
+      "description": "Identifier of the deciding reviewer; MUST be a member of the config reviewer allowlist (DD-17)."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the decision was recorded."
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "approve_recommended",
+        "approve_a",
+        "approve_b",
+        "edit",
+        "attach_media",
+        "reject"
+      ],
+      "description": "The chosen action (matches the approval card action vocabulary, release-spec.md §7.5)."
+    },
+    "selected_variant": {
+      "type": "string",
+      "enum": ["recommended", "a", "b"],
+      "description": "Which variant was approved; required for approve_* actions, absent for reject."
+    },
+    "edit_diff": {
+      "type": "string",
+      "description": "The reviewer's edit as a diff against the selected variant; captured as a calibration signal (release-spec.md §2.4). Present only for the edit action; edited text re-enters the deterministic gate subset (DD-12)."
+    },
+    "attached_media_ref": {
+      "type": "string",
+      "description": "$CONTENT_HOME-relative reference to media the reviewer attached; triggers a DD-12 re-gate before publish. Present only for the attach_media action."
+    },
+    "rejection_reason": {
+      "type": "string",
+      "description": "Reviewer's reason for rejection; captured as a calibration signal. Present only for the reject action."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "enum": ["approve_recommended", "approve_a", "approve_b", "edit"]
+          }
+        }
+      },
+      "then": {
+        "required": ["selected_variant"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "action": { "const": "reject" } }
+      },
+      "then": {
+        "required": ["rejection_reason"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "action": { "const": "attach_media" } }
+      },
+      "then": {
+        "required": ["attached_media_ref"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "content_id": "lint-selftest-variant-dup",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "format": "text",
+  "variants": [
+    { "label": "recommended", "text": "Sixty builders shipped working demos at the Acme Cosmos beta this weekend." },
+    { "label": "variant-a", "text": "Sixty builders shipped working demos at the Acme Cosmos beta this weekend." },
+    { "label": "variant-b", "text": "Sixty builders shipped working demos at the Acme Cosmos beta this weekend." }
+  ]
+}

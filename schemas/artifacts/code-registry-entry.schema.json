@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/artifacts/code-registry-entry.schema.json",
+  "title": "Failure-Code Registry Entry",
+  "description": "One entry in the unified failure-code registry (rules/codes.md, schema'd frontmatter; spec §7.3, §10.2). Every code emitted on any artifact MUST exist here; CI validates. Field names and family/tier/disposition tokens are contract, not instance data.",
+  "x-stability": "stable",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "The dotted code token (e.g. LINT.EM_DASH, FM.HOOK_WEAK, PKG.RECOMMENDED_MISSING, PLAT.TWITTER_HASHTAG_PRESENT, VIS.OFF_BRAND, SYS.READBACK_FAIL).",
+      "pattern": "^(LINT|FM|PKG|PLAT|VIS|SYS)\\.[A-Z0-9_]+$"
+    },
+    "family": {
+      "type": "string",
+      "description": "Namespaced family mapping the production source layer onto a single contract (spec §10.2).",
+      "enum": ["LINT", "FM", "PKG", "PLAT", "VIS", "SYS"]
+    },
+    "tier": {
+      "type": "string",
+      "description": "Severity tier; hard always implies disposition block.",
+      "enum": ["hard", "soft"]
+    },
+    "source": {
+      "type": "string",
+      "description": "The gate layer that emits this code.",
+      "enum": ["lint", "llm-voice", "llm-quality", "package", "platform", "visual"]
+    },
+    "disposition": {
+      "type": "string",
+      "description": "Consequence when the code fires (DD-20; hard ⇒ block; v1 default ruleset ships all soft codes as warn, RD-21).",
+      "enum": ["block", "correct", "warn"]
+    },
+    "route": {
+      "type": "string",
+      "description": "Which seat receives a routed-back failure for this code (spec §10.2; §9.2 hard-fail routing).",
+      "enum": ["matcher", "enricher", "writer", "media", "packager", "publisher-liaison"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable definition of what the code means."
+    },
+    "rule_ref": {
+      "type": "string",
+      "description": "Id of the rule file that documents and (for deterministic checks) enforces this code (spec §10.1 rule/code pairing)."
+    }
+  },
+  "required": ["code", "family", "tier", "source", "disposition", "description", "rule_ref"],
+  "additionalProperties": false
+}

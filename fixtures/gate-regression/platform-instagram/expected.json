@@ -1,0 +1,28 @@
+{
+  "rule_ref": "rule.platform.instagram",
+  "gate": "platform",
+  "executed_in_ci": true,
+  "fixture_kind": "package",
+  "requires_content_home": true,
+  "notes": "PLAT.INSTAGRAM_HASHTAG_OVER_LIMIT fires when an Instagram package exceeds the configured hashtag count (default 30). The packages are complete image packages (visual_state + media) so the only emitted code is the PLAT.* one; the runner supplies a temp CONTENT_HOME (empty usage-log ⇒ clean cooldown) and no visual-check result (so no PKG.VISUAL_CHECK_* noise).",
+  "cases": [
+    {
+      "name": "hashtags-over-limit",
+      "kind": "positive",
+      "input": "hashtags-over-limit.package.json",
+      "call": { "platform": "instagram" },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PLAT.INSTAGRAM_HASHTAG_OVER_LIMIT"],
+      "notes": "31 hashtags across variant bodies, over the 30 limit."
+    },
+    {
+      "name": "clean",
+      "kind": "negative",
+      "input": "clean.package.json",
+      "call": { "platform": "instagram" },
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "Three hashtags, within the limit; complete image package."
+    }
+  ]
+}

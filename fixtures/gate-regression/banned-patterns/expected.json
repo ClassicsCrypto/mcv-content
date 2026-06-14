@@ -1,0 +1,47 @@
+{
+  "rule_ref": "rule.core.banned-patterns",
+  "gate": "lint",
+  "executed_in_ci": true,
+  "fixture_kind": "draft",
+  "notes": "The engine ships ZERO banned phrases (§0.3 r6, §10.3): LINT.BANNED_PATTERN fires only against an operator-supplied phrase, threaded into the gate via the positive case's 'rules.banned_patterns' block. The SAME draft with the empty default list is the clean control — proving the brand-neutral default never fires. FM.BANNED_CONSTRUCTION (construction CLASSES) is the LLM-judged half.",
+  "cases": [
+    {
+      "name": "banned-phrase",
+      "kind": "positive",
+      "input": "banned-phrase.draft.json",
+      "rules": { "banned_patterns": ["working demos"] },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["LINT.BANNED_PATTERN"],
+      "notes": "Operator-supplied phrase 'working demos' appears in the Recommended variant. Deterministic, hard."
+    },
+    {
+      "name": "clean",
+      "kind": "negative",
+      "input": "banned-phrase.draft.json",
+      "rules": { "banned_patterns": [] },
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "Identical draft, empty banned-pattern list (the shipped default) — the brand-neutral engine fires nothing."
+    },
+    {
+      "name": "banned-construction",
+      "kind": "positive",
+      "input": "banned-construction.copy.md",
+      "executed_in_ci": false,
+      "expected_verdict": "FAIL",
+      "expected_codes": ["FM.BANNED_CONSTRUCTION"],
+      "code_tier": "hard",
+      "code_disposition": "block",
+      "notes": "Banned opener/closer construction classes ('In a world where', 'without further ado', 'buckle up')."
+    },
+    {
+      "name": "construction-clean",
+      "kind": "negative",
+      "input": "clean.copy.md",
+      "executed_in_ci": false,
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "Clean control for FM.BANNED_CONSTRUCTION: opens on the concrete anchor, no banned construction class."
+    }
+  ]
+}

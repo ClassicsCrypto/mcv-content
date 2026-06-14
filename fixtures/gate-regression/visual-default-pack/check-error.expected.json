@@ -1,0 +1,11 @@
+{
+  "kind": "provider-state",
+  "verdict": "FAIL",
+  "vision_pass": null,
+  "codes": ["VIS.CHECK_ERROR"],
+  "code_tier": "hard",
+  "code_disposition": "block",
+  "provider": { "kind": "cli", "model": "demo", "options": { "command": "true" } },
+  "provider_throws": true,
+  "notes": "The vision provider invocation itself failed (timeout / unreadable image / bad config). The always-write contract still writes a durable verdict with vision_pass:null + VIS.CHECK_ERROR; consumers treat null as NOT-pass and never auto-pass. There is no *.answer.json — the runner injects a spawnSync stub that throws (provider_throws), exercising the tool-error path."
+}

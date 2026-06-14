@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/inputs/draft.schema.json",
+  "title": "Draft",
+  "description": "The writer -> gate handoff artifact (spec §9.2, §7.11): exactly three labeled variants plus self-declared metadata — the artifact the deterministic pre-gate validates (variant count/dup, length, formatting, placeholder, banned-pattern). N=3 variants is a fixed v1 contract (DD-11).",
+  "x-stability": "stable",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "content_id",
+    "brand",
+    "platform",
+    "format",
+    "variants"
+  ],
+  "properties": {
+    "content_id": {
+      "description": "Content id this draft belongs to.",
+      "type": "string",
+      "minLength": 1
+    },
+    "brand": {
+      "description": "Brand id this draft targets.",
+      "type": "string",
+      "minLength": 1
+    },
+    "platform": {
+      "description": "Target platform descriptor id.",
+      "type": "string",
+      "minLength": 1
+    },
+    "format": {
+      "description": "Content format within the platform.",
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "description": "Publish posture inherited from the originating operator command.",
+      "type": "string",
+      "enum": [
+        "SAFE",
+        "LIVE_PREVIEW",
+        "LIVE"
+      ]
+    },
+    "variants": {
+      "description": "Exactly three labeled variants (DD-11). The deterministic pre-gate enforces the count and duplicate checks.",
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "label",
+          "text"
+        ],
+        "properties": {
+          "label": {
+            "description": "Variant label (e.g. recommended, variant-a, variant-b).",
+            "type": "string",
+            "minLength": 1
+          },
+          "text": {
+            "description": "The variant copy. For multi-part formats (e.g. threads) this carries the full body.",
+            "type": "string",
+            "minLength": 1
+          },
+          "hook_strength_score": {
+            "description": "Writer's self-declared hook-strength assessment for this variant (self-declared metadata, not a gate verdict).",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "hashtags": {
+      "description": "Hashtags attached to the draft, if any.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "alt_text": {
+      "description": "Alt text for an attached image/video, when present.",
+      "type": "string"
+    },
+    "cta": {
+      "description": "Call-to-action text, when present.",
+      "type": "string"
+    },
+    "strongest_variant": {
+      "description": "The writer's self-declared strongest variant (a variant label). A non-binding signal; the gate seat performs the authoritative ranking.",
+      "type": "string"
+    },
+    "notes": {
+      "description": "Writer's notes carried forward to the gate seat.",
+      "type": "string"
+    }
+  }
+}

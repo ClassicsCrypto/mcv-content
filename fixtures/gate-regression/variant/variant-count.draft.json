@@ -1,0 +1,11 @@
+{
+  "content_id": "greg-variant-count",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "format": "text",
+  "variants": [
+    { "label": "recommended", "text": "Sixty builders spent the weekend shipping demos you can open in the Acme Cosmos beta together." },
+    { "label": "variant-a", "text": "We asked for usable demos and got sixty. Here is exactly what the beta produced overall today." },
+    { "label": "variant-b", "text": "Every demo went out as a link people can open and try across the whole weekend run for sure." }
+  ]
+}

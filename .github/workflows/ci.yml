@@ -1,0 +1,140 @@
+# CI — the full public gate set (release-spec §16.5; RD-12; DD-8).
+#
+# Every push / PR runs, with READ-ONLY permissions and ZERO secrets (RD-12: secretful CI is a leak
+# surface and contradicts the zero-key bar). Every job is fully offline — no live API is ever
+# called, no credential is ever read. The gates, in order:
+#
+#   build-and-gate job
+#     1. checkout            actions/checkout@v4
+#     2. setup-node          actions/setup-node@v4 (Node 22, the engine floor)
+#     3. npm ci              clean install (deps == {}, so this is the lockfile integrity check)
+#     4. npm run lint        syntax-check the CLI + scripts
+#     5. npm test            the WHOLE Tier-1 unit/characterization suite (§16.1)
+#     6. npm run fixture-run  the zero-key deterministic E2E (`node bin/engine.js fixture-run`, §5.4)
+#     7. npm run gate-regression  assert each fixtures/gate-regression case emits its expected codes (§16.3)
+#     8. npm run validate-schemas every schema parses + every bound fixture validates (§16.5)
+#     9. npm run hygiene     the leak scan (snowflakes / user paths / credentials / brand denylist)
+#
+#   dco job
+#     verifies every commit in the push / PR carries a `Signed-off-by:` trailer (RD-4 DCO).
+#
+# The brand deny-list for the hygiene scan is injected at scan time via the ENGINE_BRAND_DENYLIST
+# repository VARIABLE (NOT a secret — it carries no credential, only brand terms the public tree
+# must never contain) and is never committed. When the variable is unset the scan still runs and
+# enforces the snowflake / path / credential checks; the brand-leak half is simply inactive.
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+# Least privilege: the workflow only needs to read the repo. No write scope anywhere (DD-8).
+permissions:
+  contents: read
+
+# A newer push to the same ref cancels the in-flight run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-gate:
+    name: build + full gate set
+    runs-on: ubuntu-latest
+    # Hard offline posture: no job-level secrets are referenced anywhere, and the one env var is a
+    # non-secret repository variable (brand terms only). CI holds zero credentials (RD-12).
+    env:
+      ENGINE_BRAND_DENYLIST: ${{ vars.ENGINE_BRAND_DENYLIST }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # deps == {} so this is fast and verifies the lockfile is install-clean. --ignore-scripts
+      # keeps a dependency's lifecycle script from ever running in CI (defense-in-depth; nothing in
+      # this repo needs a postinstall).
+      - name: Install (npm ci)
+        run: npm ci --ignore-scripts
+
+      - name: Lint (syntax-check CLI + scripts)
+        run: npm run lint
+
+      - name: Unit + characterization suite (Tier 1, §16.1)
+        run: npm test
+
+      - name: Zero-key fixture run (E2E, §5.4)
+        run: npm run fixture-run
+
+      - name: Gate regression (Tier 2, §16.3)
+        run: npm run gate-regression
+
+      - name: JSON-schema validation (schemas + fixtures, §16.5)
+        run: npm run validate-schemas
+
+      - name: Hygiene scan (leak guard, §16.5 / DD-8)
+        run: npm run hygiene
+
+  dco:
+    name: DCO sign-off check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history of the change range)
+        uses: actions/checkout@v4
+        with:
+          # Fetch enough history to see every commit introduced by this push / PR.
+          fetch-depth: 0
+          # For a PR, check the contributor's commits (the head), not the merge commit.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify Signed-off-by on every commit in the range
+        env:
+          # The commit range to inspect:
+          #  - PR:   base..head  (only the commits the PR adds)
+          #  - push: before..after (the pushed commits); for a new branch BEFORE is all-zeros,
+          #          so fall back to checking just the tip commit.
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          ZERO="0000000000000000000000000000000000000000"
+          if [ -n "${PR_HEAD:-}" ]; then
+            RANGE="${PR_BASE}..${PR_HEAD}"
+          elif [ -n "${PUSH_BEFORE:-}" ] && [ "${PUSH_BEFORE}" != "${ZERO}" ]; then
+            RANGE="${PUSH_BEFORE}..${PUSH_AFTER}"
+          else
+            # New branch / no usable base: check just the tip commit.
+            RANGE="${PUSH_AFTER}~1..${PUSH_AFTER}"
+          fi
+          echo "Checking DCO sign-off for commits in: ${RANGE}"
+
+          MISSING=0
+          # List the commit SHAs in the range (merge commits are skipped: --no-merges).
+          for sha in $(git rev-list --no-merges "${RANGE}" 2>/dev/null || git rev-list --no-merges "${PUSH_AFTER}" -1); do
+            author="$(git show -s --format='%an <%ae>' "${sha}")"
+            # A valid sign-off trailer naming the author (DCO 1.1). We require the trailer to be
+            # present; we report when it does not match the author for visibility.
+            if git show -s --format='%B' "${sha}" | grep -qiE '^Signed-off-by: .+ <.+@.+>'; then
+              if ! git show -s --format='%B' "${sha}" | grep -qiF "Signed-off-by: ${author}"; then
+                echo "::warning::commit ${sha} is signed off, but not by its author (${author})."
+              fi
+            else
+              echo "::error::commit ${sha} (${author}) is missing a 'Signed-off-by:' trailer (DCO, RD-4)."
+              MISSING=$((MISSING + 1))
+            fi
+          done
+
+          if [ "${MISSING}" -gt 0 ]; then
+            echo ""
+            echo "DCO check FAILED: ${MISSING} commit(s) lack a Signed-off-by line."
+            echo "Add one with:  git commit --amend --signoff   (or  git rebase --signoff <base>  for a range)."
+            echo "See CONTRIBUTING.md for the full DCO policy (RD-4)."
+            exit 1
+          fi
+          echo "DCO check passed: every commit in the range is signed off."

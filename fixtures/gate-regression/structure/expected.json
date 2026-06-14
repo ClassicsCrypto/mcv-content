@@ -1,0 +1,77 @@
+{
+  "rule_ref": "rule.core.structure",
+  "gate": "llm",
+  "executed_in_ci": false,
+  "fixture_kind": "prose",
+  "notes": "rule.core.structure ships six LLM-judged FM.* codes (hook, argument spine, receipt framing, anchor legibility, brief compliance, format structure). These are NOT executed in CI (no LLM judge runs — RD-12); CI validates them STRUCTURALLY (codes registered in rules/codes.md, RD-21 consistency: the SOFT codes are warn + bars_recommended; FM.BRIEF_VIOLATION / FM.STRUCTURE_VIOLATION are HARD). A keyed maintainer can run the LLM gate locally and diff. expected_codes are the judgment a calibrated judge SHOULD return; the firing thresholds are maintainer-side (DD-9).",
+  "cases": [
+    {
+      "name": "weak-hook",
+      "kind": "positive",
+      "input": "weak-hook.copy.md",
+      "expected_verdict": "PASS_ALTERNATE_ONLY",
+      "expected_codes": ["FM.WEAK_HOOK"],
+      "code_tier": "soft",
+      "code_disposition": "warn",
+      "bars_recommended": true
+    },
+    {
+      "name": "weak-arg",
+      "kind": "positive",
+      "input": "weak-arg.copy.md",
+      "expected_verdict": "PASS_ALTERNATE_ONLY",
+      "expected_codes": ["FM.WEAK_ARG"],
+      "code_tier": "soft",
+      "code_disposition": "warn",
+      "bars_recommended": true
+    },
+    {
+      "name": "status-recap",
+      "kind": "positive",
+      "input": "status-recap.copy.md",
+      "expected_verdict": "PASS_ALTERNATE_ONLY",
+      "expected_codes": ["FM.STATUS_RECAP"],
+      "code_tier": "soft",
+      "code_disposition": "warn",
+      "bars_recommended": true
+    },
+    {
+      "name": "esoteric",
+      "kind": "positive",
+      "input": "esoteric.copy.md",
+      "expected_verdict": "PASS_ALTERNATE_ONLY",
+      "expected_codes": ["FM.ESOTERIC"],
+      "code_tier": "soft",
+      "code_disposition": "warn",
+      "bars_recommended": true
+    },
+    {
+      "name": "brief-violation",
+      "kind": "positive",
+      "input": "brief-violation.copy.md",
+      "expected_verdict": "FAIL",
+      "expected_codes": ["FM.BRIEF_VIOLATION"],
+      "code_tier": "hard",
+      "code_disposition": "block",
+      "route": "matcher"
+    },
+    {
+      "name": "structure-violation",
+      "kind": "positive",
+      "input": "structure-violation.copy.md",
+      "expected_verdict": "FAIL",
+      "expected_codes": ["FM.STRUCTURE_VIOLATION"],
+      "code_tier": "hard",
+      "code_disposition": "block",
+      "route": "writer"
+    },
+    {
+      "name": "well-structured",
+      "kind": "negative",
+      "input": "well-structured.copy.md",
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "Clean control: concrete hook, complete argument spine, brief must-includes present, all beats present."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+Open Content Engine
+Copyright [yyyy] The Open Content Engine Authors
+
+This product includes software developed by the Open Content Engine project.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use the files in this repository except in compliance with the License. A copy
+of the License is distributed with this work in the LICENSE file, and is also
+available at http://www.apache.org/licenses/LICENSE-2.0.
+
+-------------------------------------------------------------------------------
+Third-party attributions
+
+This file collects required attribution notices for third-party components
+redistributed with this project. No third-party components are bundled at this
+time; entries are added here as dependencies are introduced.
+
+Note: optional agent skill packs are NOT redistributed with this repository and
+are installed separately by the operator. Their attribution and license terms
+travel with those upstream packages, not with this NOTICE file.

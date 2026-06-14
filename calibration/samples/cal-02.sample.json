@@ -1,0 +1,22 @@
+{
+  "sample_id": "cal-02",
+  "archetype": "announcement",
+  "command": {
+    "command_family": "RUN_SLOT",
+    "brand": "acme-cosmos",
+    "platform": "twitter",
+    "format": "single-post",
+    "mode": "SAFE",
+    "routing_class": "TEXT_HEAVY",
+    "slot_ref": "cal-tue-announce",
+    "pillar": "launch",
+    "theme": "Open beta sign-ups open Thursday",
+    "notes": "Announce the beta sign-up window with a concrete actionable anchor: a date (Thursday) and a concrete CTA (the sign-up link goes in the brand's bio). No vague teasing."
+  },
+  "expected_posture": "clean-on-voice",
+  "exercises": [
+    "structure: announcement carries a concrete anchor (date + CTA) — guards against FM.WEAK_HOOK",
+    "on-voice: matches the brand's plainspoken launch register"
+  ],
+  "reviewer_note": "A well-formed announcement: it names when and what to do. Contrast with cal-08, which deliberately omits the anchor."
+}

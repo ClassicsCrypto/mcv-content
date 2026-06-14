@@ -1,0 +1,26 @@
+{
+  "rule_ref": "rule.platform.facebook",
+  "gate": "platform",
+  "executed_in_ci": true,
+  "fixture_kind": "package",
+  "notes": "PLAT.FACEBOOK_COMMUNITY_BRIDGE_MISSING fires when a Facebook package has no community-bridge framing field. The clean package declares community_bridge in the audit_header. Text format, so no CONTENT_HOME needed.",
+  "cases": [
+    {
+      "name": "missing-community-bridge",
+      "kind": "positive",
+      "input": "missing-community-bridge.package.json",
+      "call": { "platform": "facebook" },
+      "expected_verdict": "FAIL",
+      "expected_codes": ["PLAT.FACEBOOK_COMMUNITY_BRIDGE_MISSING"]
+    },
+    {
+      "name": "clean",
+      "kind": "negative",
+      "input": "clean.package.json",
+      "call": { "platform": "facebook" },
+      "expected_verdict": "PASS",
+      "expected_codes": [],
+      "notes": "community_bridge field present."
+    }
+  ]
+}
