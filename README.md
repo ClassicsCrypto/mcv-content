@@ -70,17 +70,17 @@ Full diagram and state machine: [`docs/architecture.md`](docs/architecture.md).
 Open source does **not** mean free to run. The chain and several optional features call metered
 third-party services. There are two spend regimes, and the docs always say which one you are in:
 
-- **Engine-metered spend** — the visual gate, media generation, scraping, publisher calls (and library
-  indexing once the automatic indexer ships — see the roadmap). The engine meters these and enforces
-  your budget caps against them.
+- **Engine-metered spend** — the visual gate, media generation, scraping, publisher calls, and
+  **library indexing** (`engine index-library`, now shipped — it visual-tags assets through the same
+  metered provider seam). The engine meters these and enforces your budget caps against them.
 - **Host-runtime-owned chain spend** — the writer/gate/matcher LLM tokens. These belong to your host
   runtime's own LLM configuration; the engine is blind to them unless your runtime reports per-run
   cost. Your `monthly_cap` bounds engine-metered actions and run dispatch — **not** whole-system spend.
 
 Cost bands are **indicative** and marked "measured as of `<date>`"; for current numbers use the
-pre-run estimator `engine calibrate --estimate-only` (and `engine index-library`'s estimate once the
-automatic indexer ships — it is a roadmap capability, not a v1 step). Full disclosure, including how
-to cap chain spend at your runtime: [`docs/cost.md`](docs/cost.md).
+pre-run estimators `engine calibrate --estimate-only` and `engine index-library --estimate-only`
+(both reflect your configured chain and providers). Full disclosure, including how to cap chain spend
+at your runtime: [`docs/cost.md`](docs/cost.md).
 
 ## Quick start
 
@@ -107,11 +107,11 @@ The smallest path to a first approval card. Full narration:
 > state, not a failure (see [`agent.md` §8](agent.md)).
 
 **Explicitly deferrable:** competitor ingestion, the media library (empty-library mode by default;
-automatic indexing is forthcoming, with manual `index.json` population available now) + character
-sheets, additional brands/platforms, additional platform account connections, campaigns, the media and
-analyst seats, the
-analytics loop, trend slots, Giphy. Each deferred step is a labeled later checkpoint, resumable any
-time.
+`engine index-library` visual-tags assets when you opt in, with manual `index.json` population also
+available) + character sheets, additional brands/platforms, additional platform account connections,
+campaigns, the media and analyst seats, the analytics loop, trend slots, Giphy. Each deferred step is
+a labeled later checkpoint, resumable any time. Library indexing, folder auto-sort, and character
+sheets are documented in [`docs/library.md`](docs/library.md).
 
 ## Platform scope (v1)
 
@@ -160,7 +160,8 @@ This statement defines what "supported" means and is the basis for issue/PR tria
 - [`agent.md`](agent.md) — the Repo Agent Guide (start here; point your agent at it).
 - [`docs/architecture.md`](docs/architecture.md), [`docs/configuration.md`](docs/configuration.md),
   [`docs/rule-authoring.md`](docs/rule-authoring.md), [`docs/extending.md`](docs/extending.md),
-  [`docs/cost.md`](docs/cost.md), [`docs/data-policy.md`](docs/data-policy.md),
+  [`docs/cost.md`](docs/cost.md), [`docs/library.md`](docs/library.md),
+  [`docs/data-policy.md`](docs/data-policy.md),
   [`docs/observability.md`](docs/observability.md), [`docs/troubleshooting.md`](docs/troubleshooting.md).
 - [`docs/setup/`](docs/setup/) — quick-start, full-setup, cold-start.
 - [`docs/runtimes/`](docs/runtimes/) — OpenClaw fast path + the generic capability contract.

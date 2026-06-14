@@ -90,7 +90,8 @@ The project cannot advance without a C3 pass. Detail + pass criteria:
 Generate a small calendar (e.g. a 3-slot/week Twitter cadence) from `templates/calendar.template.md`;
 at least one slot needs a clock time. Use **empty-library mode** — leave the library disabled;
 retrieval returns generate-only decisions. *(Deferrable: campaigns, character sheets, the media
-library.)*
+library — when you do add media, `engine index-library` visual-tags it; see
+[`../library.md`](../library.md).)*
 
 ```
 engine verify --setup c4
@@ -134,8 +135,9 @@ executor's `verifyStatus` poll then advances the entry to `published`.
 Each of these is a labeled later checkpoint, resumable any time:
 
 - Competitor ingestion / corpus data → [`brand.md`](brand.md#corpus-intake-optional-c2-step-2)
-- Library indexing + character sheets → [`brand.md`](brand.md#calendar-and-library-c4) (auto-indexing
-  is forthcoming; v1 is empty-library mode or manual population)
+- Library indexing + folder auto-sort + character sheets → [`../library.md`](../library.md)
+  (empty-library mode is the default; `engine index-library` auto-tags assets, or populate `index.json`
+  manually)
 - Additional brands / platforms / account connections → [`platforms.md`](platforms.md)
 - Campaigns, the media + analyst seats, the analytics loop, trend slots, Giphy
 

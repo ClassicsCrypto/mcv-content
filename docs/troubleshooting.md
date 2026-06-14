@@ -51,6 +51,8 @@ populated index.
   accepts the empty catalog (otherwise it fails, asking you to add archetypes or set the flag).
 - Calibration quality improves once you add corpus data; add it later and re-calibrate. See
   [`setup/cold-start.md`](setup/cold-start.md).
+- To move off empty-library mode, add media and run `engine index-library` (it visual-tags assets;
+  estimate-and-confirm, incremental) or hand-author `index.json`. See [`library.md`](library.md).
 
 ## Gate hard-fail
 

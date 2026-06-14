@@ -251,6 +251,7 @@ resolves inside the code checkout. The full `$CONTENT_HOME` layout is documented
 ## See also
 
 - [`configuration.md`](configuration.md) — every config key, the `$CONTENT_HOME` layout, provenance classes.
+- [`library.md`](library.md) — media indexing, folder auto-sort, and character sheets.
 - [`rule-authoring.md`](rule-authoring.md) — the rule format and the unified failure-code registry.
 - [`../rules/codes.md`](../rules/codes.md) — every failure code the gate can emit.
 - [`troubleshooting.md`](troubleshooting.md) — what each stuck state means and how to recover.

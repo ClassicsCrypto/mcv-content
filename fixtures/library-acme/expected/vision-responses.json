@@ -1,0 +1,77 @@
+{
+  "$comment": "LIB-FIXTURES — recorded zero-key vision responses for the library auto-indexer (release-spec §1.5 auto-index/tag; §12.5 vision-provider seam; §15.4/DD-18 cost-estimate; fixtures contract §5). Keyed by the asset's BASENAME (filename only, no directory) so a fake visionFn(filename) can look the answer up with zero keys and zero network. These are the synthetic 'what the vision model would have said' answers for the Acme Cosmos fixture media. Each value carries the per-asset fields LIB-CORE maps into an archive-index-entry (schemas/artifacts/archive-index-entry.schema.json): description (visual-model caption), tags (searchable keywords), type (image|video|gif|animated_image), and the optional duration (seconds, time-based media only) + character_refs. The 'content_tags' array preserves the production captioner's prefixed-tag shape (subject:/scene:/mood:/style:/camera:) for indexers that emit it; LIB-CORE may fold it into tags or keep it separate. ALL SYNTHETIC — see ../PROVENANCE note and fixtures/PROVENANCE.md.",
+  "moon-first-quarter.png": {
+    "type": "image",
+    "description": "First-quarter Moon with craters sharp along the terminator against a black sky. Synthetic placeholder asset.",
+    "tags": ["moon", "first-quarter", "terminator", "craters", "how-to"],
+    "content_tags": ["subject:moon", "scene:night-sky", "mood:calm", "style:photographic", "camera:telescope"],
+    "character_refs": []
+  },
+  "jupiter-moons-line.png": {
+    "type": "image",
+    "description": "Jupiter as a bright disk with four small Galilean moons in a line beside it, eyepiece framing. Synthetic placeholder asset.",
+    "tags": ["jupiter", "galilean-moons", "planet", "sky-tonight"],
+    "content_tags": ["subject:planet", "scene:night-sky", "mood:wonder", "style:photographic", "camera:telescope"],
+    "character_refs": []
+  },
+  "st1-on-table.jpg": {
+    "type": "image",
+    "description": "The Acme Cosmos ST-1 tabletop reflector telescope set up on a picnic table at dusk, red-dot finder visible. Synthetic product placeholder asset.",
+    "tags": ["product", "st-1", "tabletop", "setup", "behind-the-glass"],
+    "content_tags": ["subject:product", "scene:outdoor-dusk", "mood:inviting", "style:product-photo", "camera:medium-shot"],
+    "character_refs": []
+  },
+  "orion-nebula-wide.png": {
+    "type": "image",
+    "description": "Wide low-power view of the Orion Nebula in the sword of Orion, faint greenish glow. Synthetic placeholder asset.",
+    "tags": ["orion-nebula", "m42", "deep-sky", "field-notes"],
+    "content_tags": ["subject:nebula", "scene:night-sky", "mood:awe", "style:astrophoto", "camera:wide-field"],
+    "character_refs": []
+  },
+  "pleiades-pan-clip.mp4": {
+    "type": "video",
+    "description": "Slow pan across the Pleiades open cluster, a tight dipper of blue-white stars filling a low-power field. Synthetic placeholder clip.",
+    "tags": ["pleiades", "m45", "star-cluster", "sky-tonight", "pan"],
+    "content_tags": ["subject:star-cluster", "scene:night-sky", "mood:serene", "style:astrovideo", "camera:pan", "role:motion_clip"],
+    "duration": 8,
+    "character_refs": []
+  },
+  "setup-timelapse.webm": {
+    "type": "video",
+    "description": "Timelapse of an Acme Cosmos telescope being assembled on a patio as the sky darkens. Synthetic placeholder clip.",
+    "tags": ["setup", "timelapse", "product", "how-to"],
+    "content_tags": ["subject:product", "scene:outdoor-dusk", "mood:instructional", "style:timelapse", "camera:locked-off", "role:motion_clip"],
+    "duration": 12,
+    "character_refs": []
+  },
+  "nebula-keyart-gen.png": {
+    "type": "image",
+    "description": "AI-generated stylized nebula key-art in deep purples and teal, no embedded text. Synthetic generated placeholder asset.",
+    "tags": ["nebula", "key-art", "generated", "background"],
+    "content_tags": ["subject:nebula", "scene:space", "mood:dramatic", "style:digital-art", "camera:wide-field"],
+    "character_refs": []
+  },
+  "mascot-orbit-loop.gif": {
+    "type": "animated_image",
+    "description": "Looping animation of the Acme Cosmos mascot character orbiting a small planet. Synthetic generated placeholder loop.",
+    "tags": ["mascot", "loop", "animation", "generated", "behind-the-glass"],
+    "content_tags": ["subject:mascot", "scene:space", "mood:playful", "style:cartoon", "camera:orbit"],
+    "duration": 2,
+    "character_refs": ["acme-mascot-comet"]
+  },
+  "app-tonight-card.png": {
+    "type": "image",
+    "description": "App screenshot mock of the 'tonight' feed top card suggesting one object to point at. Synthetic placeholder asset; no embedded marketing copy baked into the frame.",
+    "tags": ["app", "tonight-feed", "ui", "how-to"],
+    "content_tags": ["subject:ui", "scene:app-screen", "mood:helpful", "style:screenshot", "camera:flat"],
+    "character_refs": []
+  },
+  "comet-flyby-raw.mp4": {
+    "type": "video",
+    "description": "Raw unsorted clip of a comet drifting across a star field, slight handheld jitter. Synthetic placeholder clip.",
+    "tags": ["comet", "flyby", "raw", "field-notes"],
+    "content_tags": ["subject:comet", "scene:night-sky", "mood:fleeting", "style:handheld", "camera:tracking", "role:motion_clip"],
+    "duration": 6,
+    "character_refs": []
+  }
+}

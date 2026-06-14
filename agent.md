@@ -157,10 +157,17 @@ Order is fixed (DD-5): **integration/agents → ingestion → calibration → ca
 1. **Calendar:** agent-assisted from `templates/calendar.template.md` + operator cadence; calendar
    generation assigns clock times to slots (DD-22).
 2. **Campaigns (optional):** addable any time.
-3. **Library (optional / deferrable):** point config at the media library and index it. **Empty-library
-   mode is fully supported** — retrieval returns generate-only decisions; nothing hard-depends on a
-   populated index.
-4. **Character sheets (optional):** import existing; generation runs only on explicit approval.
+3. **Library (optional / deferrable):** point config at the media library and index it with
+   `engine index-library` — it visual-tags each asset (description + tags + type, plus a duration for
+   video) through the §12.5 vision provider, under the same estimate-and-confirm contract as calibrate
+   (no `--yes`, no spend) and **incrementally** (already-indexed assets are skipped and never
+   re-billed). **Empty-library mode is fully supported** — retrieval returns generate-only decisions;
+   nothing hard-depends on a populated index, and `index-library` with no media is a clean no-op.
+   `docs/library.md` covers indexing, folder auto-sort, and character sheets in full.
+4. **Character sheets (optional):** detection (which roster characters already have a sheet) is
+   deterministic, always available, and zero-key; generation of a missing sheet is metered,
+   approval-gated, dry-run by default, and **requires a configured image-gen provider** — it degrades
+   to a no-op when none is set (it never fabricates a sheet).
 5. Verify: `engine verify --checkpoint C4`. Project state → `operational`.
 
 Running `engine verify` with **no `--checkpoint`** walks the ladder from the first incomplete
@@ -235,6 +242,7 @@ config, not in scheduler wrappers.**
 | `dispatch` | write one ad-hoc slot-run task record (no calendar entry needed) | `--family`, `--brand`, `--platform`, `--format`, `--mode`, `--force` |
 | `status` | the one-command operational surface (§9) | `--json` |
 | `calibrate --brand <id>` | the C3 calibration runner (estimate-and-confirm) | `--samples`, `--yes`, `--estimate-only`, `--result <json>` |
+| `index-library` | manage the media library: visual-tag/index (default), folder auto-sort (`--organize`), or character sheets (`--character-sheets`). Metered actions are estimate-and-confirm + dry-run; incremental, never re-bills; empty-library = no-op | `--yes`, `--estimate-only`, `--force`, `--no-hash`, `--organize [--apply]`, `--character-sheets [--generate --yes --apply]`, `--brand` |
 | `purge-corpora` | enforce corpus retention windows by `retention_class` (dry-run by default) | `--apply`, `--brand` |
 | `pause` / `resume` | the kill switch — engage / clear the PAUSED sentinel + config flag | `pause --reason "<text>"` |
 
@@ -292,7 +300,7 @@ which codes, what did it spend** — without reading internals. It reports:
 
 The detailed runbooks live in [`docs/runbooks/`](docs/runbooks/): daily kickoff, approval/publish,
 weekly analytics, rotate-credentials, recover-from-stall. The deeper references live in `docs/`
-(`architecture.md`, `configuration.md`, `rule-authoring.md`, `extending.md`, `cost.md`,
+(`architecture.md`, `configuration.md`, `rule-authoring.md`, `extending.md`, `cost.md`, `library.md`,
 `data-policy.md`, `observability.md`, `troubleshooting.md`, `runtimes/`, `platforms/`).
 
 ---

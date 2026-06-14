@@ -5,18 +5,19 @@ third-party services. This doc explains what is metered, who pays for what, and 
 
 > **Numbers here are INDICATIVE.** The specific cost bands below are placeholders marked "measured
 > as of `<date>`" and are filled by a measurement pass. A stale band is a docs bug, not a release
-> blocker. For *current* numbers on your own install, use the pre-run estimator
-> `engine calibrate --estimate-only` (and `engine index-library`'s pre-run estimate once the automatic
-> indexer ships — see below) — they reflect your configured chain and provider.
+> blocker. For *current* numbers on your own install, use the pre-run estimators
+> `engine calibrate --estimate-only` and `engine index-library --estimate-only` — they reflect your
+> configured chain and provider.
 
 ## The spend split (read this first)
 
 There are two distinct cost regimes, and the engine can only see one of them:
 
 - **Engine-metered spend** — actions the engine itself performs and can bill: the visual gate, media
-  generation, scraping/trend calls, and publisher API calls — plus library indexing **once the
-  automatic indexer ships** (a roadmap capability; not metered in v1 because the verb is a stub — see
-  below). Each emits a spend event the engine can sum and cap.
+  generation, scraping/trend calls, publisher API calls, and **library indexing**
+  (`engine index-library` — it sends each library asset to the configured vision provider for a
+  description + tags; character-sheet generation is similarly metered when a provider is configured).
+  Each emits a spend event the engine can sum and cap.
 - **Host-runtime-owned spend** — the chain-seat LLM tokens (writer, gate, matcher, enricher). The
   engine does **not** call these LLMs; your host runtime does, with your provider credentials. The
   engine is structurally blind to this cost **unless** your runtime reports per-run cost back to it.
@@ -74,23 +75,32 @@ When it does not, they mark spend **"engine-metered only (partial)"** — an hon
 ## The estimators (your source of current numbers)
 
 The estimate-and-confirm contract: a command presents a pre-run estimate and **requires confirmation
-before spending**. In v1 one command is live:
+before spending**. Two commands are live:
 
 - `engine calibrate --brand <id>` — your first real spend. Run `--estimate-only` to see the band, then
   `--yes` to confirm. See [`setup/brand.md`](setup/brand.md#calibrate-c3--the-mandatory-gate).
+- `engine index-library` — library media indexing. Run `--estimate-only` to see the band (item count ×
+  the per-asset band), then `--yes` to confirm and index in resumable batches. See
+  [`library.md`](library.md).
 
-`engine calibrate --estimate-only` reflects *your* configured chain and providers, so it is the
-authoritative current number; the bands above are only orientation.
+Both `--estimate-only` outputs reflect *your* configured chain and providers, so they are the
+authoritative current numbers; the bands above are only orientation.
 
-> **`engine index-library` (when available).** Library auto-indexing is **forthcoming** (roadmap) —
-> the automatic visual-tagging indexer is not shipped in v1, so the verb is an honest stub that points
-> you at empty-library mode (default) or manual `index.json` population (see
-> [`setup/brand.md`](setup/brand.md#calendar-and-library-c4)). When it ships it will honor the same
-> estimate-and-confirm contract (a pre-run cost estimate + item count, then resumable batches once
-> confirmed) and become a second engine-metered cost driver. It is **not** a v1 spend line.
+> **`engine index-library` — the second engine-metered cost driver.** Indexing sends each
+> not-yet-indexed library asset to your configured vision provider for a description + tags (+ a
+> duration for video), so it spends. It honors the same estimate-and-confirm contract as calibrate: no
+> `--yes`, no spend — the verb returns the pre-run estimate (scanned / already-indexed / to-index
+> counts × the per-asset band) and indexes nothing. The per-asset band is **indicative** (placeholder
+> `$0.001–$0.01`, config-overridable via `cost.per_asset_usd`) until a measurement pass fills it.
+> Indexing is **incremental and idempotent**: an already-indexed, unchanged asset is skipped and
+> **never re-billed** (content-hash fingerprint); `--force` is the only way to re-spend on it.
+> **Empty-library mode** (default) is a clean no-op with zero spend. Character-sheet *generation*
+> (image-gen) is a separate metered, approval-gated, dry-run-by-default action that degrades to a
+> no-op when no image-gen provider is configured — see [`library.md`](library.md).
 
 ## See also
 
 - [`configuration.md`](configuration.md#budget-spend-governance--required) — the `budget` key and its scope caveat.
+- [`library.md`](library.md) — `engine index-library`, folder auto-sort, and character sheets in full.
 - [`observability.md`](observability.md) — the spend line in `engine status` and the digest, and the partial-spend marker.
 - [`runtimes/openclaw.md`](runtimes/openclaw.md) / [`runtimes/generic.md`](runtimes/generic.md) — capping and reporting chain spend.

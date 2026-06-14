@@ -1,0 +1,19 @@
+{
+  "$comment": "LIB-FIXTURES — synthetic SIDECAR metadata marker the indexer merges into the asset's archive-index-entry (release-spec §8.6 approved content auto-indexes back with approval lineage; DD-14 usage written to the cooldown ledger). Lives beside st1-on-table.jpg so the indexer can pick up pre-existing approval_lineage + usage_history rather than re-deriving them from vision. The merged result is the st1-on-table entry in expected/index-entries.json. ALL SYNTHETIC — invented Acme Cosmos product, no real brand or instance data; the content_id / decision_ref / timestamps are placeholders.",
+  "asset_id": "acme-st1-on-table",
+  "usage_history": [
+    {
+      "asset_id": "acme-st1-on-table",
+      "content_id": "acme-behind-the-glass-0007",
+      "used_at": "2026-05-20T14:00:00.000Z",
+      "platform": "twitter"
+    }
+  ],
+  "approval_lineage": [
+    {
+      "content_id": "acme-behind-the-glass-0007",
+      "decision_ref": "library/approvals/acme-behind-the-glass-0007.decision.json",
+      "approved_at": "2026-05-19T18:30:00.000Z"
+    }
+  ]
+}

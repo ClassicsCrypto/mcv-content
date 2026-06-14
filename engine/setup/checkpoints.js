@@ -606,9 +606,12 @@ function loadCalibrationCriteria(env) {
 /**
  * C4 verifies the calendar (a calendar file with at least one slot) and that the optional library
  * is either configured + indexed OR explicitly in empty-library mode (DD-21 — nothing in the chain
- * hard-depends on a populated index). Campaigns and character sheets are optional and not gated.
- * Project state → operational on pass (and only with C3 already passed — enforced by the lifecycle
- * derivation, §2.4 invariant).
+ * hard-depends on a populated index). The media indexer is available (`engine index-library`, the
+ * estimate-and-confirm metered verb — §1.5, DD-18), so a library that is enabled-but-unindexed has
+ * a concrete remediation; empty-library mode remains the no-op-pass default (DD-21). Campaigns and
+ * character sheets are optional and not gated (run `engine index-library --character-sheets` to
+ * audit/generate sheets, also estimate-and-confirm). Project state → operational on pass (and only
+ * with C3 already passed — enforced by the lifecycle derivation, §2.4 invariant).
  */
 function verifyC4(opts = {}) {
   const env = opts.env || process.env;
@@ -665,12 +668,12 @@ function verifyC4(opts = {}) {
       fail(
         'library',
         'library is enabled in config but no index.json entries found',
-        'Run `engine index-library` (confirm the pre-run cost estimate) to build the index, or disable the library for empty-library mode (§2.6 step 3, DD-18).',
+        'Indexing is available: run `engine index-library` to see the cost estimate, then `engine index-library --yes` to confirm and build the index (idempotent — already-indexed assets are never re-billed). Or disable the library (library.enabled=false) for empty-library mode (§2.6 step 3, §1.5, DD-18/DD-21).',
       ),
     );
   } else {
     checks.push(
-      skip('library', 'empty-library mode — retrieval returns generate-only decisions; nothing in the chain hard-depends on a populated index (DD-21, §2.6 step 3).'),
+      skip('library', 'empty-library mode — retrieval returns generate-only decisions; nothing in the chain hard-depends on a populated index (DD-21, §2.6 step 3). When a library is added, `engine index-library` builds the index (estimate-and-confirm, DD-18).'),
     );
   }
 

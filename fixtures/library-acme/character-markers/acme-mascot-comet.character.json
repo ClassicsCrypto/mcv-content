@@ -1,0 +1,9 @@
+{
+  "$comment": "LIB-FIXTURES — synthetic EXISTING character-sheet marker (release-spec §1.5 'Check the library for existing character sheets. If none exist, trigger a script to automatically generate them if approved'). Its presence lets the indexer detect that a sheet already EXISTS for this character and therefore SKIP the (metered, mutation-unsafe) auto-generation path — the dry-run-by-default / never-re-bill contract (DD-18). character_id matches the character_refs value emitted for mascot-orbit-loop.gif in expected/index-entries.json. ALL SYNTHETIC — invented Acme Cosmos mascot, no real brand or third-party character.",
+  "character_id": "acme-mascot-comet",
+  "name": "Comet (Acme Cosmos mascot)",
+  "sheet_status": "exists",
+  "sheet_path": "library/character-sheets/acme-mascot-comet/contact-sheet.png",
+  "description": "A small round cartoon comet character with a friendly face and a sweeping tail; the invented Acme Cosmos brand mascot.",
+  "depicted_in": ["mascot-orbit-loop.gif"]
+}

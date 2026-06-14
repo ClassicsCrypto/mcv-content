@@ -347,6 +347,16 @@ function buildBindings() {
     { test: (p) => p === 'fixtures/brand-acme/corpus/own-corpus.jsonl', schema: S('inputs/corpus-item.schema.json'), mode: 'jsonl' },
     { test: (p) => p === 'fixtures/brand-acme/media/index.json', schema: S('artifacts/archive-index-entry.schema.json'), mode: 'array-prop:assets' },
 
+    // library-acme media-indexer fixtures (LIB-FIXTURES). The golden post-sort index entries bind
+    // to archive-index-entry (each element of .assets). The recorded vision answers, the per-asset
+    // sidecar metadata marker, and the existing-character-sheet marker are indexer INPUT/CONTROL
+    // files (keyed-by-filename answer map / sidecar merges / character marker), not shipped artifact
+    // shapes — documented skips, never silently dropped.
+    { test: (p) => p === 'fixtures/library-acme/expected/index-entries.json', schema: S('artifacts/archive-index-entry.schema.json'), mode: 'array-prop:assets' },
+    { test: (p) => p === 'fixtures/library-acme/expected/vision-responses.json', skip: true, reason: 'recorded vision answers keyed by filename (fake-visionFn input map, not a shipped artifact shape)' },
+    { test: (p) => /^fixtures\/library-acme\/.+\.meta\.json$/.test(p), skip: true, reason: 'per-asset sidecar metadata marker (indexer merge input, not a shipped artifact shape)' },
+    { test: (p) => /^fixtures\/library-acme\/character-markers\/.+\.character\.json$/.test(p), skip: true, reason: 'existing-character-sheet marker (indexer control input, not a shipped artifact shape)' },
+
     // recorded stage outputs (the fixture-run replay set).
     { test: (p) => p === 'fixtures/stage-outputs/brief.json', schema: S('inputs/brief.schema.json'), mode: 'single' },
     { test: (p) => p === 'fixtures/stage-outputs/draft.json', schema: S('inputs/draft.schema.json'), mode: 'single' },

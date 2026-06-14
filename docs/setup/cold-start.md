@@ -55,10 +55,11 @@ A cold-start brand has no media library, which is fine: **empty-library mode is 
 Leave the library disabled; retrieval returns generate-only decisions and the C4 verifier passes
 without an index.
 
-Note that **library auto-indexing is forthcoming** (roadmap) — `engine index-library` is an honest
-stub in v1 that reports this and points you back to the two supported paths: empty-library mode (this
-section) or manual population (hand-authoring `index.json` against the archive-index-entry schema). Do
-not expect automatic indexing to populate a cold-start brand's library in v1.
+A cold-start brand typically has nothing to index yet, so empty-library mode is the right default.
+When you do add media later, **library indexing is available** — `engine index-library` visual-tags
+assets through your configured vision provider (estimate-and-confirm, incremental, never re-billing an
+already-indexed asset), or you can hand-author `index.json` against the archive-index-entry schema.
+With no media present, `engine index-library` is a clean no-op. Full detail: [`../library.md`](../library.md).
 
 ## Step 4 — calibrate and verify as usual
 
@@ -83,7 +84,7 @@ Cold start is not a permanent mode. At any time you can:
 - add corpus data (manual submission, own-account export, or a BYO scraper adapter — see
   [`brand.md`](brand.md#corpus-intake-optional-c2-step-2)),
 - add real archetypes and clear `cold_start`,
-- populate the media library (manual `index.json` today; automatic indexing when it ships),
+- populate the media library (`engine index-library` to auto-tag, or manual `index.json`),
 
 then **re-run calibration** to re-baseline. The docs state plainly that calibration quality improves
 once you add corpus data; cold start gets you operating, not stuck.

@@ -111,11 +111,16 @@ re-run. Full detail and the criteria block:
 
 - **Calendar (required):** agent-assisted generation from `templates/calendar.template.md`; the C4
   verifier needs at least one slot with a clock time.
-- **Library (optional):** **auto-indexing is forthcoming** (roadmap) — `engine index-library` is an
-  honest stub in v1. Use **empty-library mode** (default; retrieval returns generate-only) or
-  **manual population** (hand-author `index.json` against the archive-index-entry schema). The verifier
-  passes either. Detail: [`brand.md`](brand.md#calendar-and-library-c4).
-- **Campaigns and character sheets:** optional, addable later.
+- **Library (optional):** **library indexing is available** — `engine index-library` visual-tags
+  assets (estimate-and-confirm, incremental, never re-billing an already-indexed asset). Use
+  **empty-library mode** (default; retrieval returns generate-only), **auto-indexing**
+  (`engine index-library --estimate-only` then `--yes`), or **manual population** (hand-author
+  `index.json` against the archive-index-entry schema). The verifier passes any of them. Detail:
+  [`../library.md`](../library.md).
+- **Campaigns:** optional, addable later.
+- **Character sheets:** optional — detection is always available and zero-key; generation is metered,
+  approval-gated, dry-run by default, and requires a configured image-gen provider (degrades to a
+  no-op without one). See [`../library.md`](../library.md#character-sheets).
 
 ```
 engine verify --setup c4

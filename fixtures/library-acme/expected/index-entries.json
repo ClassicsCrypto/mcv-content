@@ -1,0 +1,95 @@
+{
+  "$comment": "LIB-FIXTURES — expected archive-index entries the indexer should emit for the Acme Cosmos fixture library AFTER folder-sort (release-spec §1.5 folder-sort Images/Videos/AI-generated; §7.8 archive index; schemas/artifacts/archive-index-entry.schema.json). Each object validates against that schema (additionalProperties:false). Paths are $CONTENT_HOME-relative and reflect the post-sort layout (DD-21 manual/authored shape). LIB-CORE produces description/tags/type/duration from the recorded vision-responses.json; source_class is inferred from the sort bucket (Images/Videos => library, AI-generated => generated). Two entries (mascot-orbit-loop, st1-on-table) carry the optional character_refs / approval_lineage / usage_history fields so the indexer's full emit path is exercised. This is a golden-output fixture for an exact-match assertion in LIB-CORE tests; it is NOT loaded by the indexer at runtime. ALL SYNTHETIC.",
+  "assets": [
+    {
+      "asset_id": "acme-moon-first-quarter",
+      "path": "library/Images/moon-first-quarter.png",
+      "type": "image",
+      "description": "First-quarter Moon with craters sharp along the terminator against a black sky. Synthetic placeholder asset.",
+      "tags": ["moon", "first-quarter", "terminator", "craters", "how-to"],
+      "source_class": "library",
+      "character_refs": []
+    },
+    {
+      "asset_id": "acme-jupiter-moons-line",
+      "path": "library/Images/jupiter-moons-line.png",
+      "type": "image",
+      "description": "Jupiter as a bright disk with four small Galilean moons in a line beside it, eyepiece framing. Synthetic placeholder asset.",
+      "tags": ["jupiter", "galilean-moons", "planet", "sky-tonight"],
+      "source_class": "library",
+      "character_refs": []
+    },
+    {
+      "asset_id": "acme-st1-on-table",
+      "path": "library/Images/st1-on-table.jpg",
+      "type": "image",
+      "description": "The Acme Cosmos ST-1 tabletop reflector telescope set up on a picnic table at dusk, red-dot finder visible. Synthetic product placeholder asset.",
+      "tags": ["product", "st-1", "tabletop", "setup", "behind-the-glass"],
+      "source_class": "library",
+      "character_refs": [],
+      "usage_history": [
+        {
+          "asset_id": "acme-st1-on-table",
+          "content_id": "acme-behind-the-glass-0007",
+          "used_at": "2026-05-20T14:00:00.000Z",
+          "platform": "twitter"
+        }
+      ],
+      "approval_lineage": [
+        {
+          "content_id": "acme-behind-the-glass-0007",
+          "decision_ref": "library/approvals/acme-behind-the-glass-0007.decision.json",
+          "approved_at": "2026-05-19T18:30:00.000Z"
+        }
+      ]
+    },
+    {
+      "asset_id": "acme-orion-nebula-wide",
+      "path": "library/Images/orion-nebula-wide.png",
+      "type": "image",
+      "description": "Wide low-power view of the Orion Nebula in the sword of Orion, faint greenish glow. Synthetic placeholder asset.",
+      "tags": ["orion-nebula", "m42", "deep-sky", "field-notes"],
+      "source_class": "library",
+      "character_refs": []
+    },
+    {
+      "asset_id": "acme-pleiades-pan-clip",
+      "path": "library/Videos/pleiades-pan-clip.mp4",
+      "type": "video",
+      "description": "Slow pan across the Pleiades open cluster, a tight dipper of blue-white stars filling a low-power field. Synthetic placeholder clip.",
+      "tags": ["pleiades", "m45", "star-cluster", "sky-tonight", "pan"],
+      "duration": 8,
+      "source_class": "library",
+      "character_refs": []
+    },
+    {
+      "asset_id": "acme-setup-timelapse",
+      "path": "library/Videos/setup-timelapse.webm",
+      "type": "video",
+      "description": "Timelapse of an Acme Cosmos telescope being assembled on a patio as the sky darkens. Synthetic placeholder clip.",
+      "tags": ["setup", "timelapse", "product", "how-to"],
+      "duration": 12,
+      "source_class": "library",
+      "character_refs": []
+    },
+    {
+      "asset_id": "acme-nebula-keyart-gen",
+      "path": "library/AI-generated/nebula-keyart-gen.png",
+      "type": "image",
+      "description": "AI-generated stylized nebula key-art in deep purples and teal, no embedded text. Synthetic generated placeholder asset.",
+      "tags": ["nebula", "key-art", "generated", "background"],
+      "source_class": "generated",
+      "character_refs": []
+    },
+    {
+      "asset_id": "acme-mascot-orbit-loop",
+      "path": "library/AI-generated/mascot-orbit-loop.gif",
+      "type": "animated_image",
+      "description": "Looping animation of the Acme Cosmos mascot character orbiting a small planet. Synthetic generated placeholder loop.",
+      "tags": ["mascot", "loop", "animation", "generated", "behind-the-glass"],
+      "duration": 2,
+      "source_class": "generated",
+      "character_refs": ["acme-mascot-comet"]
+    }
+  ]
+}

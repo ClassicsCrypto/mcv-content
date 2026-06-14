@@ -88,6 +88,24 @@ the deterministic spine. Authored fresh; never copied from any production run (�
 | `usage-log.jsonl` | Recorded cooldown history (one asset inside the 14-day floor, one outside); canonical `{asset_id, content_id, used_at}` shape. | Authored-synthetic |
 | `README.md` | Provenance + spine-consumption notes for the recorded artifacts. | Authored-synthetic |
 
+## `fixtures/library-acme/` — synthetic media library + zero-key vision recordings (release-spec §1.5, §7.8, §12.5)
+
+The zero-key test fixtures + fake-vision recordings for the library auto-indexer. A small synthetic
+media set laid out across the §1.5 folder-sort buckets (`Images/`, `Videos/`, `AI-generated/`) plus an
+`unsorted/` root, with recorded vision answers a fake `visionFn(filename)` returns so the indexer runs
+in CI with zero keys and zero network (RD-12). See `fixtures/library-acme/PROVENANCE.md` for the full
+file table. The consumer helper is `tests/helpers/fake-vision.js`.
+
+| File / dir | What it is | Provenance |
+|---|---|---|
+| `library-acme/Images/*` (3 png + 1 jpg + 1 sidecar) | Tiny placeholder images + one `*.meta.json` sidecar. | Authored-synthetic / CC0 |
+| `library-acme/Videos/*` (mp4 + webm) | Minimal valid-header placeholder clips marked SYNTHETIC. | Authored-synthetic / CC0 |
+| `library-acme/AI-generated/*` (png + gif) | Generated-class placeholder still + animated loop. | Authored-synthetic / CC0 |
+| `library-acme/unsorted/*` (png + mp4) | Pre-folder-sort mixed-kind root (folder-sort input). | Authored-synthetic / CC0 |
+| `library-acme/character-markers/*.character.json` | Existing-character-sheet marker (skips metered generation). | Authored-synthetic |
+| `library-acme/expected/vision-responses.json` | Recorded vision answers keyed by basename. | Authored-synthetic |
+| `library-acme/expected/index-entries.json` | Golden `archive-index-entry` outputs (schema-valid). | Authored-synthetic |
+
 ## Why no instance content migrates
 
 Per the release gap analysis, **zero** files from the private instance pass the §13.3 r1 test

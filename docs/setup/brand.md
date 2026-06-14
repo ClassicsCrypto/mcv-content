@@ -126,17 +126,26 @@ calibrate` and the C3 verifier, so the runner and the gate can never disagree.
 - **Calendar (required):** agent-assisted generation from `templates/calendar.template.md` plus your
   cadence preferences. Calendar generation assigns clock times to slots. The C4 verifier needs at
   least one slot with a clock time.
-- **Library (optional):** **library auto-indexing is forthcoming** (roadmap, Appendix B) — the
-  automatic visual-tagging indexer is **not shipped in v1**. Running `engine index-library` today
-  reports that it is forthcoming and points at the two supported v1 paths:
+- **Library (optional):** **library indexing is available** via `engine index-library` — it scans
+  `library/media`, asks your configured vision provider for a description + searchable tags (+ a
+  duration for video) per asset, and writes the archive index retrieval consumes. It is
+  estimate-and-confirm (no `--yes`, no spend), **incremental** (already-indexed assets are skipped and
+  never re-billed), and resumable. Three supported v1 paths:
   - **Empty-library mode (default, fully supported):** leave the library disabled; retrieval returns
-    generate-only decisions and nothing in the chain hard-depends on an index.
+    generate-only decisions and nothing in the chain hard-depends on an index. `engine index-library`
+    with no media present is a clean no-op (zero spend).
+  - **Automatic indexing:** point config at the library and run
+    `engine index-library --estimate-only` then `engine index-library --yes`.
   - **Manual population:** hand-author `index.json` entries against the archive-index-entry schema.
 
-  The C4 verifier passes either an empty/disabled library (empty-library mode) or a manually
-  populated index. When the automatic indexer ships it will honor the same estimate-and-confirm
-  contract as calibration (a pre-run cost estimate, then confirmation before spending).
-- **Campaigns and character sheets:** optional, addable later.
+  The C4 verifier passes either an empty/disabled library (empty-library mode) or a populated index
+  (auto-indexed or manual). Full detail — indexing, folder auto-sort, and character sheets — is in
+  [`../library.md`](../library.md).
+- **Campaigns:** optional, addable later.
+- **Character sheets:** optional. **Detection** (which roster characters already have a sheet in the
+  library) is deterministic and always available, zero-key. **Generation** of a missing sheet is
+  metered, approval-gated, and dry-run by default; it **requires a configured image-gen provider** and
+  degrades to a no-op when none is set. See [`../library.md`](../library.md#character-sheets).
 
 ```
 engine verify --setup c4

@@ -41,6 +41,9 @@ const mode = require('../orchestrator/mode');
 const BOOLEAN_FLAGS = new Set([
   'help', 'json', 'now', 'force', 'dry-run', 'apply', 'yes', 'estimate-only',
   'dispatch-only', 'no-git', 'keep',
+  // index-library sub-actions + modifiers (LIB-CLI): each is a presence flag that never
+  // consumes the following token (so `engine index-library --organize --apply` parses cleanly).
+  'organize', 'character-sheets', 'generate', 'no-hash',
 ]);
 
 /**

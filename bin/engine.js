@@ -80,7 +80,7 @@ const VERB_SUMMARY = {
   dispatch: 'write one pending slot-run task record (RD-18)',
   status: 'the one-command operational surface (§13.1)',
   calibrate: 'the C3 calibration runner (estimate-and-confirm)',
-  'index-library': 'build the library index (forthcoming — roadmap)',
+  'index-library': 'index/sort the media library + character sheets (estimate-and-confirm)',
   'purge-corpora': 'enforce corpus retention windows (RD-9)',
   pause: 'engage the kill switch (PAUSED sentinel + config)',
   resume: 'reverse the kill switch',
