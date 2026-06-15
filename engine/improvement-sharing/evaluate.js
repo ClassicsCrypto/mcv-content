@@ -493,8 +493,114 @@ function gateAxisFieldsOnly(change) {
  * @param {boolean}  [opts.skipGateRegression]  test-only: skip the suite (recorded on the verdict).
  * @returns {{accepted:boolean, reasons:string[], checks:{shareable, applies, gate_regression, mutability}, auto_merge:false}}
  */
+/* ------------------------------------------------------------------------------------------------ *
+ * Check (e) — voice/brand-dna artifacts are NEVER shareable upstream (P10 / roadmap #5).
+ *
+ * Voice calibration records (target_artifact matching brand:*:voice or brand:*:drama_dial) are
+ * instance-specific preference records — they encode THIS brand's voice dial values derived from
+ * THIS install's corpus. They are NOT generalizable upstream rule-diffs; sharing them would (a)
+ * leak instance-specific preference data (a variant of the DD-7 specifics ban) and (b) attempt
+ * to "vote" on the upstream default voice, which is not the improvement-sharing contract.
+ *
+ * This is a STRUCTURAL REFUSAL: we detect the brand:*:voice family from target_artifact OR from
+ * the contribution's target descriptor carrying kind='voice'. A voice record is EHUMANONLY at
+ * every machine path AND non-shareable upstream (P10). We add it as check (e) so the verdict
+ * names the reason explicitly rather than losing it inside the existing EHUMANONLY check (d)
+ * which handles the machine-apply refusal; this check is the UPSTREAM-SHARING refusal.
+ * ------------------------------------------------------------------------------------------------ */
+
+/**
+ * Is this target_artifact a voice/brand-dna calibration artifact that must NEVER be shared upstream?
+ * Matches:
+ *   brand:*:voice          (voice-calibration records — P10)
+ *   brand:*:drama_dial     (the drama_dial sub-axis, if ever surfaced standalone)
+ *
+ * @param {object} contribution  the inbound contribution
+ * @returns {{ ok:boolean, reasons:string[] }}
+ */
+function checkNotVoiceArtifact(contribution) {
+  if (!contribution || typeof contribution !== 'object') return { ok: true, reasons: [] };
+
+  // Check target_artifact at the top level (the learning-record field name).
+  const artifact = contribution.target_artifact;
+  if (isVoiceArtifact(artifact)) {
+    return {
+      ok: false,
+      reasons: [
+        `target_artifact "${artifact}" is a voice-calibration record (brand:*:voice family). ` +
+        'Voice calibration is instance-specific: it encodes THIS brand\'s voice preferences derived from ' +
+        'THIS install\'s corpus. It is NEVER a generalizable upstream rule-diff (P10 / roadmap #5). ' +
+        'Only abstract rule-diffs may be shared upstream (DD-7).',
+      ],
+    };
+  }
+
+  // Also check contribution.target (the mutability target descriptor).
+  const target = contribution.target;
+  if (target && typeof target === 'object') {
+    const kind = typeof target.kind === 'string' ? target.kind.toLowerCase() : null;
+    if (kind === 'voice' || kind === 'brand-dna') {
+      return {
+        ok: false,
+        reasons: [
+          `contribution.target.kind "${target.kind}" is a voice/brand-dna surface. ` +
+          'Voice and brand-dna calibration records are instance-specific and must NEVER be shared upstream ' +
+          '(P10 / roadmap #5, DD-7 abstract-rule-diffs-only). This contribution is REJECTED.',
+        ],
+      };
+    }
+    // Also catch brand:*:voice in target.path or target.target_artifact.
+    if (isVoiceArtifact(target.path) || isVoiceArtifact(target.target_artifact)) {
+      return {
+        ok: false,
+        reasons: [
+          'contribution.target carries a voice/brand-dna artifact path — instance-specific, never shareable upstream (P10).',
+        ],
+      };
+    }
+  }
+
+  return { ok: true, reasons: [] };
+}
+
+/**
+ * True when an artifact id matches the brand:*:voice or brand:*:drama_dial family.
+ * Pattern: "brand:" prefix + any characters + ":voice" or ":drama_dial" suffix,
+ * OR the path/kind 'voice' or 'brand-dna'.
+ *
+ * @param {string|undefined|null} artifact
+ * @returns {boolean}
+ */
+function isVoiceArtifact(artifact) {
+  if (typeof artifact !== 'string') return false;
+  const a = artifact.toLowerCase().trim();
+  if (a.startsWith('brand:') && (a.endsWith(':voice') || a.endsWith(':drama_dial') || a.includes(':voice:'))) return true;
+  if (a === 'voice' || a === 'brand-dna' || a === 'voice-calibration') return true;
+  return false;
+}
+
+/**
+ * assertShareable extension: reject a payload whose target_artifact or target.kind is a voice artifact.
+ * Called by evaluateContribution as check (e). Export for direct use in tests.
+ *
+ * @param {object} contribution
+ * @throws {ContributionRejected} (EHUMANONLY) when the target is a voice artifact.
+ */
+function assertNotVoiceArtifact(contribution) {
+  const check = checkNotVoiceArtifact(contribution);
+  if (!check.ok) {
+    throw new ContributionRejected(check.reasons[0], {
+      families: ['voice-calibration-instance-specific'],
+      code: 'EHUMANONLY',
+    });
+  }
+}
+
 function evaluateContribution(contribution, opts = {}) {
   const options = opts && typeof opts === 'object' ? opts : {};
+
+  // (e) Voice artifact check — BEFORE all other checks (fastest structural rejection; P10).
+  const voiceCheck = checkNotVoiceArtifact(contribution);
 
   const shareable = checkShapeAndShareable(contribution, options);
   // (b)/(d) only make sense once the shape is sane; still run them when possible so the verdict is
@@ -504,12 +610,13 @@ function evaluateContribution(contribution, opts = {}) {
   const mut = checkMutability(contribution);
 
   const reasons = []
+    .concat(voiceCheck.reasons.map((r) => `[not-shareable-voice] ${r}`))
     .concat(shareable.reasons.map((r) => `[shape/shareable] ${r}`))
     .concat(applies.reasons.map((r) => `[applies] ${r}`))
     .concat(gateReg.reasons.map((r) => `[gate-regression] ${r}`))
     .concat(mut.reasons.map((r) => `[mutability] ${r}`));
 
-  const accepted = shareable.ok && applies.ok && gateReg.ok && mut.ok;
+  const accepted = voiceCheck.ok && shareable.ok && applies.ok && gateReg.ok && mut.ok;
 
   return {
     // The verdict. NEVER an apply — DD-7 (4): never auto-merge; a maintainer reviews after this.
@@ -517,6 +624,7 @@ function evaluateContribution(contribution, opts = {}) {
     auto_merge: false, // structural: there is no auto-merge path in this harness.
     reasons,
     checks: {
+      not_voice_artifact: { ok: voiceCheck.ok, reasons: voiceCheck.reasons },
       shareable: { ok: shareable.ok, reasons: shareable.reasons },
       applies: { ok: applies.ok, reasons: applies.reasons },
       gate_regression: { ok: gateReg.ok, reasons: gateReg.reasons, skipped: gateReg.skipped === true },
@@ -537,6 +645,10 @@ module.exports = {
   checkAppliesCleanly,
   checkGateRegression,
   checkMutability,
+  // P10: voice-artifact check (brand:*:voice is never shareable upstream).
+  checkNotVoiceArtifact,
+  assertNotVoiceArtifact,
+  isVoiceArtifact,
   // the self-contained outbound-mirror guard (used when the sibling sanitizer is absent).
   fallbackAssertShareable,
   collectStrings,

@@ -60,6 +60,33 @@ approval card (DD-16 — never out-of-calendar; nothing auto-publishes). It ship
    safely) and honors PAUSED + budget caps. Run it by hand once with `--dry-run`
    first. Scraping is BYO (RD-9) — the engine bundles no provider credentials.
 
+## Optional: the monthly competitor scan (config-gated, OFF by default)
+
+The competitor-scan pathway (roadmap #5) ingests competitor content on a monthly or quarterly
+cadence, runs a DETERMINISTIC landscape analysis, and writes a PATTERNS-ONLY Zone-U scan report.
+When `voice_calibration.enabled` is also true, it derives a structured voice-calibration proposal
+over the four voice axes (`drama_dial`, `archetype_emphasis`, `hook_preferences`,
+`cadence_preferences`). It ships **disabled** (both `competitor_scan.enabled` and
+`voice_calibration.enabled` must be explicitly `true`). To use it:
+
+1. Set `competitor_scan.enabled: true`, a `competitor_scan.adapter` (or `"fixture"` for zero-key),
+   and optionally `competitor_scan.voice_calibration.enabled: true` in `config/system.json`.
+2. Schedule **`engine competitor-scan --brand <id> --yes`** on a monthly or quarterly cadence
+   (the `--yes` flag confirms the DD-18 metered-scrape gate). Example crontab line for the 1st
+   of each month at 07:00 (set `CONTENT_HOME` as in the recipes):
+
+   ```
+   0 7 1 * *  CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js competitor-scan --brand <id> --yes
+   ```
+
+   The scan runs under the single-runner lock (overlapping fires skip safely) and honors PAUSED +
+   budget caps. Run it by hand once with `--dry-run` first. Scraping is BYO (RD-9).
+
+3. After each scan, review the proposal with `engine voice-calibrate --show` and apply with
+   **`engine voice-calibrate --apply --consent`** (explicit `--consent` is required — HUMAN-ONLY
+   path; the machine stops at the proposal and never auto-applies). See
+   [`docs/voice-calibration.md`](../../docs/voice-calibration.md) for the full walkthrough.
+
 ## Optional: the daily work-recap option (config-gated, OFF by default)
 
 The work-recap / build-in-public pathway (release-spec §3.3) is the daily option the

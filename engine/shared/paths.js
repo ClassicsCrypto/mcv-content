@@ -120,6 +120,14 @@ const paths = {
   brandTrendsDir: (brandId, env = process.env) =>
     underHome(env, 'trends', brandId),
 
+  // Competitor scan reports (roadmap #5; Zone U, retention_class:transient).
+  // competitor-scan.js writes schema-conformant competitor-scan-report.schema.json documents here.
+  // Paths mirror the trends layout; scans are transient and governed by the retention.transient_days
+  // window (engine purge-corpora). No other engine file may construct scan paths — ask this module.
+  scansDir: (env = process.env) => underHome(env, 'scans'),
+  brandScansDir: (brandId, env = process.env) =>
+    underHome(env, 'scans', brandId),
+
   // Queue (DD-4/DD-19) — the dir queue.js operates inside.
   queueDir: (env = process.env) => underHome(env, 'queue'),
   publishQueue: (env = process.env) =>

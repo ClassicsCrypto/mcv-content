@@ -21,6 +21,17 @@
 #
 # 0 */4 * * *  CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js poll-trends >> <CONTENT_HOME>/logs/trend-poll.cron.log 2>&1
 
+# OPTIONAL — the config-gated MONTHLY COMPETITOR SCAN (roadmap #5; OFF by default).
+# Enable competitor_scan.enabled + competitor_scan.adapter (or "fixture" for zero-key)
+# + competitor_scan.voice_calibration.enabled (if you also want proposal generation) in
+# config/system.json, then schedule competitor-scan on a MONTHLY or QUARTERLY cadence.
+# The --yes flag confirms the DD-18 metered-scrape gate; replace <brand-id> with your
+# brand. The scan is idempotent per (brand, calendar month): a second fire in the same
+# month is skipped safely. After the scan, run engine voice-calibrate --show to review
+# the proposal and engine voice-calibrate --apply --consent to apply with consent.
+#
+# 0 7 1 * *  CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js competitor-scan --brand <brand-id> --yes >> <CONTENT_HOME>/logs/competitor-scan.cron.log 2>&1
+
 # Notes:
 #   - Logs append to $CONTENT_HOME/logs/kickoff.cron.log; the engine redacts secrets at
 #     write time, but rotate/secure this file like any operational log.
@@ -29,3 +40,6 @@
 #   - cron uses the system timezone; align HH:MM with your calendar's scheduler.timezone.
 #   - The trend pass shares the kickoff's single-runner lock and PAUSED/budget preflight;
 #     overlapping fires skip safely and a reserved trend slot filled today is not refilled.
+#   - The competitor-scan pass also runs under the single-runner lock (overlapping fires
+#     skip safely) and honors PAUSED + budget preflight. Voice calibration is HUMAN-ONLY:
+#     the scan writes a proposal; the operator applies it with engine voice-calibrate --apply --consent.

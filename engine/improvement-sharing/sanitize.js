@@ -631,10 +631,18 @@ function pickRationale(record) {
  *
  * Fail-closed by construction: a non-object payload, or any residual, refuses.
  *
+ * Voice-artifact pre-check (P10 / roadmap #5): if the payload's target_artifact matches the
+ * brand:*:voice or brand:*:drama_dial family, OR payload.target.kind is "voice"/"brand-dna", throws
+ * EHUMANONLY BEFORE the string-specifics walk — because a clean voice payload (carrying no leaky
+ * strings) would otherwise pass the walk, producing a false "safe to share" result. This pre-check
+ * is independent of the string-specifics pass so it holds even against payloads hand-built to carry
+ * no instance strings (P10 closed independently).
+ *
  * @param {object} payload  the (sanitized) abstract rule-diff to verify.
  * @param {object} [opts]   same deny/brand/secret-key context as sanitizeForSharing (or the
  *                          pre-resolved _denySet / _brandMatchers threaded by sanitizeForSharing).
  * @returns {true} when no specific is present.
+ * @throws {UnshareableError} (code EHUMANONLY) when the payload targets a voice/brand-dna artifact.
  * @throws {UnshareableError} (code EUNSHAREABLE) on any residual specific.
  */
 function assertShareable(payload, opts = {}) {
@@ -643,6 +651,32 @@ function assertShareable(payload, opts = {}) {
       reason: 'no-payload',
     });
   }
+
+  // --- VOICE ARTIFACT PRE-CHECK (P10 / roadmap #5) — runs BEFORE the string-specifics walk. ---
+  // A clean brand:*:voice payload carries no leaky strings so the walk below would return true —
+  // a false "safe to share". We check the structural indicators FIRST and fail with EHUMANONLY.
+  // This is independent of the string-specifics scan: it guards against payloads hand-crafted to
+  // carry no instance strings but that still encode a voice/brand-dna target.
+  const payloadArtifact = typeof payload.target_artifact === 'string' ? payload.target_artifact : null;
+  const payloadTargetKind =
+    payload.target && typeof payload.target === 'object' && typeof payload.target.kind === 'string'
+      ? payload.target.kind
+      : null;
+  if (isVoiceArtifact(payloadArtifact) || payloadTargetKind === 'voice' || payloadTargetKind === 'brand-dna') {
+    throw new UnshareableError(
+      'Refusing to share: payload targets a voice-calibration artifact ' +
+        '(brand:*:voice / brand:*:drama_dial family, or target.kind voice/brand-dna). ' +
+        'Voice calibration records are instance-specific — they encode THIS brand\'s voice preferences ' +
+        'derived from THIS install\'s corpus. They are NEVER generalizable upstream rule-diffs and must ' +
+        'NEVER be shared upstream (P10 / roadmap #5, DD-7).',
+      {
+        code: 'EHUMANONLY',
+        families: ['voice-calibration-instance-specific'],
+        reason: 'voice-artifact',
+      },
+    );
+  }
+
   const denySet = opts._denySet || resolveDenySet(opts);
   const brandMatchersList = opts._brandMatchers || brandMatchers(resolveBrandTerms(opts));
 
@@ -688,9 +722,77 @@ function assertShareable(payload, opts = {}) {
   return true;
 }
 
+/* ------------------------------------------------------------------------------------------------ *
+ * Voice artifact check (P10 / roadmap #5) — mirrors the evaluate.js check (e).
+ *
+ * Voice calibration records (target_artifact matching brand:*:voice or brand:*:drama_dial) are
+ * instance-specific preference records. They are NEVER shareable upstream (P10). sanitizeForSharing
+ * MUST refuse them BEFORE extraction — even the extraction step would carry instance preferences.
+ *
+ * We add this as a pre-flight check in sanitizeForSharing rather than extending the three strip
+ * passes (which can mask text but cannot remove instance-semantics from a voice record).
+ * ------------------------------------------------------------------------------------------------ */
+
+/**
+ * True when an artifact id matches the brand:*:voice or brand:*:drama_dial family.
+ * Instance-specific voice calibration records are NEVER shareable upstream (P10).
+ *
+ * @param {string|undefined|null} artifact
+ * @returns {boolean}
+ */
+function isVoiceArtifact(artifact) {
+  if (typeof artifact !== 'string') return false;
+  const a = artifact.toLowerCase().trim();
+  if (a.startsWith('brand:') && (a.endsWith(':voice') || a.endsWith(':drama_dial') || a.includes(':voice:'))) return true;
+  if (a === 'voice' || a === 'brand-dna' || a === 'voice-calibration') return true;
+  return false;
+}
+
+/**
+ * Assert that a record is not a voice artifact before sanitizing for sharing.
+ * Throws UnshareableError (code EHUMANONLY) when the record targets a voice artifact.
+ *
+ * @param {object} record  the learning record to check
+ * @throws {UnshareableError} (code EHUMANONLY) when the target is a voice artifact
+ */
+function assertNotVoiceRecord(record) {
+  if (!record || typeof record !== 'object') return;
+
+  // Check target_artifact at the top level.
+  if (isVoiceArtifact(record.target_artifact)) {
+    throw new UnshareableError(
+      `record.target_artifact "${record.target_artifact}" is a voice-calibration artifact ` +
+      '(brand:*:voice family). Voice calibration records are instance-specific — they encode ' +
+      'THIS brand\'s voice preferences derived from THIS install\'s corpus. They are NEVER ' +
+      'generalizable upstream rule-diffs and must NEVER be shared upstream (P10 / roadmap #5, DD-7).',
+      { families: ['voice-calibration-instance-specific'], reason: 'voice-artifact' },
+    );
+  }
+
+  // Also check machine_change.kind and target.kind.
+  const kind = record.machine_change && typeof record.machine_change.kind === 'string'
+    ? record.machine_change.kind.toLowerCase() : null;
+  if (kind === 'voice' || kind === 'brand-dna' || kind === 'voice-calibration') {
+    throw new UnshareableError(
+      `record.machine_change.kind "${record.machine_change.kind}" is a voice/brand-dna artifact — ` +
+      'never shareable upstream (P10).',
+      { families: ['voice-calibration-instance-specific'], reason: 'voice-artifact' },
+    );
+  }
+}
+
+// Wrap sanitizeForSharing to add the voice-artifact pre-flight check.
+const _sanitizeForSharingOriginal = sanitizeForSharing;
+/** @type {typeof sanitizeForSharing} */
+function sanitizeForSharingWithVoiceCheck(record, opts) {
+  // Pre-flight: refuse voice artifacts before any extraction (P10).
+  assertNotVoiceRecord(record);
+  return _sanitizeForSharingOriginal(record, opts);
+}
+
 module.exports = {
   // the two public entry points (DD-7 (2)).
-  sanitizeForSharing,
+  sanitizeForSharing: sanitizeForSharingWithVoiceCheck,
   assertShareable,
   // error type (callers branch on .code: EUNSHAREABLE).
   UnshareableError,
@@ -714,4 +816,7 @@ module.exports = {
   USER_PATH,
   HANDLE,
   PERF_NUMBER,
+  // P10: voice-artifact check (brand:*:voice never shareable upstream).
+  isVoiceArtifact,
+  assertNotVoiceRecord,
 };

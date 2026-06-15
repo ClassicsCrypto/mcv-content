@@ -51,6 +51,37 @@ auto-publishes) and posts an angles-only readout to the `trend-readout` channel.
 The daily **work-recap** option (release-spec §3.3) needs NO extra job — the daily
 `engine kickoff` fills it when `work_recap.enabled: true`.
 
+## Optional: the monthly competitor scan (config-gated, OFF by default)
+
+The competitor-scan pathway (roadmap #5) scrapes or loads competitor content on a monthly or
+quarterly cadence, runs the deterministic landscape analyzer, and writes a patterns-only Zone-U
+scan report. When `voice_calibration.enabled` is also true, it derives a structured proposal over
+the four voice axes (drama_dial, archetype_emphasis, hook_preferences, cadence_preferences).
+It ships **disabled**. To use it:
+
+1. Set `competitor_scan.enabled: true`, a `competitor_scan.adapter` (e.g. `fixture` for a
+   zero-key smoke test, or a BYO adapter you register), and optionally
+   `competitor_scan.voice_calibration.enabled: true` in `config/system.json`.
+2. Add a MONTHLY job (one per brand, with `--yes` to confirm the DD-18 scrape gate):
+
+```json
+{
+  "id": "content-engine-competitor-scan",
+  "schedule": "0 7 1 * *",
+  "command": "node <ENGINE_DIR>/bin/engine.js competitor-scan --brand <brand-id> --yes",
+  "env": {
+    "CONTENT_HOME": "<CONTENT_HOME>"
+  },
+  "description": "Open Content Engine monthly competitor scan (roadmap #5). OFF unless competitor_scan.enabled."
+}
+```
+
+After each scan, review the pending proposal with `engine voice-calibrate --show` and apply
+with explicit `engine voice-calibrate --apply --consent` when you are ready. **Voice
+calibration is HUMAN-ONLY — the machine writes a proposal and stops; the operator consents
+and applies.** The scan is idempotent per (brand, calendar month): a second fire in the same
+month is skipped safely.
+
 ## Notes
 
 - The mode (SAFE / LIVE_PREVIEW / LIVE) is read from `config/system.json`, never from

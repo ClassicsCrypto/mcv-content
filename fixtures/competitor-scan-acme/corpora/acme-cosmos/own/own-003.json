@@ -1,0 +1,9 @@
+{
+  "source": "export",
+  "captured_at": "2099-03-07T20:00:00Z",
+  "text": "Clear sky tonight over most of the Midwest. Best single target if you have an hour: the Orion Nebula at low power. The four Trapezium stars at the core are visible in any aperture above 60mm.",
+  "url": "https://example.test/acmecosmos/status/cs-own-003",
+  "trust_class": "untrusted-scraped",
+  "retention_class": "standard",
+  "metrics": { "likes": 760, "replies": 31, "reposts": 89, "bookmarks": 420, "impressions": 58000 }
+}

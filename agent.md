@@ -478,3 +478,86 @@ is governed hardest of all (the governance is the feature). Internalize this:
 Full reference, the config block, the receiving harness, and the fixtures:
 [`docs/improvement-sharing.md`](docs/improvement-sharing.md). What may/may-not leave the install:
 [`docs/data-policy.md`](docs/data-policy.md).
+
+---
+
+## 13. Monthly competitor scan + consent-gated voice-DNA calibration (roadmap #5)
+
+The engine can watch competitor patterns on a monthly cadence and derive structured changes to the
+brand's four voice-preference axes. **Both blocks ship OFF by default** and are independently
+config-gated. The governance is the same kind as §11: the machine stops at a proposal, the human
+decides.
+
+**The two config gates (both must be explicitly `true`):**
+
+```jsonc
+"competitor_scan": {
+  "enabled": true,                     // THE LAW: strictly true or pathway refuses (exits 0)
+  "voice_calibration": { "enabled": true, "freshness_days": 30 }
+}
+```
+
+**The four structured voice axes (all in `brand.json`):**
+
+| Axis | What it controls |
+|---|---|
+| `drama_dial` | Intensity register for the brand's voice (`low\|medium\|high`). |
+| `archetype_emphasis` | Ranked archetype codes + weights — steers the matcher toward favored content types. |
+| `hook_preferences` | Preferred opening-hook pattern labels + weights — steers the writer's opener choices. |
+| `cadence_preferences` | Preferred posts-per-week, thread/media preference, top posting days. |
+
+These are **generation-input preferences**, not gate parameters. The gate runs **unchanged** against
+whatever the writer produces with the new preferences; every draft still goes through the full gate
+and the mandatory human approval card.
+
+**The autonomy boundary for voice calibration.** The machine generates a `proposed` learning record
+(`target_mutability: "human-only"`, `target_artifact: "brand:<id>:voice"`). The self-improve
+`applyGovernedChange` path **structurally refuses it with `EHUMANONLY`** — voice calibration is
+**never** machine-applied. Two separate code paths enforce this; neither is bypassable by config.
+
+**What you do as the agent:**
+
+- Treat both config gates as **OFF** unless the operator explicitly set them. Do not enable either
+  on your own.
+- On a monthly schedule (see `templates/scheduler/`), run
+  `engine competitor-scan --brand <id> --yes` (with the DD-18 `--estimate-only` check first).
+  The scan is idempotent per (brand, calendar month); a second fire in the same month is skipped
+  and logged.
+- After the scan, **show** the pending proposal with `engine voice-calibrate --brand <id> --show`.
+  Present the card to the operator; do not apply on your own.
+- When the operator explicitly approves, run
+  `engine voice-calibrate --brand <id> --apply --consent` (the `--consent` flag is the operator's
+  explicit instruction — never pass it without being told to).
+- If the operator asks to undo: `engine voice-calibrate --brand <id> --rollback`.
+
+**What the scan produces (P11 / DD-16 — informational only).** The scan dispatches ONE
+`competitor_scan` task record. That slot is **informational** — no approval card, no content draft,
+no publish. The record is for auditing and scheduling attribution only.
+
+**Patterns only — no verbatim competitor text (P1).** The scan report contains only counts, rates,
+labels, and codes. The landscape analyzer throws `EVERBATIMCOPY` and writes nothing if any verbatim
+competitor text shingle appears in the output. The calibration card shown to the operator contains
+no competitor text.
+
+**Sharing is refused (P10).** Voice calibration records are instance-specific — they reflect the
+brand's competitors, not a generalizable rule change. `engine share` and `evaluate-contribution`
+structurally refuse any `brand:*:voice` payload with `EUNSHAREABLE` / `EHUMANONLY`.
+
+**Agent seat contract — how the four voice axes affect your seats:**
+
+When `brand.json` carries `archetype_emphasis`, `hook_preferences`, and `cadence_preferences`
+fields, the orchestrator and matcher seats should read them alongside `brand-dna.md`:
+
+- `archetype_emphasis` — prefer content archetypes with higher weights when selecting a content
+  type for a slot. These are weighted preferences, not hard constraints; the gate and the approval
+  card still govern what is acceptable.
+- `hook_preferences` — prefer opening-hook patterns with higher weights in the writer brief. Again,
+  these are weighted preferences; the writer's judgment and the gate still apply.
+- `cadence_preferences` — inform scheduling suggestions when assisting the operator with calendar
+  changes. Do not modify the live calendar without operator instruction.
+- `drama_dial` — the established axis; behavior is unchanged from v1.
+
+When these fields are absent from `brand.json`, seats fall back to `brand-dna.md` as before.
+
+Full reference, walkthrough, governance invariants, and the Acme Cosmos worked example:
+[`docs/voice-calibration.md`](docs/voice-calibration.md).

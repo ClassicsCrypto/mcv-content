@@ -55,6 +55,11 @@ const BOOLEAN_FLAGS = new Set([
   // following token (so `engine share --record r1 --prepare --yes` parses cleanly). --operator,
   // --private-term, --brand-term DO take a value, so they are intentionally NOT boolean here.
   'prepare', 'refuse-residual', 'skip-gate-regression',
+  // voice-calibrate (VC-CLI / roadmap #5): --show, --rollback, and --consent are presence flags
+  // that never consume the following token (so `engine voice-calibrate --brand x --rollback`
+  // and `engine voice-calibrate --brand x --apply --consent` parse cleanly).
+  // --to-baseline DOES take a value (a commit ref), so it is intentionally NOT boolean here.
+  'show', 'rollback', 'consent',
 ]);
 
 /**

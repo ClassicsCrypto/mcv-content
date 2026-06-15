@@ -47,10 +47,200 @@
       }
     },
     "drama_dial": {
-      "description": "Per-brand dramatization stance consumed by the voice/style rules. The brand-DNA authoring template carries the matching preference question.",
+      "description": "Per-brand dramatization stance consumed by the voice/style rules. The brand-DNA authoring template carries the matching preference question. VOICE-CALIBRATION AXIS 1: this is a STRUCTURED voice field; it is managed by the voice-calibration pathway (engine voice-calibrate) and is always target_mutability:human-only — the self-improve machine applier MUST refuse it (EHUMANONLY). Changes to this field ONLY via the consent-gated apply path (engine voice-calibrate --apply --consent).",
       "type": "string",
       "enum": ["low", "medium", "high"],
       "default": "medium"
+    },
+    "archetype_emphasis": {
+      "description": "VOICE-CALIBRATION AXIS 2: a ranked list of content archetype codes the brand leans into, with associated weights. Managed by the voice-calibration pathway (engine voice-calibrate); always target_mutability:human-only. Absent means no explicit weighting — the engine uses the flat distribution. Pattern LABELS only (archetype code strings); never verbatim copy. Changes only via consent-gated apply (engine voice-calibrate --apply --consent).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "weight"],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Archetype code from the engine archetype taxonomy (e.g. HOW_TO, SKY_TONIGHT, THESIS_OR_RECEIPT). Labels only.",
+            "minLength": 1
+          },
+          "weight": {
+            "type": "number",
+            "description": "Relative weight for this archetype (higher = more emphasis). Weights need not sum to 1; the engine normalizes.",
+            "exclusiveMinimum": 0
+          }
+        }
+      }
+    },
+    "hook_preferences": {
+      "description": "VOICE-CALIBRATION AXIS 3: preferred opening-hook patterns with associated weights. Managed by the voice-calibration pathway; always target_mutability:human-only. Pattern LABELS only (e.g. 'direct-tip', 'how-to-numbered', 'question-hook') — NEVER verbatim competitor text. Changes only via consent-gated apply (engine voice-calibrate --apply --consent).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["pattern", "weight"],
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "A label for the preferred opening-hook pattern (e.g. 'direct-tip', 'how-to-numbered', 'question-hook', 'announcement-breaking'). Label strings only — never competitor copy.",
+            "minLength": 1
+          },
+          "weight": {
+            "type": "number",
+            "description": "Relative weight for this hook pattern (higher = more preferred). The engine normalizes.",
+            "exclusiveMinimum": 0
+          }
+        }
+      }
+    },
+    "cadence_preferences": {
+      "description": "VOICE-CALIBRATION AXIS 4: posting cadence and structural preferences. Managed by the voice-calibration pathway; always target_mutability:human-only. Structured counts/ratios only — never verbatim copy. Changes only via consent-gated apply (engine voice-calibrate --apply --consent).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "preferred_posts_per_week": {
+          "type": "number",
+          "description": "Preferred posting frequency (posts per week) for this brand.",
+          "exclusiveMinimum": 0
+        },
+        "thread_preference": {
+          "type": "string",
+          "description": "Preference for thread / multi-part format relative to standalone posts.",
+          "enum": ["never", "rarely", "sometimes", "often", "always"]
+        },
+        "media_preference": {
+          "type": "string",
+          "description": "Preference for including media (images, video, GIFs) in posts.",
+          "enum": ["never", "rarely", "sometimes", "often", "always"]
+        },
+        "top_days": {
+          "type": "array",
+          "description": "Preferred day-of-week labels (mon–sun) sorted by posting priority descending.",
+          "items": {
+            "type": "string",
+            "enum": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+          }
+        }
+      }
+    },
+    "voice_calibration": {
+      "description": "OPTIONAL state object tracking the most recent voice-calibration cycle for this brand (roadmap #5). Written by the engine voice-calibrate pathway; never hand-edited. Records the scan that sourced the proposal, the four-axis current and proposed values at proposal time, consent status, and apply metadata. Written alongside the learning record at proposal/apply time. ALWAYS target_mutability:human-only — the self-improve machine applier MUST refuse it.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "scan_id": {
+          "type": "string",
+          "description": "The learning record id of the voice-calibration proposal derived from the most recent competitor scan.",
+          "minLength": 1
+        },
+        "current": {
+          "type": "object",
+          "description": "Snapshot of the four voice axes as they stood when the proposal was generated (for diffing and rollback).",
+          "additionalProperties": false,
+          "properties": {
+            "drama_dial": {
+              "type": "string",
+              "enum": ["low", "medium", "high"]
+            },
+            "archetype_emphasis": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["code", "weight"],
+                "properties": {
+                  "code": { "type": "string", "minLength": 1 },
+                  "weight": { "type": "number", "exclusiveMinimum": 0 }
+                }
+              }
+            },
+            "hook_preferences": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["pattern", "weight"],
+                "properties": {
+                  "pattern": { "type": "string", "minLength": 1 },
+                  "weight": { "type": "number", "exclusiveMinimum": 0 }
+                }
+              }
+            },
+            "cadence_preferences": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "preferred_posts_per_week": { "type": "number", "exclusiveMinimum": 0 },
+                "thread_preference": { "type": "string", "enum": ["never", "rarely", "sometimes", "often", "always"] },
+                "media_preference": { "type": "string", "enum": ["never", "rarely", "sometimes", "often", "always"] },
+                "top_days": { "type": "array", "items": { "type": "string", "enum": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] } }
+              }
+            }
+          }
+        },
+        "proposed": {
+          "type": "object",
+          "description": "Proposed four-axis values from the most recent calibration proposal.",
+          "additionalProperties": false,
+          "properties": {
+            "drama_dial": {
+              "type": "string",
+              "enum": ["low", "medium", "high"]
+            },
+            "archetype_emphasis": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["code", "weight"],
+                "properties": {
+                  "code": { "type": "string", "minLength": 1 },
+                  "weight": { "type": "number", "exclusiveMinimum": 0 }
+                }
+              }
+            },
+            "hook_preferences": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["pattern", "weight"],
+                "properties": {
+                  "pattern": { "type": "string", "minLength": 1 },
+                  "weight": { "type": "number", "exclusiveMinimum": 0 }
+                }
+              }
+            },
+            "cadence_preferences": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "preferred_posts_per_week": { "type": "number", "exclusiveMinimum": 0 },
+                "thread_preference": { "type": "string", "enum": ["never", "rarely", "sometimes", "often", "always"] },
+                "media_preference": { "type": "string", "enum": ["never", "rarely", "sometimes", "often", "always"] },
+                "top_days": { "type": "array", "items": { "type": "string", "enum": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] } }
+              }
+            }
+          }
+        },
+        "consented": {
+          "type": "boolean",
+          "description": "Whether the operator has explicitly consented to apply the proposal (via engine voice-calibrate --apply --consent). False until consent is given; the apply step refuses without consent (ECONSENTREQUIRED).",
+          "default": false
+        },
+        "applied_at": {
+          "type": ["string", "null"],
+          "description": "ISO 8601 timestamp when the proposal was applied (voice fields written to brand.json). Null until applied.",
+          "format": "date-time",
+          "default": null
+        },
+        "rollback_ref": {
+          "type": ["string", "null"],
+          "description": "Instance-repo git commit ref captured before the apply (the pre-apply HEAD), enabling one-step rollback via engine voice-calibrate --rollback. Null until applied.",
+          "default": null
+        }
+      }
     },
     "work_recap": {
       "description": "OPTIONAL per-brand work-recap / build-in-public settings (release-spec §3.3). Meaningful only for account_class=operator brands (founder/operator/team accounts share the build in the open with flexible voice). CONFIG-GATED and OFF BY DEFAULT — enable the pathway in system.json work_recap; this block scopes a brand's own memory source and private-term deny list when system.json work_recap.accounts references it (or single-account mode points at this brand). PRIVACY IS LOAD-BEARING: the repo ships the MECHANISM pointed at a configured path; it NEVER bundles real memory.",

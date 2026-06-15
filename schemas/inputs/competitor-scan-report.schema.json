@@ -1,0 +1,278 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/inputs/competitor-scan-report.schema.json",
+  "title": "Competitor Scan Report",
+  "description": "A competitor scan report produced by engine/orchestrator/competitor-scan.js and stored at $CONTENT_HOME/scans/<brand>/<YYYY-MM-DD>.json (Zone U, retention_class:transient — release-spec roadmap #5). PATTERNS ONLY: no field in this schema may carry verbatim competitor text — only counts, ratios, and label strings (P1 guarantee). Always Zone U (untrusted external competitive signals). The freshness_window feeds the DD-15 stale guard used by the voice-calibration propose step.",
+  "x-stability": "experimental",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "period",
+    "brand",
+    "platform",
+    "drama_markers",
+    "archetype_distribution",
+    "hook_signals",
+    "cadence_profile",
+    "engagement_profile",
+    "drama_signal",
+    "confidence",
+    "provenance"
+  ],
+  "properties": {
+    "period": {
+      "description": "The reporting period this scan covers (the window the competitor corpus was captured in).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Start of the observation period (ISO 8601 date-time)."
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "description": "End of the observation period (ISO 8601 date-time)."
+        }
+      }
+    },
+    "brand": {
+      "type": "string",
+      "description": "Brand id this scan was run for (matches brand.json id).",
+      "minLength": 1
+    },
+    "platform": {
+      "type": "string",
+      "description": "Platform descriptor id the competitor corpus was observed on (e.g. 'twitter', 'instagram'). Use 'mixed' when items span platforms.",
+      "minLength": 1
+    },
+    "drama_markers": {
+      "description": "Aggregated DRAMA SIGNAL counts across the competitor corpus (counts and ratios only — NO verbatim text). Measures the frequency of dramatic/hype textual patterns.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_items",
+        "high_drama_count",
+        "medium_drama_count",
+        "low_drama_count",
+        "exclamation_rate",
+        "hype_term_rate"
+      ],
+      "properties": {
+        "total_items": {
+          "type": "integer",
+          "description": "Total competitor corpus items analyzed.",
+          "minimum": 0
+        },
+        "high_drama_count": {
+          "type": "integer",
+          "description": "Items classified as high-drama (hype terms, exclamation, scarcity language, ALL CAPS segments).",
+          "minimum": 0
+        },
+        "medium_drama_count": {
+          "type": "integer",
+          "description": "Items classified as medium-drama (moderate urgency, some exclamation).",
+          "minimum": 0
+        },
+        "low_drama_count": {
+          "type": "integer",
+          "description": "Items classified as low-drama (factual, calm tone).",
+          "minimum": 0
+        },
+        "exclamation_rate": {
+          "type": "number",
+          "description": "Fraction (0..1) of competitor items containing one or more exclamation marks.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "hype_term_rate": {
+          "type": "number",
+          "description": "Fraction (0..1) of competitor items matching hype-term patterns (e.g. 'biggest', 'HUGE', 'don't miss', 'last chance').",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "archetype_distribution": {
+      "description": "Per-archetype code counts across own vs competitor corpus items. LABELS only (archetype code strings) — NO verbatim text. Each entry is one archetype code with own-corpus count and competitor-corpus count.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "own_count", "competitor_count"],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Archetype code from the engine archetype taxonomy (e.g. HOW_TO, TEASER, SKY_TONIGHT). Labels only — never verbatim competitor text.",
+            "minLength": 1
+          },
+          "own_count": {
+            "type": "integer",
+            "description": "Number of own-corpus items assigned this archetype code.",
+            "minimum": 0
+          },
+          "competitor_count": {
+            "type": "integer",
+            "description": "Number of competitor-corpus items assigned this archetype code.",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "hook_signals": {
+      "description": "Aggregated HOOK / opening-pattern signals across the competitor corpus (pattern labels and counts only — NO verbatim competitor text).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total_items", "top_patterns"],
+      "properties": {
+        "total_items": {
+          "type": "integer",
+          "description": "Number of competitor corpus items with a detectable opening-pattern hook.",
+          "minimum": 0
+        },
+        "top_patterns": {
+          "type": "array",
+          "description": "Top detected opening-hook patterns, sorted by count descending. Pattern LABELS only (e.g. 'how-to-numbered', 'question-hook', 'announcement-breaking') — NEVER verbatim competitor text.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["pattern", "count"],
+            "properties": {
+              "pattern": {
+                "type": "string",
+                "description": "A label for the detected hook pattern (e.g. 'how-to-numbered', 'question-hook', 'direct-tip', 'announcement-breaking', 'numbered-list'). Label strings only — never competitor copy.",
+                "minLength": 1
+              },
+              "count": {
+                "type": "integer",
+                "description": "Number of competitor corpus items matching this hook pattern.",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "cadence_profile": {
+      "description": "Posting cadence and structural preferences observed across the competitor corpus (counts and ratios only).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total_items", "avg_posts_per_week", "thread_rate", "media_rate"],
+      "properties": {
+        "total_items": {
+          "type": "integer",
+          "description": "Total corpus items used for cadence profiling.",
+          "minimum": 0
+        },
+        "avg_posts_per_week": {
+          "type": "number",
+          "description": "Average competitor posts per week across the observation period.",
+          "minimum": 0
+        },
+        "thread_rate": {
+          "type": "number",
+          "description": "Fraction (0..1) of competitor items that are multi-part / thread format.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "media_rate": {
+          "type": "number",
+          "description": "Fraction (0..1) of competitor items containing media (images, video, GIFs).",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "top_days": {
+          "type": "array",
+          "description": "Day-of-week labels (mon–sun) sorted by competitor posting frequency descending (inferred from captured_at timestamps).",
+          "items": {
+            "type": "string",
+            "enum": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+          }
+        }
+      }
+    },
+    "engagement_profile": {
+      "description": "Engagement metric aggregates across the competitor corpus (counts and medians only — NO verbatim text, NO attribution to individual competitors beyond the distribution).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "median_value", "high_engagement_archetype_codes"],
+      "properties": {
+        "metric": {
+          "type": "string",
+          "description": "Primary engagement metric used for ranking (e.g. 'bookmarks', 'likes', 'reposts').",
+          "minLength": 1
+        },
+        "median_value": {
+          "type": "number",
+          "description": "Median value of the primary engagement metric across all competitor corpus items with metrics.",
+          "minimum": 0
+        },
+        "high_engagement_archetype_codes": {
+          "type": "array",
+          "description": "Archetype codes (labels only) that appear disproportionately often among the top-performing competitor corpus items by the primary metric.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "drama_signal": {
+      "type": "string",
+      "description": "Aggregate drama signal for the competitor landscape: low, medium, or high. Derived deterministically from drama_markers counts (high when hype_term_rate > 0.4 or exclamation_rate > 0.5; medium 0.15–0.4; low below).",
+      "enum": ["low", "medium", "high"]
+    },
+    "confidence": {
+      "type": "number",
+      "description": "Confidence level (0..1) of the scan analysis — a function of corpus size and item coverage. Below a minimum threshold, the voice-calibration propose step degrades to a low-confidence warning.",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "freshness_window": {
+      "description": "How long this scan report remains actionable. Consumed by the DD-15 stale guard in the voice-calibration propose step (a report older than competitor_scan.voice_calibration.freshness_days must NOT advance to a proposal).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "duration": {
+          "type": "string",
+          "description": "Duration the scan stays fresh, as an ISO 8601 duration (e.g. P30D, P7D)."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Absolute time the scan freshness window closes."
+        }
+      }
+    },
+    "provenance": {
+      "description": "How this report was produced. Always Zone U (untrusted external competitive signals), whether submitted via manual/export or adapter-fetched.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trust_zone", "method"],
+      "properties": {
+        "trust_zone": {
+          "type": "string",
+          "description": "Trust zone. Always U for competitor scan reports (untrusted external input, RD-8).",
+          "const": "U"
+        },
+        "method": {
+          "type": "string",
+          "description": "How the report was produced: manual/export corpus submission or a registered adapter.",
+          "enum": ["manual", "adapter"]
+        },
+        "submitted_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the report was produced / the scan completed."
+        },
+        "corpus_item_count": {
+          "type": "integer",
+          "description": "Total corpus items the scan analyzed (own + competitor).",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}
