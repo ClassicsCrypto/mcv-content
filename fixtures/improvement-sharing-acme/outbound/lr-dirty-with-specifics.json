@@ -1,0 +1,46 @@
+{
+  "$comment": "IS-FIXTURES (a) — OUTBOUND DIRTY learning record. release-spec roadmap #4 improvement-sharing / DD-7(b); original-design-spec §2.6 Improvement Sharing. A promoted learnable rule-diff that a naive operator might try to share UPSTREAM but which still CARRIES instance/brand specifics. The OUTBOUND sanitizer (engine/improvement-sharing/sanitize.js sanitizeForSharing) must STRIP every planted specific; the structural guard assertShareable must REFUSE (EUNSHAREABLE) to emit a contribution package if ANY residual specific survives (the OUTBOUND mirror of the work-recap privacy gate — reuses engine/shared/redact.js + the private-term deny list + a no-instance-specifics check). Each planted item is FAKE and obviously synthetic, AND each is chosen so it is DETECTED by the engine sanitizer yet stays CLEAN for the public-tree hygiene scan (scripts/hygiene-scan.js): the snowflake is the all-zero/zero-padded placeholder shape (still matches the engine's 17-20-digit detector, exempt from hygiene-scan via snowflakeIsPlaceholder), and the path is $CONTENT_HOME-relative (detected by the engine as an internal_id shape, exempt from hygiene-scan via the $CONTENT_HOME placeholder allow). The fake secret is deliberately NOT credential-SHAPED so it reads as fake on sight; it is caught by the deny-list secret_literals, NOT by a real-credential matcher. See PROVENANCE.md and expected/sanitize-outcomes.json.",
+  "id": "lr-2099-05-02-share-dirty",
+  "created_at": "2099-05-02T09:00:00.000Z",
+  "source_signals": [
+    {
+      "type": "analytics",
+      "refs": [
+        "analytics/performance-report-2099-05-01-acme-cosmos.json",
+        "$CONTENT_HOME/ledger/events.jsonl"
+      ],
+      "count": 17
+    },
+    {
+      "type": "edit",
+      "refs": [
+        "$CONTENT_HOME/ledger/thread-000000000000000077.jsonl"
+      ],
+      "count": 5
+    }
+  ],
+  "target_artifact": "tunable_dial:variant_emphasis.opener_repetition_penalty",
+  "target_mutability": "learnable",
+  "machine_change": {
+    "kind": "tunable-dial",
+    "values": { "opener_repetition_penalty": 0.40 },
+    "baseline_values": { "opener_repetition_penalty": 0.20 }
+  },
+  "rationale": "When seeding sibling variants, raise the opener-repetition penalty so two variants never share the first sentence. This lifted timely-event engagement materially for our brand Acme Cosmos and our launch partner Nebula Nine Optics on the Project Dark Comet campaign (operator note: gated behind FAKE_TOKEN_do_not_use_0000; config lives at $CONTENT_HOME/config/system.json; tracked in thread 000000000000000077 by @acme_founder).",
+  "proposed_diff": "--- rules/voice/opener-variety.md\n+++ rules/voice/opener-variety.md\n@@ generalizable improvement (planted-dirty version)\n# Raise opener-repetition penalty for our brand Acme Cosmos / partner Nebula Nine Optics\n# (Project Dark Comet; token FAKE_TOKEN_do_not_use_0000; $CONTENT_HOME/config/system.json;\n# thread 000000000000000077; @acme_founder).\n-  \"opener_repetition_penalty\": 0.20,\n+  \"opener_repetition_penalty\": 0.40,\n",
+  "status": "applied",
+  "applied_by": "operator",
+  "applied_at": "2099-05-02T09:05:00.000Z",
+  "rollback_ref": "instance-repo@HEAD~3",
+  "shareability": "candidate-for-upstream",
+  "planted_specifics": {
+    "$comment": "Enumerated so the test can assert the sanitizer stripped EACH class and assertShareable REFUSES on any residual. Mirrors the work-recap planted-items table. ALL FAKE, and all hygiene-scan-clean (placeholder snowflake + $CONTENT_HOME path).",
+    "brand_name": "Acme Cosmos",
+    "invented_partner": "Nebula Nine Optics",
+    "private_term_codename": "Project Dark Comet",
+    "fake_secret_literal": "FAKE_TOKEN_do_not_use_0000",
+    "snowflake_placeholder_shape": "000000000000000077",
+    "content_home_relative_path": "$CONTENT_HOME/config/system.json",
+    "handle": "@acme_founder"
+  }
+}

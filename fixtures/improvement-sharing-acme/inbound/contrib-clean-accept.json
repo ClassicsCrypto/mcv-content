@@ -1,0 +1,15 @@
+{
+  "$comment": "Improvement-sharing inbound fixtures, case (e): INBOUND CLEAN abstract rule-diff the maintainer harness ACCEPTS (release-spec roadmap #4 / DD-7(4); DD-6). Shaped as evaluate.js expects: top-level kind:'rule-diff' + target + change, carrying NO instance/brand specifics. It targets an ALLOWLISTED machine-changeable class (calendar-weighting; original-design-spec sec 2.6) so assertMachineChangeAllowed passes (not EHUMANONLY), and it is gate-NEUTRAL (a calendar weighting carries no severity/disposition/threshold semantics) so assertNotGateLoosening passes (not ENEVERLOOSEN). evaluate ACCEPTS: parses/applies cleanly, passes gate-regression, loosens nothing. ACCEPT is admissible-for-manual-review, NEVER auto-merge (DD-7(4)). Synthetic. See expected/evaluate-outcomes.json.",
+  "kind": "rule-diff",
+  "summary": "Raise the calendar weighting of timely-event content.",
+  "rationale": "Generalizable: timely-event content tends to outperform on a rolling window; raise its calendar weighting (a generation-input preference, never a gate).",
+  "target": {
+    "kind": "calendar-weighting",
+    "path": "calendar.content_type_weights.timely_event"
+  },
+  "change": {
+    "field": "calendar.content_type_weights.timely_event",
+    "before": 0.2,
+    "after": 0.3
+  }
+}

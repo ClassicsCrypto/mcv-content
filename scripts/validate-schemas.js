@@ -420,6 +420,20 @@ function buildBindings() {
     { test: (p) => p === 'fixtures/self-improve-acme/system.self-improve.json', skip: true, reason: 'partial system.json fragment (self_improve slice; its self_improve block is sub-validated against system.schema #/properties/self_improve in tests/self-improve-schema.test.js)' },
     { test: (p) => p === 'fixtures/self-improve-acme/expected/applier-outcomes.json', skip: true, reason: 'governed-applier ground-truth control shape (asserted in tests, not a shipped artifact shape)' },
     { test: (p) => p === 'fixtures/self-improve-acme/recorded/analyst-refinements.json', skip: true, reason: 'recorded analyst-seat refinement replay map (fake-seat input, not a shipped artifact shape)' },
+
+    // improvement-sharing-acme OUTBOUND/INBOUND fixtures (IS-FIXTURES; release-spec roadmap #4; DD-7).
+    // The OUTBOUND learning records are based on learning-record but carry an extra $comment and (for
+    // the dirty one) a planted_specifics manifest, so they are sharing-test INPUTS, not strict shipped
+    // learning-record artifacts — documented skips (the canonical learning-record shape is validated by
+    // the self-improve-acme records). The INBOUND contributions are a NEW inbound-contribution/v1
+    // wire shape consumed by the maintainer evaluation harness (mutability.js assert*), not a shipped
+    // artifact schema. The partial system fragment's improvement_sharing block is sub-validated against
+    // system.schema #/properties/improvement_sharing in tests; the expected/* files are ground-truth
+    // control shapes. All documented skips, never silently dropped.
+    { test: (p) => /^fixtures\/improvement-sharing-acme\/outbound\/.+\.json$/.test(p), skip: true, reason: 'OUTBOUND improvement-sharing learning record carrying a sharing-test $comment + planted_specifics manifest (DD-7 sanitizer/assertShareable input, not a strict shipped learning-record artifact — the canonical shape is validated by self-improve-acme records)' },
+    { test: (p) => /^fixtures\/improvement-sharing-acme\/inbound\/.+\.json$/.test(p), skip: true, reason: 'INBOUND contribution (inbound-contribution/v1 maintainer-harness wire shape consumed by mutability.js assertMachineChangeAllowed/assertNotGateLoosening, not a shipped artifact shape)' },
+    { test: (p) => p === 'fixtures/improvement-sharing-acme/system.improvement-sharing.json', skip: true, reason: 'partial system.json fragment (improvement_sharing slice; its improvement_sharing block is sub-validated against system.schema #/properties/improvement_sharing in tests)' },
+    { test: (p) => /^fixtures\/improvement-sharing-acme\/expected\/.+\.json$/.test(p), skip: true, reason: 'improvement-sharing ground-truth control shapes (sanitize/assertShareable + maintainer-evaluate outcomes asserted in tests, not shipped artifact shapes)' },
   ];
 }
 

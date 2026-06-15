@@ -1,0 +1,58 @@
+{
+  "$comment": "IS-FIXTURES ground truth — OUTBOUND sanitizer + assertShareable (release-spec roadmap #4; DD-7(2) abstract-only + DD-7(3) operator-reviewed). The deterministic OUTBOUND tooling (engine/improvement-sharing/sanitize.js: sanitizeForSharing + assertShareable; RD-2 no chain LLM; RD-12 zero-key) MUST reproduce this for each outbound record. The codes/families below were produced by running the LIVE sanitize.js over these fixtures with the deny list from system.improvement-sharing.json -> improvement_sharing.private_terms and brandTerms=['Acme Cosmos']. Two laws: (1) the SANITIZER strips every instance/brand specific reusing engine/shared/redact.js + the inbound privacy-filter primitives + the configured private-term deny list + a no-instance-specifics check (snowflakes / paths / @handles / brand names) — the OUTBOUND mirror of the work-recap privacy gate; (2) assertShareable is a FAIL-CLOSED structural guard that REFUSES (throws UnshareableError, code EUNSHAREABLE) to emit a payload if ANY residual specific survives. The dirty record is refused in onResidual:'refuse' mode and yields a CLEAN payload in 'strip' mode; the clean record passes as-is (sanitizer is a no-op / idempotent). All synthetic Acme Cosmos.",
+  "deny_list_source": "fixtures/improvement-sharing-acme/system.improvement-sharing.json -> improvement_sharing.private_terms",
+  "brand_terms": ["Acme Cosmos"],
+  "refusal_error": { "name": "UnshareableError", "code": "EUNSHAREABLE" },
+  "reused_engine": [
+    "engine/shared/redact.js (secret-SHAPED + known-KEY masking)",
+    "engine/sources/work-recap/privacy-filter.js (inbound structural shapes + private-term matcher — reused outbound)",
+    "no-instance-specifics check mirrored from scripts/hygiene-scan.js (snowflake / user-path / @handle / brand-tied-number)"
+  ],
+  "family_mapping_note": "The engine COLLAPSES brand name, invented partner, private-term codename, and the fake secret_literal all into the `private_term` family (they are all entries in the private-term deny list; the brand name additionally raises `brand_term`). The $CONTENT_HOME-relative path is detected as the `internal_id` structural shape (not `user-path`, because a $CONTENT_HOME placeholder is hygiene-exempt by design). The placeholder-shaped snowflake raises `snowflake-id`; the @handle raises `handle`.",
+  "records": [
+    {
+      "record": "outbound/lr-dirty-with-specifics.json",
+      "label": "(a) DIRTY — carries planted instance/brand specifics",
+      "onResidual_refuse_decision": "refuse",
+      "onResidual_refuse_code": "EUNSHAREABLE",
+      "refuse_families": ["handle", "internal_id", "private_term", "snowflake-id"],
+      "why": "the rationale + proposed_diff + source_signals.refs carry planted specifics across every class the OUTBOUND guard checks; in onResidual:'refuse' mode the package is fail-closed REFUSED. The fake secret FAKE_TOKEN_do_not_use_0000 is deliberately NOT credential-SHAPED, so engine/shared/redact.js does NOT mask it on its own — it is caught by the deny-list secret_literals (proving the deny list is REQUIRED, mirroring work-recap).",
+      "residual_specifics_detected": [
+        { "value": "Acme Cosmos", "class": "brand-name", "engine_family": "private_term + brand_term", "caught_by": "private-term deny list (terms) + brand-term matcher" },
+        { "value": "Nebula Nine Optics", "class": "invented-partner", "engine_family": "private_term", "caught_by": "private-term deny list (terms)" },
+        { "value": "Project Dark Comet", "class": "private-term codename", "engine_family": "private_term", "caught_by": "private-term deny list (terms)" },
+        { "value": "FAKE_TOKEN_do_not_use_0000", "class": "secret-literal", "engine_family": "private_term", "caught_by": "private-term deny list (secret_literals)" },
+        { "value": "000000000000000077", "class": "snowflake (placeholder shape)", "engine_family": "snowflake-id", "caught_by": "no-instance-specifics check (17-20 digit id) — placeholder shape so hygiene-scan stays clean" },
+        { "value": "$CONTENT_HOME/config/system.json", "class": "instance path", "engine_family": "internal_id", "caught_by": "inbound privacy-filter structural shape — $CONTENT_HOME placeholder keeps hygiene-scan clean" },
+        { "value": "@acme_founder", "class": "handle", "engine_family": "handle", "caught_by": "no-instance-specifics check (@handle)" }
+      ],
+      "onResidual_strip_decision": "produce_clean_payload",
+      "after_strip_residual_specifics": 0,
+      "after_strip_flag_count": 7,
+      "after_strip_assertShareable": "accept",
+      "emitted_payload_kind": "abstract-rule-diff",
+      "note": "In onResidual:'strip' mode the ONLY content that may be emitted is the abstract rule-diff (target kind/path-shape, the opener_repetition_penalty INCREASE direction — never the brand's tuned 0.20->0.40 absolute values are carried as values, only the direction) + a sanitized rationale — never the brand, partner, codename, secret, snowflake, path, or handle. sanitizeForSharing ends by calling assertShareable on its own output, so the returned payload is guaranteed clean (fail-closed even in strip mode). Operator must explicitly confirm the sanitized payload before any package is written (DD-7(3))."
+    },
+    {
+      "record": "outbound/lr-clean-abstract.json",
+      "label": "(b) CLEAN — already abstract",
+      "onResidual_refuse_decision": "accept",
+      "onResidual_refuse_code": "OK",
+      "refuse_families": [],
+      "why": "carries NO instance/brand specifics: no brand name, partner, codename, secret, snowflake, path, handle, or brand-tied performance number. The sanitizer raises ZERO flags (x-sharing.stripped=false, flag_count=0) and assertShareable ACCEPTS. Still requires explicit operator confirmation before the package is written (DD-7(3) — opt-in, fail-closed: disabled/unconfirmed => nothing produced).",
+      "residual_specifics_detected": [],
+      "after_strip_residual_specifics": 0,
+      "after_strip_flag_count": 0,
+      "after_strip_assertShareable": "accept",
+      "emitted_payload_kind": "abstract-rule-diff"
+    }
+  ],
+  "consent_and_transmit": {
+    "$comment": "DD-7(1) + (3): opt-in only, off by default, operator-reviewed, NO transmit path. Encodes the cross-cutting laws every outbound run obeys regardless of record.",
+    "off_by_default": true,
+    "disabled_decision": "produce_nothing",
+    "unconfirmed_decision": "produce_nothing",
+    "transmit_target": null,
+    "only_output_sink": "local package_output_path (improvement-sharing/outbox) — v1 never pushes, posts, or transmits"
+  }
+}

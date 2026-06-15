@@ -1,0 +1,24 @@
+{
+  "$comment": "Improvement-sharing inbound fixtures, case (c): INBOUND gate-LOOSENING contribution. release-spec roadmap #4 / DD-7(4) maintainer evaluation harness (design-review supply-chain risk #7); original-design-spec sec 3.1 never-loosen. Shaped as evaluate.js expects (top-level kind:'rule-diff' + target + change), and it carries NO instance/brand specifics so it CLEARS the outbound cleanliness guard — but its EFFECT would make a gate/guardrail MORE PERMISSIVE. The maintainer harness `evaluate` MUST REJECT it via engine/self-improve/mutability.js assertNotGateLoosening (ENEVERLOOSEN) — NEVER auto-merge. This is the load-bearing inbound case: clean payload, but a gate-loosener; it proves never-loosen is checked on the RECEIVING side too. `change.effects` carry all three loosening forms the harness must catch (severity hard->soft, disposition block->warn, threshold loosened in its declared strictness direction). The target names an allowlisted machine-tunable dial so it CLEARS the human-only check and the rejection must come from never-loosen, not EHUMANONLY. Synthetic. See expected/evaluate-outcomes.json.",
+  "kind": "rule-diff",
+  "summary": "Tune variant-distinctness lint to fire less often (claims it reduces false positives).",
+  "rationale": "Reviewers reported the variant-duplication lint over-firing; this relaxes it.",
+  "target": {
+    "kind": "tunable-dial",
+    "machine_tunable": true,
+    "bounds": { "min": 0, "max": 1 },
+    "path": "gate.variant_distinctness.jaccard_threshold"
+  },
+  "change": {
+    "effects": [
+      { "field": "severity", "before": "hard", "after": "soft" },
+      { "field": "disposition", "before": "block", "after": "warn" },
+      {
+        "field": "gate.variant_distinctness.jaccard_threshold",
+        "before": 0.45,
+        "after": 0.8,
+        "direction": "higher-is-stricter"
+      }
+    ]
+  }
+}

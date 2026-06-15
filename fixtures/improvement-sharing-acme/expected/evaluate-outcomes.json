@@ -1,0 +1,41 @@
+{
+  "$comment": "IS-FIXTURES ground truth — INBOUND maintainer evaluation harness (release-spec roadmap #4; DD-7(4) supply-chain safety / design-review risk #7). Given an INBOUND sanitized rule-diff contribution, the MAINTAINER-side harness `evaluate` (deterministic, RD-2 no chain LLM; RD-12 zero-key) decides admissibility BEFORE assimilation. It REUSES engine/self-improve/mutability.js: assertMachineChangeAllowed (EHUMANONLY — never touch a human-only/guardrail target) checked FIRST (most-restrictive wins), then assertNotGateLoosening (ENEVERLOOSEN — a contribution that would loosen any gate/guardrail is REJECTED). NEVER auto-merge: ACCEPT means 'admissible for manual maintainer review', not 'merged'. The codes below were produced by running the two assertions over each inbound fixture (verified against the live mutability.js). All synthetic.",
+  "reused_engine": [
+    "engine/self-improve/mutability.js assertMachineChangeAllowed (EHUMANONLY)",
+    "engine/self-improve/mutability.js assertNotGateLoosening (ENEVERLOOSEN)"
+  ],
+  "evaluation_order": [
+    "1. assertMachineChangeAllowed(target) — refuse EHUMANONLY if the target is human-only / a guardrail / the gate / a hard-fail threshold",
+    "2. assertNotGateLoosening(target, change) — refuse ENEVERLOOSEN if the change's effect makes any gate/guardrail more permissive",
+    "3. (admissible) parses/applies cleanly + passes gate-regression + loosens nothing => ACCEPT for manual maintainer review (never auto-merge)"
+  ],
+  "contributions": [
+    {
+      "contribution": "inbound/contrib-loosens-gate.json",
+      "label": "(c) GATE-LOOSENING — never-loosen MUST reject",
+      "target_classification": "machine-changeable",
+      "decision": "reject",
+      "code": "ENEVERLOOSEN",
+      "auto_merge": false,
+      "why": "the target names an allowlisted class (tunable-dial), so it CLEARS the human-only check (assertMachineChangeAllowed passes) — but its EFFECT is gate-loosening on three axes the comparator catches: severity hard->soft, disposition block->warn, and jaccard_threshold 0.45->0.80 (higher-is-stricter, so raising it makes the variant-dup lint fire LESS). assertNotGateLoosening REJECTS structurally. This is the load-bearing inbound case: a CLEAN (specifics-free) payload can still be a gate-loosener, and never-loosen is enforced on the RECEIVING side INDEPENDENTLY of the human-only check."
+    },
+    {
+      "contribution": "inbound/contrib-targets-human-only.json",
+      "label": "(d) HUMAN-ONLY target — MUST reject",
+      "target_classification": "human-only",
+      "decision": "reject",
+      "code": "EHUMANONLY",
+      "auto_merge": false,
+      "why": "the target is a guardrail/safety rule (frontmatter mutability:human-only, category:safety). assertMachineChangeAllowed REFUSES structurally — a human-only safety surface is never assimilable by the loop, regardless of evidence. The change here is deliberately a TIGHTENING (severity soft->hard, disposition warn->block), so assertNotGateLoosening would NOT have fired — proving the rejection comes from the HUMAN-ONLY boundary, not from never-loosen. The harness checks human-only FIRST (most-restrictive wins), so the code is EHUMANONLY."
+    },
+    {
+      "contribution": "inbound/contrib-clean-accept.json",
+      "label": "(e) CLEAN admissible — evaluate ACCEPTS",
+      "target_classification": "machine-changeable",
+      "decision": "accept",
+      "code": "OK",
+      "auto_merge": false,
+      "why": "the target is an allowlisted machine-changeable class (calendar-weighting; original-design-spec §2.6), so assertMachineChangeAllowed passes (not EHUMANONLY); the change is gate-NEUTRAL (a calendar weighting carries no severity/disposition/threshold semantics — a non-gate content-preference dial), so assertNotGateLoosening passes (not ENEVERLOOSEN). The contribution parses/applies cleanly, passes gate-regression, and loosens nothing => ACCEPTED for MANUAL maintainer review. ACCEPT is explicitly NOT auto-merge (DD-7(4) never auto-merge inbound)."
+    }
+  ]
+}

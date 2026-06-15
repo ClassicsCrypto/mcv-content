@@ -170,6 +170,9 @@ This statement defines what "supported" means and is the basis for issue/PR tria
   content sources (trend automation; build-in-public from project memory).
 - [`docs/self-improvement.md`](docs/self-improvement.md) — the governed self-improvement loop and its
   DD-6 governance (OFF by default; the machine touches only weightings/prioritization, never the gates).
+- [`docs/improvement-sharing.md`](docs/improvement-sharing.md) — the opt-in outbound sharing tooling +
+  the maintainer evaluation harness (OFF by default; never auto-sends; abstract rule-diffs only,
+  sanitized + operator-reviewed; manual PR; never-loosen on inbound).
 - [`docs/setup/`](docs/setup/) — quick-start, full-setup, cold-start.
 - [`docs/runtimes/`](docs/runtimes/) — OpenClaw fast path + the generic capability contract.
 - [`docs/platforms/`](docs/platforms/) — per-platform setup, incl. the TikTok manual path.
@@ -189,7 +192,9 @@ This statement defines what "supported" means and is the basis for issue/PR tria
 - **Removing the human from the publish path by default.** The double gate is the product's trust
   signal; auto-publish exists only under mechanical trust criteria.
 - **Opt-out telemetry or automatic upstream data sharing of any kind.** Nothing leaves an install
-  without explicit operator action.
+  without explicit operator action. The *opt-in* improvement-sharing tooling (below) is the only
+  outbound path, and it never auto-sends — it prepares a sanitized, operator-reviewed package for a
+  **manual** pull request. See [`docs/improvement-sharing.md`](docs/improvement-sharing.md).
 - **Bundled scraping credentials or a hosted scraping service.** Bring-your-own adapter + manual paths
   only.
 - **Multi-box / distributed deployment.** One instance = one host (single-runner); HA is not a v1
@@ -231,6 +236,17 @@ authoring template when no seat or corpus is present (onboarding is never blocke
   mandatory human approval, the mechanism reads a configured memory path and **never bundles or
   commits memory**, and nothing auto-publishes. See [`docs/work-recap.md`](docs/work-recap.md).
 
+A fourth opt-in extension is **outbound**, not a content source: **improvement sharing**
+(`config/system.json` `improvement_sharing` block). It is the only path by which anything leaves the
+install, so it is governed hardest of all. **Opt-in, OFF by default, and it never auto-sends:** the
+tooling prepares a **sanitized, operator-reviewed abstract rule-diff** package on local disk for a
+**manual** pull request — the operator transmits by hand; the engine never pushes, posts, or opens a
+socket (a checked invariant, not a promise). A deterministic sanitizer + structural guard refuses to
+emit any instance/brand data, secret, corpus, performance number, or configured private term, and a
+**maintainer evaluation harness** gates inbound contributions on the receiving side (never auto-merge;
+never-loosen + gate-regression). Deterministic, zero-key. See
+[`docs/improvement-sharing.md`](docs/improvement-sharing.md).
+
 ### Roadmap (in intended order; each lands only with its governance)
 
 1. **Trend-pathway depth** — readout automation polish, additional providers, monthly competitor scan
@@ -247,8 +263,12 @@ authoring template when no seat or corpus is present (onboarding is never blocke
    archetype/content-type prioritization — never the gates. Deterministic engine code (no chain LLM);
    an optional host analyst seat refines proposal prose only. See
    [`docs/self-improvement.md`](docs/self-improvement.md).
-4. **Improvement-sharing automation** — outbound sanitize/consent tooling + a maintainer evaluation
-   harness; v1 is manual, opt-in, sanitized rule-diff PRs only.
+4. **Improvement-sharing automation** — *shipped* (governance-first): outbound sanitize/consent tooling
+   + a maintainer evaluation harness. **Opt-in, OFF by default; never auto-sends.** It prepares a
+   sanitized, operator-reviewed **abstract rule-diff** package for a **manual** PR (the operator
+   transmits, by hand); a structural guard refuses to emit any instance/brand specific, and the
+   receiving harness gates inbound contributions (never auto-merge; never-loosen + gate-regression).
+   Deterministic, zero-key. See [`docs/improvement-sharing.md`](docs/improvement-sharing.md).
 5. **Monthly competitor scan + consent-gated voice calibration.**
 6. **Additional approval surfaces** (Slack-class) behind the card schema; additional publisher
    adapters; per-seat LLM-provider routing.

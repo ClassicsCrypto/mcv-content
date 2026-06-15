@@ -73,11 +73,16 @@ const VERBS = {
   // by default, --apply to perform), rollback reverts one machine change (DD-6 (5) one-step rollback).
   improve: { mod: require('../engine/cli/improve'), fn: 'run' },
   rollback: { mod: require('../engine/cli/improve'), fn: 'rollbackRun' },
+  // The OUTBOUND/INBOUND improvement-sharing surface (IS-CLI / DD-7(b) / §2.6). `share` PREPARES a
+  // sanitized abstract rule-diff for a MANUAL PR (off by default; review default; no auto-send path);
+  // `evaluate-contribution` runs the maintainer-side harness on an inbound contribution (never auto-merge).
+  share: { mod: require('../engine/cli/share'), fn: 'run' },
+  'evaluate-contribution': { mod: require('../engine/cli/evaluate-contribution'), fn: 'run' },
   pause: { mod: require('../engine/cli/pause'), fn: 'pauseRun' },
   resume: { mod: require('../engine/cli/pause'), fn: 'resumeRun' },
 };
 
-const VERB_ORDER = ['init', 'verify', 'fixture-run', 'run-slot', 'kickoff', 'poll-trends', 'dispatch', 'status', 'calibrate', 'ingest-brand', 'generate-dna', 'index-library', 'purge-corpora', 'improve', 'rollback', 'pause', 'resume'];
+const VERB_ORDER = ['init', 'verify', 'fixture-run', 'run-slot', 'kickoff', 'poll-trends', 'dispatch', 'status', 'calibrate', 'ingest-brand', 'generate-dna', 'index-library', 'purge-corpora', 'improve', 'rollback', 'share', 'evaluate-contribution', 'pause', 'resume'];
 
 /** One-line summary per verb for the top-level help (kept short; --help <verb> has the full text). */
 const VERB_SUMMARY = {
@@ -96,6 +101,8 @@ const VERB_SUMMARY = {
   'purge-corpora': 'enforce corpus retention windows (RD-9)',
   improve: 'run the governed self-improvement loop (dry-run default; --apply; DD-6 / §8.9)',
   rollback: 'revert one machine change — --last or --to-baseline <ref> (DD-6 (5))',
+  share: 'prepare a sanitized abstract rule-diff for a MANUAL upstream PR (off by default; review default; no auto-send; DD-7(b) / §2.6)',
+  'evaluate-contribution': 'maintainer harness: evaluate an inbound contribution (accept/reject; never auto-merge; DD-7 (4))',
   pause: 'engage the kill switch (PAUSED sentinel + config)',
   resume: 'reverse the kill switch',
 };

@@ -1,0 +1,22 @@
+{
+  "$comment": "Improvement-sharing inbound fixtures, case (d): INBOUND human-only-target contribution. release-spec roadmap #4 / DD-7(4); DD-6(1) human-only boundary; mutability.js. Shaped as evaluate.js expects (top-level kind:'rule-diff' + target + change), carrying NO instance/brand specifics — but its TARGET is a guardrail/safety rule (frontmatter mutability:human-only, category:safety). The maintainer harness `evaluate` MUST REJECT it via engine/self-improve/mutability.js assertMachineChangeAllowed (EHUMANONLY): a contribution that would modify a human-only safety surface is never assimilable by the loop, regardless of its evidence or its (here deliberately TIGHTENING) direction. Making the change a TIGHTENING (soft->hard, warn->block) proves the rejection comes from the human-only boundary (EHUMANONLY), NOT from never-loosen — the two structural refusals are independent. The harness checks the human-only boundary FIRST (most-restrictive wins), so the expected code is EHUMANONLY. Synthetic. See expected/evaluate-outcomes.json.",
+  "kind": "rule-diff",
+  "summary": "Strengthen the claims-safety guardrail (tighten a safety rule).",
+  "rationale": "Well-intentioned: proposes making a safety rule STRICTER. Still inadmissible to the automated loop — safety rules are human-only.",
+  "target": {
+    "kind": "rule",
+    "rule_path": "rules/core/claims-safety.md",
+    "rule_frontmatter": {
+      "id": "core.claims-safety",
+      "mutability": "human-only",
+      "category": "safety",
+      "severity": "hard"
+    }
+  },
+  "change": {
+    "effects": [
+      { "field": "severity", "before": "soft", "after": "hard" },
+      { "field": "disposition", "before": "warn", "after": "block" }
+    ]
+  }
+}

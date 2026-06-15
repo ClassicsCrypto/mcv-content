@@ -263,6 +263,8 @@ config, not in scheduler wrappers.**
 | `purge-corpora` | enforce corpus retention windows by `retention_class` (dry-run by default) | `--apply`, `--brand` |
 | `improve` † | the **governed self-improvement loop** (§11; OFF by default, behind `self_improve.enabled` + the kill switch): evaluate analytics → derive governed proposals → apply auto-applicable ones in **canary** → observe → promote/auto-rollback. Touches only weightings/prioritization; structurally refuses any human-only / gate-loosening / below-threshold / unversioned change | `--dry-run` (default, applies nothing), `--apply`, `--brand`, `--json` |
 | `rollback` | **one-step revert** of the most recent governed machine change to its pinned instance-repo baseline (or a named record / pinned ref) | `--last` (default), `--to-baseline <ref>`, `--record <id>`, `--reason "<text>"`, `--json` |
+| `share` | **outbound improvement sharing** (§12; OFF by default, behind `improvement_sharing.enabled`): sanitize a promoted learning record into an ABSTRACT rule-diff and **review** it; writes a LOCAL package for a MANUAL PR only on explicit consent — **never auto-sends** | `--record <id>`, `--prepare` (needs `--yes`), `--yes`, `--operator <ref>`, `--refuse-residual`, `--json` |
+| `evaluate-contribution <file>` | **maintainer harness** (§12; receiving side): ACCEPT/REJECT an inbound abstract rule-diff (no-instance-specifics + applies + gate-regression + never-loosen/machine-allowed); **never auto-merges** (`auto_merge:false`) | `--private-term <t>`, `--brand-term <t>`, `--json` |
 | `pause` / `resume` | the kill switch — engage / clear the PAUSED sentinel + config flag (halts the self-improvement loop too, §11/§15.4) | `pause --reason "<text>"` |
 
 † `improve` / `rollback` are **wired in `bin/engine.js` and run live** — the governed self-improvement
@@ -433,3 +435,46 @@ The loop **never calls a chain LLM**: proposals are derived deterministically fr
 optional host **analyst seat** may refine a proposal's *rationale prose* only — it cannot change a
 target, a value, the evidence, or a classification. Full reference, the six DD-6 invariants, the state
 machine, and the `self_improve` config block: [`docs/self-improvement.md`](docs/self-improvement.md).
+
+---
+
+## 12. Improvement sharing — the one outbound path, and the no-auto-send guarantee (§2.6; DD-7(b); roadmap #4)
+
+A promoted learning record from §11 might help the next operator. **Improvement sharing** lets you
+offer that improvement **upstream** — but **only** as a sanitized, opt-in, operator-reviewed **abstract
+rule-diff**, and it **never transmits**. This is the single place data flows *out* of an install, so it
+is governed hardest of all (the governance is the feature). Internalize this:
+
+- **OFF by default, opt-in only.** Nothing runs unless the operator sets
+  `improvement_sharing.enabled: true`. There is **no opt-out / telemetry path** (DD-7 permanently
+  rejected it) and **no automatic-send path of any kind**. Treat enabling it as a risk-posture change,
+  like auto-publish — never enable it on your own.
+- **The two operator verbs (deterministic, zero-key — RD-2/RD-12):**
+  - **`share` (the outbound surface — `engine/cli/share.js`)** — sanitize a promoted learning record
+    (`--record <id>`) into an abstract rule-diff and **review** it. **Default is review-only:** it
+    shows you the EXACT sanitized payload that *would* be shared and **writes nothing**. Only
+    `--prepare --yes` (explicit consent) writes a **local** package to
+    `$CONTENT_HOME/contributions/`; `--prepare` without `--yes` is refused (you must review first).
+    `--operator <ref>` adds an operator-chosen PR label (itself sanitized); `--refuse-residual` makes
+    a residual specific a hard error instead of masking it.
+  - **`evaluate-contribution <file>` (the maintainer/receiving surface)** — given an INBOUND abstract
+    rule-diff file, return an ACCEPT/REJECT verdict **before** any human considers merging
+    (`--private-term` / `--brand-term` add anti-targets; exit 0 = accepted, 1 = rejected).
+- **The no-auto-send guarantee (a CHECKED invariant, not a promise).** The packager imports **no**
+  transport (`http`/`https`/`http2`/`net`/`tls`/`dgram`/`dns`/`child_process`, or a bare `fetch`); it
+  can only write a local file. `assertNoAutoSendPath` reads the module's own source and the test suite
+  asserts it, so a future edit that adds a send path **FAILS CI**. After a package is written, **you**
+  open the upstream pull request **by hand**. The engine never pushes, posts, or opens a socket.
+- **Abstract-only + structural refusal.** The payload is the generalizable change only (rule-diff shape
+  + rationale) — **never** instance/brand data, corpora, brand-tied performance numbers, secrets, or
+  configured private terms. A sanitizer strips every specific and a guard **throws `EUNSHAREABLE`** if
+  any residual brand name / secret / snowflake / path / handle / private term remains. Fail-closed:
+  disabled or unconfirmed ⇒ nothing produced.
+- **Receiving side never auto-merges (DD-7 (4)).** `evaluateContribution` gates an inbound contribution
+  on four checks — shape + no-instance-specifics, applies-cleanly, **gate-regression green**, and
+  **never-loosen + machine-allowed target** (reusing §11's `assertMachineChangeAllowed` /
+  `assertNotGateLoosening`). It returns `auto_merge: false` always; a maintainer reviews after a pass.
+
+Full reference, the config block, the receiving harness, and the fixtures:
+[`docs/improvement-sharing.md`](docs/improvement-sharing.md). What may/may-not leave the install:
+[`docs/data-policy.md`](docs/data-policy.md).
