@@ -1,0 +1,52 @@
+{
+  "$comment": "CS-FIXTURES — GROUND TRUTH for the DETERMINISTIC voice-calibration proposer (engine/voice-calibration/propose.js proposeVoiceCalibration). Asserted field-by-field in tests/competitor-scan-schema.test.js. The proposal is ALWAYS target_mutability:human-only + status:proposed (P2 guarantee). NEVER auto-applicable. ALL SYNTHETIC.",
+  "status": "proposed",
+  "target_mutability": "human-only",
+  "target_artifact": "brand:acme-cosmos:voice",
+  "proposed_diff": {
+    "drama_dial": { "current": "low", "proposed": "low" },
+    "archetype_emphasis": {
+      "current": [
+        { "code": "HOW_TO",           "weight": 3.0 },
+        { "code": "SKY_TONIGHT",      "weight": 2.0 },
+        { "code": "THESIS_OR_RECEIPT","weight": 1.5 }
+      ],
+      "proposed": [
+        { "code": "HOW_TO",           "weight": 3.5 },
+        { "code": "SKY_TONIGHT",      "weight": 2.0 },
+        { "code": "THESIS_OR_RECEIPT","weight": 1.5 }
+      ]
+    },
+    "hook_preferences": {
+      "current": [
+        { "pattern": "direct-tip",      "weight": 3.0 },
+        { "pattern": "how-to-numbered", "weight": 2.5 },
+        { "pattern": "question-hook",   "weight": 1.0 }
+      ],
+      "proposed": [
+        { "pattern": "direct-tip",      "weight": 3.0 },
+        { "pattern": "how-to-numbered", "weight": 3.0 },
+        { "pattern": "question-hook",   "weight": 1.0 }
+      ]
+    },
+    "cadence_preferences": {
+      "current": {
+        "preferred_posts_per_week": 5,
+        "thread_preference": "rarely",
+        "media_preference": "sometimes",
+        "top_days": ["mon", "wed", "fri"]
+      },
+      "proposed": {
+        "preferred_posts_per_week": 5,
+        "thread_preference": "rarely",
+        "media_preference": "sometimes",
+        "top_days": ["mon", "wed", "fri"]
+      }
+    }
+  },
+  "source_signals": [
+    { "type": "calibration", "count": 4 }
+  ],
+  "rationale": "Competitor analysis (4 items, confidence 0.62): HOW_TO archetype shows highest engagement lift in competitor corpus (median bookmarks above 500 for HOW_TO vs 249 overall). Drama signal is high in competitor landscape but own brand voice is established low — ANTI-PATTERN, do not raise drama_dial. Numbered how-to hook pattern observed 2/4 items with top engagement; recommend increasing how-to-numbered hook weight. Overall cadence and cadence_preferences unchanged — insufficient signal to shift. Regenerate brand-dna.md prose via engine generate-dna after applying.",
+  "confidence": 0.62
+}

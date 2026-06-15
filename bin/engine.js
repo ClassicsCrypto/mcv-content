@@ -80,9 +80,13 @@ const VERBS = {
   'evaluate-contribution': { mod: require('../engine/cli/evaluate-contribution'), fn: 'run' },
   pause: { mod: require('../engine/cli/pause'), fn: 'pauseRun' },
   resume: { mod: require('../engine/cli/pause'), fn: 'resumeRun' },
+  // Roadmap #5: competitor scan (off by default; DD-18 estimate-and-confirm; P11 no-post).
+  'competitor-scan': { mod: require('../engine/cli/poll-competitors'), fn: 'run' },
+  // Roadmap #5: voice-calibration (consent-gated human-applied path; EHUMANONLY for machine-apply).
+  'voice-calibrate': { mod: require('../engine/cli/voice-calibrate'), fn: 'run' },
 };
 
-const VERB_ORDER = ['init', 'verify', 'fixture-run', 'run-slot', 'kickoff', 'poll-trends', 'dispatch', 'status', 'calibrate', 'ingest-brand', 'generate-dna', 'index-library', 'purge-corpora', 'improve', 'rollback', 'share', 'evaluate-contribution', 'pause', 'resume'];
+const VERB_ORDER = ['init', 'verify', 'fixture-run', 'run-slot', 'kickoff', 'poll-trends', 'dispatch', 'status', 'calibrate', 'ingest-brand', 'generate-dna', 'index-library', 'purge-corpora', 'improve', 'rollback', 'share', 'evaluate-contribution', 'pause', 'resume', 'competitor-scan', 'voice-calibrate'];
 
 /** One-line summary per verb for the top-level help (kept short; --help <verb> has the full text). */
 const VERB_SUMMARY = {
@@ -105,6 +109,8 @@ const VERB_SUMMARY = {
   'evaluate-contribution': 'maintainer harness: evaluate an inbound contribution (accept/reject; never auto-merge; DD-7 (4))',
   pause: 'engage the kill switch (PAUSED sentinel + config)',
   resume: 'reverse the kill switch',
+  'competitor-scan': 'run a config-gated monthly competitor scan into reserved competitor_scan slots (roadmap #5, off by default)',
+  'voice-calibrate': 'propose or apply a consent-gated voice-DNA calibration (roadmap #5; human-only path)',
 };
 
 function topLevelHelp() {

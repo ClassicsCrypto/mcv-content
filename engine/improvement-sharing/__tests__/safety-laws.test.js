@@ -232,6 +232,106 @@ test('LAW1 guard: assertShareable REFUSES a residual brand / secret-literal / sn
   }
 });
 
+/* ================================================================================================ *
+ * P10 / ROADMAP #5 — VOICE ARTIFACT GUARD (EHUMANONLY).
+ *
+ * Voice calibration records (target_artifact brand:*:voice or brand:*:drama_dial; target.kind
+ * "voice"/"brand-dna") are instance-specific preferences for THIS install. They are NEVER
+ * generalizable upstream rule-diffs. Two independent guards enforce this:
+ *
+ *   (A) assertShareable (sanitize.js) — EHUMANONLY pre-check at the TOP, before string-specifics.
+ *   (B) checkShareable / prepareContribution GATE 2 (package.js) — isVoiceArtifact pre-check
+ *       that fires before the assertShareable string walk.
+ *
+ * These tests use CLEAN voice payloads (no leaky instance strings) to prove the guards are
+ * NON-VACUOUS: the string-specifics walk alone would pass a clean payload, so a vacuous guard
+ * would produce mode:'written' — a P10 violation. Both guards must fail closed independently.
+ * Synthetic brands only (Acme Cosmos / Orbit Outfitters) — real brand names fail hygiene CI.
+ * ================================================================================================ */
+
+test('P10 assertShareable REJECTS a clean brand:*:voice payload (no leaky strings) with code EHUMANONLY', () => {
+  // A payload with a brand:*:voice target_artifact and NO leaked instance strings. The string-
+  // specifics walk would pass this (nothing trips snowflake/handle/secret/path matchers). The voice
+  // pre-check must catch it FIRST and throw EHUMANONLY, proving the guard is non-vacuous.
+  const cleanVoicePayload = {
+    kind: 'abstract-rule-diff',
+    schema_version: '1.0.0',
+    target_artifact: 'brand:acme-cosmos:voice',          // voice artifact — synthetic brand
+    target: { kind: 'voice', path_shape: 'voice.tone' },
+    structural_diff: { structural_changes: [], knob_deltas: [{ field: 'tone', direction: 'increase' }] },
+    rationale: 'Generalizable adjustment to voice tone from reviewer signals; no instance values shared.',
+    provenance: { derived_from: 'learning-record', signal_kinds: ['reviewer'], signal_count: 3 },
+    'x-sharing': { stripped: false, families: [], flag_count: 0 },
+  };
+
+  let thrown;
+  try {
+    sanitize.assertShareable(cleanVoicePayload, SANITIZE_OPTS);
+  } catch (err) {
+    thrown = err;
+  }
+  assert.ok(thrown, 'assertShareable must throw on a clean brand:*:voice payload');
+  assert.equal(thrown.code, 'EHUMANONLY', `expected EHUMANONLY but got ${thrown.code}: ${thrown.message}`);
+  assert.ok(thrown.families && thrown.families.includes('voice-calibration-instance-specific'),
+    'thrown error must name the voice-calibration-instance-specific family');
+
+  // Also verify the drama_dial variant is caught.
+  const dramaDial = { ...cleanVoicePayload, target_artifact: 'brand:orbit-outfitters:drama_dial' };
+  let thrown2;
+  try {
+    sanitize.assertShareable(dramaDial, SANITIZE_OPTS);
+  } catch (err) {
+    thrown2 = err;
+  }
+  assert.ok(thrown2, 'assertShareable must throw on a clean brand:*:drama_dial payload');
+  assert.equal(thrown2.code, 'EHUMANONLY');
+});
+
+test('P10 package.prepareContribution REFUSES a clean brand:*:voice record — mode != written, no file written', () => {
+  // A voice record with a clean payload (no leaky strings). GATE 2 (checkShareable voice pre-check)
+  // must refuse it before writing — mode must NOT be 'written' and no file may appear on disk.
+  // Uses a throwaway CONTENT_HOME so the assertion is unambiguous.
+  const cleanVoiceRecord = {
+    id: 'lr-voice-orbit-001',
+    target_artifact: 'brand:orbit-outfitters:voice',     // voice artifact — synthetic brand
+    target_mutability: 'human-only',
+    shareability: 'candidate-for-upstream',
+    machine_change: { kind: 'voice', values: { tone: 0.8 }, baseline_values: { tone: 0.6 } },
+    rationale: 'Generalizable adjustment derived from reviewer signals; no instance values shared.',
+    source_signals: [{ type: 'reviewer', count: 2 }],
+  };
+  // A clean payload that carries no leaky strings — it would pass the string-specifics walk alone.
+  const cleanVoicePayload = {
+    kind: 'abstract-rule-diff',
+    schema_version: '1.0.0',
+    target_artifact: 'brand:orbit-outfitters:voice',
+    target: { kind: 'voice', path_shape: 'voice.tone' },
+    structural_diff: { structural_changes: [], knob_deltas: [{ field: 'tone', direction: 'increase' }] },
+    rationale: 'Generalizable adjustment to voice tone; no instance values shared.',
+    provenance: { derived_from: 'learning-record', signal_kinds: ['reviewer'], signal_count: 2 },
+    'x-sharing': { stripped: false, families: [], flag_count: 0 },
+  };
+
+  const { env, dir } = tmpHome();
+  const result = pkg.prepareContribution(cleanVoiceRecord, {
+    config: SYSTEM,       // improvement_sharing.enabled === true
+    payload: cleanVoicePayload,
+    consent: true,        // explicit consent — only the voice guard should stop this
+    env,
+    now: NOW,
+  });
+
+  // The packager must refuse — not write — the voice record.
+  assert.notEqual(result.mode, 'written', `mode must not be 'written' for a voice record; got ${result.mode}: ${result.summary}`);
+  assert.equal(result.written, false, 'written must be false for a voice record');
+
+  // No contribution file may be written under the throwaway CONTENT_HOME.
+  const contribDir = path.join(dir, ...SYSTEM.improvement_sharing.package_output_path.split('/'));
+  const filesWritten = fs.existsSync(contribDir) ? fs.readdirSync(contribDir) : [];
+  assert.equal(filesWritten.length, 0,
+    `no contribution file may be written for a voice record; found: ${filesWritten.join(', ')}`);
+});
+
 test('LAW1 guard: a refusal NEVER echoes the offending value back (privacy: no re-leak)', () => {
   const secret = PLANTED.fake_secret_literal;
   let thrown;

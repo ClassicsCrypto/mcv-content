@@ -1,0 +1,38 @@
+{
+  "$comment": "CS-FIXTURES — GROUND TRUTH for the DETERMINISTIC competitor landscape analyzer (engine/brand-dna/competitor-landscape.js analyzeCompetitorPatterns). A test runs the analyzer over the fixture competitor corpora (4 items: comp-001..004 for orbit-outfitters) and asserts these stats. Counts are exact and hand-verifiable from the 4 synthetic competitor items. PATTERNS ONLY: no verbatim competitor text. NOT bound to a published schema — it is the analyzer expected OUTPUT shape, asserted field-by-field in tests/competitor-scan-schema.test.js. ALL SYNTHETIC.",
+  "drama_markers": {
+    "total_items": 4,
+    "high_drama_count": 2,
+    "medium_drama_count": 1,
+    "low_drama_count": 1,
+    "exclamation_rate": 0.5,
+    "hype_term_rate": 0.5
+  },
+  "archetype_distribution": [
+    { "code": "HOW_TO",        "own_count": 0, "competitor_count": 2 },
+    { "code": "SCARCITY_FOMO", "own_count": 0, "competitor_count": 1 },
+    { "code": "TEASER",        "own_count": 0, "competitor_count": 1 }
+  ],
+  "hook_signals": {
+    "total_items": 4,
+    "top_patterns": [
+      { "pattern": "how-to-numbered",      "count": 2 },
+      { "pattern": "announcement-breaking", "count": 1 },
+      { "pattern": "direct-tip",            "count": 1 }
+    ]
+  },
+  "cadence_profile": {
+    "total_items": 4,
+    "avg_posts_per_week": 1.3,
+    "thread_rate": 0.0,
+    "media_rate": 0.0,
+    "top_days": ["wed", "sat", "tue"]
+  },
+  "engagement_profile": {
+    "metric": "bookmarks",
+    "median_value": 249,
+    "high_engagement_archetype_codes": ["HOW_TO"]
+  },
+  "drama_signal": "high",
+  "confidence": 0.62
+}

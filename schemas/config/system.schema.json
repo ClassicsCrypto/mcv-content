@@ -664,6 +664,64 @@
         }
       }
     },
+    "competitor_scan": {
+      "description": "The COMPETITOR SCAN pathway (release-spec roadmap #5). CONFIG-GATED and OFF BY DEFAULT: a monthly (or quarterly) scheduled scan ingests the competitor corpus, runs a DETERMINISTIC pattern analysis (NO LLM — RD-2, RD-12 zero-key), and emits a patterns-only landscape report to $CONTENT_HOME/scans/<brand>/<date>.json (Zone U, retention_class:transient). The report is then handed to the voice-calibration propose step, which emits a PROPOSED human-only learning record over four voice axes (drama_dial, archetype_emphasis, hook_preferences, cadence_preferences). The learning record is target_mutability:human-only — the self-improve machine applier MUST refuse it (EHUMANONLY); it is applied ONLY via the engine voice-calibrate --apply --consent path. SCRAPING POSTURE (RD-9): manual export + BYO adapter; no creds bundled; DD-18 estimate-and-confirm before any metered scrape. Competitor content is analyzed for PATTERNS only — NEVER republished verbatim (P1 enforced by runEnforceNotVerbatim + assertNoVerbatimCompetitorCopy). The PAUSED kill switch overrides this pathway regardless of enabled.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "The OFF-by-default gate (the LAW). Strictly true to enable the scheduled competitor-scan + voice-calibration-propose pathway; any other value keeps the pathway disabled (fail-closed). Even when true, the PAUSED kill switch overrides.",
+          "default": false
+        },
+        "cadence": {
+          "type": "string",
+          "description": "How often the scheduler recipe invokes the competitor scan. Default month (monthly). quarter is an alternative for slower-moving markets.",
+          "enum": ["month", "quarter"],
+          "default": "month"
+        },
+        "adapter": {
+          "type": "string",
+          "description": "OPTIONAL registered scraper-adapter name to poll for competitor corpus (shipped: 'reference' for a BYO provider, 'fixture' for zero-key tests; or an operator-registered adapter). Absent means manual/export corpus only — the first-class non-scraped path (RD-9). When present, a DD-18 cost estimate is presented before any metered scrape.",
+          "minLength": 1,
+          "examples": ["reference", "fixture"]
+        },
+        "provider": {
+          "type": "object",
+          "description": "Adapter-specific provider configuration (a §12.5-style block, opaque to the engine). Credentials resolve BY NAME via secrets.js (RD-9 BYO); no credential VALUE ever lives here.",
+          "additionalProperties": true
+        },
+        "private_terms": {
+          "$ref": "#/$defs/private_terms",
+          "description": "Extra redaction deny-list terms applied to scan report bodies at write (the privacy pre-pass, §13.3). Public anti-targets, not secrets."
+        },
+        "monthly_cap_usd": {
+          "type": "number",
+          "description": "OPTIONAL cap on adapter-metered spend per scan run (USD). The DD-18 pre-run estimate is capped at this value; a run that would exceed the cap is refused until the operator raises it or uses the manual/export path.",
+          "exclusiveMinimum": 0
+        },
+        "voice_calibration": {
+          "type": "object",
+          "description": "Voice-calibration sub-pathway. Gated: enabled here is the pathway's own gate (the parent competitor_scan.enabled must ALSO be true). OFF by default. The propose step runs ONLY when a fresh scan report exists; consent-gated apply is the only machine-apply path (P2 guarantee).",
+          "additionalProperties": false,
+          "required": ["enabled"],
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "The OFF-by-default gate for the voice-calibration propose step. Strictly true to enable; any other value keeps proposal generation disabled (fail-closed). Both competitor_scan.enabled AND this flag must be true for proposals to be generated.",
+              "default": false
+            },
+            "freshness_days": {
+              "type": "integer",
+              "description": "DD-15 stale guard: a scan report older than this many days MUST NOT advance to a voice-calibration proposal and MUST NOT be applied (the stale-scan guard). Default 30 days (aligned with monthly cadence).",
+              "minimum": 1,
+              "default": 30
+            }
+          }
+        }
+      }
+    },
     "paused": {
       "type": "boolean",
       "description": "Mirror of the PAUSED sentinel. When true, all autonomous loops are paused (kill switch, §15.4).",

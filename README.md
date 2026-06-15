@@ -173,6 +173,9 @@ This statement defines what "supported" means and is the basis for issue/PR tria
 - [`docs/improvement-sharing.md`](docs/improvement-sharing.md) — the opt-in outbound sharing tooling +
   the maintainer evaluation harness (OFF by default; never auto-sends; abstract rule-diffs only,
   sanitized + operator-reviewed; manual PR; never-loosen on inbound).
+- [`docs/voice-calibration.md`](docs/voice-calibration.md) — the monthly competitor scan +
+  consent-gated voice-DNA calibration pathway (roadmap #5; OFF by default; HUMAN-ONLY apply path;
+  patterns-only, never verbatim; versioned + reversible; zero-key fixture suite).
 - [`docs/setup/`](docs/setup/) — quick-start, full-setup, cold-start.
 - [`docs/runtimes/`](docs/runtimes/) — OpenClaw fast path + the generic capability contract.
 - [`docs/platforms/`](docs/platforms/) — per-platform setup, incl. the TikTok manual path.
@@ -214,6 +217,21 @@ pretense that the public gates equal the maintainers' calibrated instance.
 Two optional **content sources** ship in v1 as opt-in extensions. Both produce a *seed* that flows
 through the same chain to the **human approval card** — neither bypasses the chain, and **nothing
 auto-publishes**. Both are disabled until you add their config block.
+
+A fifth opt-in extension, **monthly competitor scan + consent-gated voice-DNA calibration**
+(`config/system.json` `competitor_scan` block), is the roadmap #5 addition. It watches competitor
+patterns on a monthly cadence, derives structured changes to four voice-preference axes in
+`brand.json` (`drama_dial`, `archetype_emphasis`, `hook_preferences`, `cadence_preferences`), and
+presents them as a consent-gated proposal. **Both sub-blocks ship OFF by default
+(`competitor_scan.enabled` and `competitor_scan.voice_calibration.enabled` must each be explicitly
+`true`).** The machine never auto-applies: the proposal is always `target_mutability: "human-only"`;
+`self-improve applyGovernedChange` refuses it with `EHUMANONLY`; the human runs
+`engine voice-calibrate --apply --consent`. Competitor content is analyzed for **patterns only —
+never verbatim text** (enforced by `enforceNotVerbatim`). The scan slot is **informational
+(DD-16)**: it dispatches a `competitor_scan` task record that produces no content, no approval card,
+no publish. Voice calibration records are **never shared upstream** (P10 — `sanitizeForSharing`
+refuses them). Scraping is BYO; a zero-key fixture adapter ships for offline testing. See
+[`docs/voice-calibration.md`](docs/voice-calibration.md).
 
 A third opt-in pathway, **brand-DNA generation + competitor ingestion** (`config/system.json`
 `brand_dna` block), upgrades C2 onboarding into a one-command flow (`engine ingest-brand`): ingest the operator + competitor
@@ -269,7 +287,19 @@ never-loosen + gate-regression). Deterministic, zero-key. See
    transmits, by hand); a structural guard refuses to emit any instance/brand specific, and the
    receiving harness gates inbound contributions (never auto-merge; never-loosen + gate-regression).
    Deterministic, zero-key. See [`docs/improvement-sharing.md`](docs/improvement-sharing.md).
-5. **Monthly competitor scan + consent-gated voice calibration.**
+5. **Monthly competitor scan + consent-gated voice-DNA calibration** — *shipped*
+   (governance-first): a monthly BYO-scrape (or manual export) pass writes a **patterns-only**
+   Zone-U scan report, derives structured changes to four voice axes (`drama_dial`,
+   `archetype_emphasis`, `hook_preferences`, `cadence_preferences`) in `brand.json`, and
+   presents them as a human-reviewed, consent-gated proposal. The machine stops at the
+   proposal; a consented `engine voice-calibrate --apply --consent` is the only apply path
+   (the self-improve machine-apply path structurally refuses voice targets with `EHUMANONLY`).
+   Gate, rules, and thresholds are never touched (`assertNotGateLoosening` enforces
+   `ENEVERLOOSEN`). Versioned one-step rollback via the instance repo. `competitor_scan` task
+   slot is informational only (DD-16 — no post produced). Both sub-blocks (`competitor_scan`
+   and `voice_calibration`) ship **OFF by default**; neither enables itself. Deterministic +
+   zero-key (`fixture` adapter for offline test). See
+   [`docs/voice-calibration.md`](docs/voice-calibration.md).
 6. **Additional approval surfaces** (Slack-class) behind the card schema; additional publisher
    adapters; per-seat LLM-provider routing.
 7. **TikTok publishing** — when the upstream publisher path verifies truthfully.

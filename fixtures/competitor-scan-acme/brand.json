@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0.0",
+  "id": "acme-cosmos",
+  "display_name": "Acme Cosmos",
+  "account_class": "brand",
+  "drama_dial": "low",
+  "archetype_emphasis": [
+    { "code": "HOW_TO", "weight": 3.0 },
+    { "code": "SKY_TONIGHT", "weight": 2.0 },
+    { "code": "THESIS_OR_RECEIPT", "weight": 1.5 }
+  ],
+  "hook_preferences": [
+    { "pattern": "direct-tip", "weight": 3.0 },
+    { "pattern": "how-to-numbered", "weight": 2.5 },
+    { "pattern": "question-hook", "weight": 1.0 }
+  ],
+  "cadence_preferences": {
+    "preferred_posts_per_week": 5,
+    "thread_preference": "rarely",
+    "media_preference": "sometimes",
+    "top_days": ["mon", "wed", "fri"]
+  },
+  "ingestion": {
+    "account_handles": [
+      { "platform": "twitter", "handle": "@acmecosmos" }
+    ],
+    "competitors": [
+      {
+        "name": "Orbit Outfitters",
+        "handles": [
+          { "platform": "twitter", "handle": "@orbitoutfitters" }
+        ]
+      }
+    ],
+    "manual_corpus_path": "corpora/acme-cosmos",
+    "retention_class": "standard"
+  },
+  "paths": {
+    "dna": "brands/acme-cosmos/brand-dna.md",
+    "archetypes": "brands/acme-cosmos/archetypes",
+    "corpora": "corpora/acme-cosmos"
+  },
+  "platforms": [
+    {
+      "platform": "twitter",
+      "publisher": "postiz",
+      "integration_ref": null,
+      "handle_placeholder": "@acmecosmos",
+      "rate_limit_per_day": 4,
+      "auto_publish": {
+        "enabled": false,
+        "qualifying_streak": 0,
+        "last_revocation": null,
+        "revocation_reason": null
+      }
+    }
+  ]
+}

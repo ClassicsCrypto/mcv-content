@@ -1,0 +1,20 @@
+{
+  "$comment": "CS-FIXTURES — synthetic system.json FRAGMENT exercising the competitor_scan block (release-spec roadmap #5). NOT a full system.json (it omits the always-required reviewers/budget/publish/approval_surface/scheduler) — it is the competitor_scan + retention slice a test merges over a base system config or sub-validates against the competitor_scan sub-schema. competitor_scan.enabled=true turns ON the pathway; adapter='fixture' + voice_calibration.enabled=true wire the ZERO-KEY test path (helpers/fake-scraper-adapter.js + helpers/fake-analyst-seat.js) — NO creds, NO network (RD-9/RD-12). retention governs purge-corpora for the transient scan reports. ALL SYNTHETIC. NEVER real brand names.",
+  "competitor_scan": {
+    "enabled": true,
+    "cadence": "month",
+    "adapter": "fixture",
+    "provider": { "platform": "twitter" },
+    "monthly_cap_usd": 5.0,
+    "private_terms": ["Acme Cosmos", "Orbit Outfitters"],
+    "voice_calibration": {
+      "enabled": true,
+      "freshness_days": 30
+    }
+  },
+  "retention": {
+    "raw_corpus_days": 90,
+    "transient_days": 7,
+    "purge_schedule": "weekly"
+  }
+}

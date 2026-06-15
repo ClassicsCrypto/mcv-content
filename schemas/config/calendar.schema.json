@@ -97,9 +97,9 @@
           "minLength": 1
         },
         "slot_type": {
-          "description": "Slot category. trend slots are RESERVED for the config-gated trend pass (DD-16: trend content fills these, never out-of-calendar); work_recap slots are RESERVED for the config-gated daily build-in-public option (§3.3, operator/founder/team accounts); campaign slots are claimable by a campaign's slot_pattern; regular is the default pillar-driven slot. Both trend and work_recap pathways ship OFF by default; reserving a slot only enables filling once the matching config block is enabled.",
+          "description": "Slot category. trend slots are RESERVED for the config-gated trend pass (DD-16: trend content fills these, never out-of-calendar); work_recap slots are RESERVED for the config-gated daily build-in-public option (§3.3, operator/founder/team accounts); campaign slots are claimable by a campaign's slot_pattern; competitor_scan slots are RESERVED for the config-gated monthly/quarterly competitor-scan pass (roadmap #5: informational only — the dispatched task record produces NO content, NO approval card, and NO publish, DD-16/P11; filling only when competitor_scan.enabled is true); regular is the default pillar-driven slot. All non-regular pathways ship OFF by default; reserving a slot only enables filling once the matching config block is enabled.",
           "type": "string",
-          "enum": ["regular", "trend", "campaign", "work_recap"],
+          "enum": ["regular", "trend", "campaign", "work_recap", "competitor_scan"],
           "default": "regular"
         },
         "state": {

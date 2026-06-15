@@ -149,12 +149,54 @@ function loadSanitizeModule() {
 }
 
 /**
+ * Resolve the IS-SANITIZE sibling's isVoiceArtifact helper (used by the independent voice
+ * pre-check below). Returns null when the sibling is unavailable (fail-closed: callers treat
+ * a null result as "assume it might be voice" and refuse — never the other way).
+ */
+function loadIsVoiceArtifact() {
+  const mod = loadSanitizeModule();
+  return mod && typeof mod.isVoiceArtifact === 'function' ? mod.isVoiceArtifact : null;
+}
+
+/**
  * Run the OUTBOUND shareability guard against the payload. Returns { ok, findings, reason }.
  * Fail-closed: if IS-SANITIZE's assertShareable is unavailable we DECLINE (ok:false) — a missing
  * guard must never become an open door. A caller may inject `opts.assertShareable` (tests / a host
  * wiring) which takes precedence over the on-disk sibling.
+ *
+ * Voice artifact pre-check (P10 / roadmap #5 — INDEPENDENT of the assertShareable string-scan).
+ * A clean brand:*:voice payload carries no leaky strings so assertShareable's string walk alone
+ * would return ok:true. We detect the voice/brand-dna structural indicator FIRST and refuse
+ * immediately with code EHUMANONLY — so the packager refuses voice records independently of whether
+ * assertShareable has its own voice check (belt-and-suspenders; neither gate depends on the other).
  */
 function checkShareable(payload, opts = {}) {
+  // --- VOICE ARTIFACT PRE-CHECK (P10 / roadmap #5): independent of the string-specifics walk. ---
+  // Inspect target_artifact and target.kind directly on the payload object. This catches a clean
+  // brand:*:voice payload that carries no instance strings — something the string-scan walk below
+  // would silently pass (producing mode:'written', a P10 violation).
+  if (payload && typeof payload === 'object') {
+    const artifactId = typeof payload.target_artifact === 'string' ? payload.target_artifact : null;
+    const targetKind =
+      payload.target && typeof payload.target === 'object' && typeof payload.target.kind === 'string'
+        ? payload.target.kind
+        : null;
+    const isVoice = loadIsVoiceArtifact();
+    const voiceArtifact = (isVoice && artifactId && isVoice(artifactId)) ||
+      targetKind === 'voice' || targetKind === 'brand-dna';
+    if (voiceArtifact) {
+      return {
+        ok: false,
+        findings: [],
+        reason:
+          'payload targets a voice-calibration artifact (brand:*:voice / brand:*:drama_dial family, ' +
+          'or target.kind voice/brand-dna). Voice calibration records are instance-specific and are ' +
+          'NEVER shareable upstream (P10 / roadmap #5, DD-7). mode must not be written.',
+        code: 'EHUMANONLY',
+      };
+    }
+  }
+
   // opts.assertShareable: a FUNCTION overrides the sibling (tests / host wiring); the explicit value
   // `null` means "no guard available" (forces the fail-closed branch, exercised in tests); `undefined`
   // (absent) means "use the on-disk IS-SANITIZE sibling".
@@ -191,6 +233,7 @@ function checkShareable(payload, opts = {}) {
       ok: false,
       findings,
       reason: (err && err.message) || 'payload failed the shareability guard',
+      code: (err && err.code) || undefined,
     };
   }
 }

@@ -434,6 +434,20 @@ function buildBindings() {
     { test: (p) => /^fixtures\/improvement-sharing-acme\/inbound\/.+\.json$/.test(p), skip: true, reason: 'INBOUND contribution (inbound-contribution/v1 maintainer-harness wire shape consumed by mutability.js assertMachineChangeAllowed/assertNotGateLoosening, not a shipped artifact shape)' },
     { test: (p) => p === 'fixtures/improvement-sharing-acme/system.improvement-sharing.json', skip: true, reason: 'partial system.json fragment (improvement_sharing slice; its improvement_sharing block is sub-validated against system.schema #/properties/improvement_sharing in tests)' },
     { test: (p) => /^fixtures\/improvement-sharing-acme\/expected\/.+\.json$/.test(p), skip: true, reason: 'improvement-sharing ground-truth control shapes (sanitize/assertShareable + maintainer-evaluate outcomes asserted in tests, not shipped artifact shapes)' },
+
+    // competitor-scan-acme voice-calibration fixtures (CS-FIXTURES; release-spec roadmap #5; DD-16).
+    // The brand.json carries the four voice axes (archetype_emphasis, hook_preferences,
+    // cadence_preferences + the existing drama_dial) and the optional voice_calibration state object
+    // — bound to brand.schema.json to validate all new fields. Each scan report in scans/<brand>/
+    // is a competitor-scan-report.schema.json instance (patterns only, Zone U). The corpora items
+    // bind to corpus-item.schema.json (each is an own or competitor corpus item). The system config
+    // fragment (enabled:true for the test) and expected/* files are test control shapes
+    // — documented skips, never silently dropped.
+    { test: (p) => p === 'fixtures/competitor-scan-acme/brand.json', schema: S('config/brand.schema.json'), mode: 'single' },
+    { test: (p) => /^fixtures\/competitor-scan-acme\/scans\/.+\/.+\.json$/.test(p), schema: S('inputs/competitor-scan-report.schema.json'), mode: 'single' },
+    { test: (p) => /^fixtures\/competitor-scan-acme\/corpora\/.+\/(own|competitors)\/.+\.json$/.test(p), schema: S('inputs/corpus-item.schema.json'), mode: 'single' },
+    { test: (p) => p === 'fixtures/competitor-scan-acme/system.competitor-scan.json', skip: true, reason: 'partial system.json fragment (competitor_scan + retention slice; not a complete system.json — merged/sub-validated in tests/competitor-scan-schema.test.js)' },
+    { test: (p) => /^fixtures\/competitor-scan-acme\/expected\/.+\.json$/.test(p), skip: true, reason: 'competitor-scan / voice-calibration ground-truth control shapes (analyzer, propose, apply, consent outcomes asserted in tests, not shipped artifact shapes)' },
   ];
 }
 
