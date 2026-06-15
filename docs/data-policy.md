@@ -9,9 +9,11 @@ third-party data.
 **You — the operator running the install — are the data controller.** This engine is software you
 run on your own infrastructure with your own credentials and accounts. The maintainers do not receive
 your data: nothing leaves an install without your explicit action, there is no telemetry, and there
-is no automatic upstream data sharing of any kind. Compliance with the terms of service of every
-platform you connect to or scrape — and with any applicable data-protection law — is your
-responsibility.
+is no automatic upstream data sharing of any kind. The one *opt-in* outbound path — improvement
+sharing (below) — is OFF by default, shares only sanitized **abstract rule-diffs**, and **never
+auto-sends**: it prepares a local package for a manual pull request *you* open by hand. Compliance with
+the terms of service of every platform you connect to or scrape — and with any applicable
+data-protection law — is your responsibility.
 
 ## Intake posture
 
@@ -97,6 +99,37 @@ codenames, financial figures, and internal IDs. The policy around it:
 The full mechanism and the four privacy layers are documented in
 [`work-recap.md`](work-recap.md#2-the-privacy-model--read-this-first).
 
+## Improvement sharing — the only outbound flow
+
+The optional **improvement-sharing** tooling ([`improvement-sharing.md`](improvement-sharing.md)) is the
+**only** path by which anything leaves your install, and it is governed hardest of all. It lets you offer
+a *generalizable* improvement (a promoted rule-diff from the self-improvement loop) **upstream** — but the
+posture is load-bearing:
+
+- **Opt-in, OFF by default, and it never auto-sends.** The whole path is gated on
+  `improvement_sharing.enabled: true` (strict). DD-7 **permanently rejected** opt-out/telemetry, so there
+  is **no automatic-send path of any kind**. The tooling only **writes a local contribution package** for
+  a **manual** pull request — *you* transmit, by hand. The engine never pushes, posts, or opens a network
+  socket (a checked invariant: the packager imports no transport at all, asserted in CI).
+- **What may leave: an ABSTRACT rule-diff only.** The shared payload is the generalizable change — the
+  rule-diff *structure* (which knob class, the gate-strictness transitions, an abstract `direction`) plus
+  a sanitized rationale and abstract provenance (signal **types + counts**, never refs).
+- **What may NOT leave (structurally refused):** instance/brand data, content corpora, **brand-tied
+  performance numbers**, secrets, instance ids / handles / paths / snowflakes, source-signal refs, and
+  your configured **private terms** (the `improvement_sharing.private_terms` deny list, unioned with the
+  `work_recap` / `trends` / `brand_dna` deny lists). A deterministic sanitizer strips every specific, and
+  a structural guard **refuses** to emit a payload that still carries one — the outbound mirror of the
+  work-recap privacy gate, reusing the same `redact.js` + deny-list primitives.
+- **Operator-reviewed consent.** You see the EXACT sanitized payload and must explicitly confirm before
+  any package is even written. Disabled or unconfirmed ⇒ nothing is produced.
+- **Receiving side never auto-merges.** Inbound contributions pass a deterministic maintainer harness
+  (no-instance-specifics, applies-cleanly, gate-regression green, never-loosen + machine-allowed target)
+  that yields an advisory verdict; a human merges, never the harness.
+
+This is **pattern + known-name redaction + a structural no-instance-specifics scan**, not semantic DLP —
+which is exactly why the deny list is yours to extend, the guard fails closed, and *you* review the exact
+payload first. Full reference: [`improvement-sharing.md`](improvement-sharing.md).
+
 ## Retention and deletion
 
 Each corpus item carries a `retention_class`. `engine purge-corpora` enforces the windows over
@@ -159,6 +192,8 @@ holder lists, member profiling). Schemas of these ship; instances never do.
   the host synthesis seat, the no-verbatim enforcement, and the `brand_dna` config block.
 - [`configuration.md`](configuration.md) — the `retention` block and the trust glossary.
 - [`work-recap.md`](work-recap.md) — project memory as a source: the four-layer privacy model in full.
+- [`improvement-sharing.md`](improvement-sharing.md) — the only outbound flow: opt-in, sanitized
+  abstract rule-diffs, manual-PR-only, never auto-sends; the maintainer evaluation harness.
 - [`trends.md`](trends.md) — the BYO trend pathway: Zone-U reports, manual-first, metered polling.
 - [`extending.md`](extending.md#4-scraper--trend-adapters) — the scraper adapter and the everything-Zone-U rule.
 - [`architecture.md`](architecture.md#5-trust-boundaries-zones-u--o--s--a) — zones U/O/S/A and data fences.

@@ -534,6 +534,58 @@
         }
       }
     },
+    "improvement_sharing": {
+      "description": "OUTBOUND IMPROVEMENT-SHARING (release-spec roadmap #4; DD-7 = option (b); original-design-spec §2.6 Improvement Sharing). Lets an operator SHARE a generalizable improvement (a promoted learnable rule-diff / learning record from the §8.9 self-improvement loop, #3) UPSTREAM — but ONLY as a sanitized, opt-in, operator-reviewed, ABSTRACT rule-diff. THE GOVERNANCE IS THE FEATURE (design-review risk: exfiltration + upstream supply-chain poisoning). This block is CONFIG-GATED and OFF BY DEFAULT (fail-closed). v1 is MANUAL: the tooling PREPARES a contribution package on the local disk for the operator to manually PR; it NEVER pushes, posts, or transmits — there is NO automatic-send path of ANY kind (DD-7 PERMANENTLY REJECTED option (c) opt-out/telemetry; Appendix B non-goal 'opt-out telemetry ... rejected permanently'). The shared payload is the GENERALIZABLE change ONLY (abstract rule-diff structure + rationale) — NEVER instance/brand data, content corpora, brand-tied performance numbers, secrets, or configured private terms. A deterministic SANITIZER (RD-2: no chain LLM; RD-12: zero-key) strips all specifics and a structural guard (assertShareable) REFUSES to write a package that still contains a brand name / secret shape / snowflake / absolute path / configured private term — reusing engine/shared/redact.js + the private-term deny list + a no-instance-specifics check (the OUTBOUND mirror of the work-recap privacy gate). The operator sees EXACTLY the sanitized payload and must explicitly confirm BEFORE the package is written (operator-reviewed consent); disabled / unconfirmed => nothing is produced. There is NO transmit target — only a LOCAL package output path.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "The OFF-by-default gate (the LAW; DD-7(1) opt-in only). Strictly true to enable preparing a contribution package; any other value keeps improvement-sharing disabled and produces NOTHING (fail-closed). Even when true, nothing leaves the install without an explicit operator confirmation (DD-7(3)).",
+          "default": false
+        },
+        "share": {
+          "type": "object",
+          "description": "WHAT MAY BE SHARED (DD-7(2) abstract rule-diffs ONLY). The payload kind is closed to the single generalizable form. There is intentionally no option to include instance data, corpora, or brand-tied metrics — those are structurally stripped by the sanitizer and refused by assertShareable.",
+          "additionalProperties": false,
+          "properties": {
+            "payload_kind": {
+              "type": "string",
+              "description": "The only shareable payload kind: an ABSTRACT rule-diff (the generalizable rule-diff structure + rationale derived from a promoted learning record). NEVER instance/brand data.",
+              "const": "abstract_rule_diff",
+              "default": "abstract_rule_diff"
+            },
+            "include_rationale": {
+              "type": "boolean",
+              "description": "Whether to include the abstract rationale text alongside the rule-diff. The rationale is itself sanitized (no brand/partner/codename/metric); when in doubt the sanitizer strips it.",
+              "default": true
+            }
+          }
+        },
+        "private_terms": {
+          "$ref": "#/$defs/private_terms",
+          "description": "The config-extendable private-term deny list (partner names, codenames, unreleased feature names, obviously-fake-but-still-secret literals) the OUTBOUND sanitizer + assertShareable enforce, ON TOP OF engine/shared/redact.js shape/known-name redaction. The OUTBOUND mirror of the work-recap deny list: any payload still containing one of these is REFUSED, never emitted. Public anti-targets to NOT share — secret VALUES are separately stripped by redaction."
+        },
+        "extra_secret_keys": {
+          "type": "array",
+          "description": "Extra sensitive key NAMES the outbound sanitizer treats as secret-bearing (extends redact.js built-in secret shapes for instance-specific key names). Names only, never secret values.",
+          "items": { "type": "string", "minLength": 1 },
+          "default": []
+        },
+        "require_operator_confirmation": {
+          "type": "boolean",
+          "description": "DD-7(3) operator-reviewed consent (the LAW; cannot be set false to bypass review). When true (the only permitted value in v1), the operator is shown EXACTLY the sanitized payload and must explicitly confirm before the package is written; an unconfirmed run produces NOTHING (fail-closed). Present so the contract is explicit and machine-checkable; false is rejected by the consuming tool.",
+          "const": true,
+          "default": true
+        },
+        "package_output_path": {
+          "type": "string",
+          "description": "LOCAL directory (absolute or process-relative) where the prepared, sanitized contribution package is WRITTEN for the operator to manually PR. This is the ONLY output sink — there is NO transmit target, no URL, no token: v1 never pushes, posts, or transmits (DD-7(1)). Required when enabled.",
+          "default": "improvement-sharing/outbox"
+        }
+      }
+    },
     "card_ttl": {
       "description": "Approval-card time-to-live per slot type (DD-15).",
       "type": "object",
@@ -666,8 +718,7 @@
       "enum": ["2h", "4h", "8h", "12h"]
     },
     "private_terms": {
-      "type": "array",
-      "description": "A private-term deny list: PUBLIC anti-targets (terms NOT to print, e.g. partner names / codenames / unreleased feature names). NEVER secret VALUES — those are stripped by redaction. Either a flat string array, or a { terms, secret_literals } object (both forbidden-to-print).",
+      "description": "A private-term deny list: PUBLIC anti-targets (terms NOT to print, e.g. partner names / codenames / unreleased feature names). NEVER secret VALUES — those are stripped by redaction. Either a flat string array, or a { terms, secret_literals } object (both forbidden-to-print). NOTE: the shape is governed ENTIRELY by the oneOf below (flat-array OR {terms, secret_literals} object); there is intentionally NO top-level `type` here — a top-level `type:\"array\"` would contradict the object branch and reject the documented {terms, secret_literals} form.",
       "oneOf": [
         {
           "type": "array",

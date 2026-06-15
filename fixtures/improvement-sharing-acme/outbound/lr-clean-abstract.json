@@ -1,0 +1,22 @@
+{
+  "$comment": "IS-FIXTURES (b) — OUTBOUND CLEAN abstract rule-diff. release-spec roadmap #4 / DD-7(b); original-design-spec §2.6. The GENERALIZABLE form of the SAME improvement as lr-dirty-with-specifics.json, but stripped to the abstract change + rationale: NO brand name, NO partner, NO codename, NO secret, NO snowflake, NO absolute path, NO handle, NO performance numbers tied to the brand. This is the ONLY shape DD-7(2) permits to leave the install (abstract rule-diff structure + rationale). assertShareable MUST ACCEPT it and the sanitizer MUST be a NO-OP on it (idempotence — sanitizing an already-clean payload changes nothing). Refs are generic/relative; the rationale speaks about content types in the abstract ('timely-event content', not the brand). Synthetic. See PROVENANCE.md.",
+  "id": "lr-2099-05-02-share-clean",
+  "created_at": "2099-05-02T09:10:00.000Z",
+  "source_signals": [
+    {
+      "type": "analytics",
+      "refs": [
+        "analytics/performance-report.json"
+      ],
+      "count": 17
+    }
+  ],
+  "target_artifact": "tunable_dial:variant_emphasis.opener_repetition_penalty",
+  "target_mutability": "learnable",
+  "proposed_diff": "--- rules/voice/opener-variety.md\n+++ rules/voice/opener-variety.md\n@@ generalizable improvement\n# When seeding sibling variants, raise the opener-repetition penalty so two variants do\n# not share the first sentence. Across a rolling window this improved distinctness of\n# timely-event content without tripping the variant-duplication lint or any gate.\n-  \"opener_repetition_penalty\": 0.20,\n+  \"opener_repetition_penalty\": 0.40,\n",
+  "status": "applied",
+  "applied_by": "operator",
+  "applied_at": "2099-05-02T09:12:00.000Z",
+  "rollback_ref": "instance-repo@HEAD~1",
+  "shareability": "candidate-for-upstream"
+}

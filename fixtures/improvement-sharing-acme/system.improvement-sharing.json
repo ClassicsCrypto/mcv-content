@@ -1,0 +1,26 @@
+{
+  "$comment": "IS-FIXTURES — partial config/system.json fragment exercising the new `improvement_sharing` block (release-spec roadmap #4 OUTBOUND improvement-sharing; DD-7; original-design-spec §2.6). Synthetic Acme Cosmos. The OFF-by-default gate is flipped ON here so the zero-key outbound-sanitizer/assertShareable test runs the prepare-package path; require_operator_confirmation stays true (the LAW — it cannot be bypassed) and there is NO transmit target, only a LOCAL package_output_path. The private_terms deny list carries the SAME planted Acme Cosmos specifics as fixtures/work-recap-acme/private-terms.json so the OUTBOUND guard refuses the dirty record and passes the clean one. Sub-validated against schemas/config/system.schema.json#/properties/improvement_sharing. NOT a full system.json.",
+  "improvement_sharing": {
+    "enabled": true,
+    "share": {
+      "payload_kind": "abstract_rule_diff",
+      "include_rationale": true
+    },
+    "private_terms": {
+      "case_insensitive": true,
+      "terms": [
+        "Acme Cosmos",
+        "Nebula Nine Optics",
+        "Project Dark Comet",
+        "Stargate-Wizard"
+      ],
+      "secret_literals": [
+        "FAKE_TOKEN_do_not_use_0000",
+        "changeme_fake_not_real"
+      ]
+    },
+    "extra_secret_keys": [],
+    "require_operator_confirmation": true,
+    "package_output_path": "improvement-sharing/outbox"
+  }
+}
