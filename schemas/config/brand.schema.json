@@ -93,6 +93,52 @@
         }
       }
     },
+    "ingestion": {
+      "description": "OPTIONAL per-brand DATA-INGESTION & BRAND-IDENTITY settings (release-spec §1.1/§1.2; DD-10 brand-keyed). Consumed by the one-command brand-DNA flow in the C2 setup checkpoint when system.json brand_dna.enabled is true (both gates must hold). OFF BY DEFAULT — absent means the brand uses the manual authoring path only (DD-21). Names WHICH accounts to ingest the own-corpus from and WHICH competitors to analyze for patterns; competitor content is Zone U (RD-8) and analyzed for PATTERNS only, never republished verbatim. Handles are public anti-targets/identifiers, never secrets. Scraping is BYO (RD-9): a per-brand scraper.adapter ref may override the system default; manual submission + EXPORTS to manual_corpus_path are first-class and need no adapter.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "account_handles": {
+          "description": "Per-platform OWN-account handle(s) the own-corpus is ingested from (release-spec §1.1 Account Linking). Synthetic placeholders in shipped templates (e.g. @acmecosmos). Public identifiers, never secrets.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/ingestion_handle" }
+        },
+        "competitors": {
+          "description": "Competitor/comparator handles to ingest as Zone-U corpus and analyze for PATTERNS (release-spec §1.2 Competitor Identification). Each is untrusted third-party (RD-8) — analyzed for archetypes/hooks only, NEVER republished verbatim. Public handles, never secrets.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/ingestion_competitor" }
+        },
+        "manual_corpus_path": {
+          "$ref": "#/$defs/relative_path",
+          "description": "CONTENT_HOME-relative directory the operator drops MANUAL / EXPORTED corpus items into (the first-class non-scraped path, RD-9). Items conform to schemas/inputs/corpus-item.schema.json. Defaults to the brand's corpora dir when absent."
+        },
+        "scraper": {
+          "type": "object",
+          "description": "OPTIONAL per-brand override of the system brand_dna.scraper adapter ref (DD-10). Absent inherits the system default; still BYO (RD-9, no creds bundled) and still a metered action gated by the cost estimate (DD-18).",
+          "additionalProperties": false,
+          "required": ["adapter"],
+          "properties": {
+            "adapter": {
+              "type": "string",
+              "description": "Registered scraper-adapter name for this brand (overrides system default). The manual/export path needs no adapter.",
+              "minLength": 1,
+              "examples": ["reference", "fixture"]
+            },
+            "provider": {
+              "type": "object",
+              "description": "Adapter-specific provider config (§12.5-style, opaque to the engine). Credential resolves BY NAME via secrets.js; no credential VALUE here.",
+              "additionalProperties": true
+            }
+          }
+        },
+        "retention_class": {
+          "description": "Default retention_class stamped on this brand's ingested corpus items at write (corpus-item.schema.json). Governs engine purge-corpora windows (system.json retention). Defaults to 'standard'; competitor corpus is typically 'transient' so it ages out fast.",
+          "type": "string",
+          "enum": ["transient", "standard", "retained"],
+          "default": "standard"
+        }
+      }
+    },
     "paths": {
       "description": "CONTENT_HOME-relative locations of this brand's authored assets. Absolute paths are forbidden.",
       "type": "object",
@@ -221,6 +267,44 @@
       "description": "CONTENT_HOME-relative path. Absolute paths and drive letters are forbidden.",
       "minLength": 1,
       "pattern": "^(?![A-Za-z]:)(?!/)(?!.*\\.\\.).+$"
+    },
+    "ingestion_handle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "handle"],
+      "properties": {
+        "platform": {
+          "type": "string",
+          "description": "Platform the handle belongs to (twitter, instagram, youtube, tiktok, facebook, ...).",
+          "minLength": 1,
+          "examples": ["twitter", "instagram", "youtube", "tiktok", "facebook"]
+        },
+        "handle": {
+          "type": "string",
+          "description": "The public account handle (synthetic placeholder in shipped templates, e.g. @acmecosmos). Never a secret.",
+          "minLength": 1,
+          "examples": ["@acmecosmos"]
+        }
+      }
+    },
+    "ingestion_competitor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "handles"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable competitor/comparator name (Zone U, RD-8). Synthetic in shipped templates. Public identifier; analyzed for patterns only, never republished.",
+          "minLength": 1,
+          "examples": ["Stellar Optics Co"]
+        },
+        "handles": {
+          "description": "The competitor's public per-platform handle(s) to ingest as Zone-U corpus.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/ingestion_handle" }
+        }
+      }
     }
   }
 }

@@ -48,6 +48,18 @@
         "type": "string"
       }
     },
+    "metrics": {
+      "description": "OPTIONAL public engagement metrics observed for this item (release-spec §1.1/§1.2 — the ingestion analyzer uses them to compute per-archetype engagement lift, the deterministic analysis §2.6 pattern). All values are public counts the operator may capture; never private/PII. Absent when an item was submitted text-only (the analyzer falls back to structural stats). Additive metric keys are permitted (additionalProperties) since platforms differ.",
+      "type": "object",
+      "additionalProperties": { "type": "number" },
+      "properties": {
+        "likes": { "type": "number", "minimum": 0 },
+        "replies": { "type": "number", "minimum": 0 },
+        "reposts": { "type": "number", "minimum": 0 },
+        "bookmarks": { "type": "number", "minimum": 0 },
+        "impressions": { "type": "number", "minimum": 0 }
+      }
+    },
     "trust_class": {
       "description": "Trust zone of the item (RD-8). untrusted-scraped is Zone U (the default for anything scraped or third-party); operator-curated is the promoted class and requires an attestation.",
       "type": "string",

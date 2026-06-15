@@ -1,0 +1,38 @@
+{
+  "$comment": "BD-FIXTURES — GROUND TRUTH for the COST-ESTIMATE gate on metered ingestion actions (release-spec DD-18: metered actions present a pre-run cost estimate + confirm; §11.2 budget.indexing_requires_estimate). The brand-DNA flow has TWO metered actions: (1) SCRAPE (only when a scraper adapter is configured — manual/export submission is FREE and ungated), and (2) DNA SYNTHESIS (host seat). A test asserts the flow computes these estimates and requires confirmation BEFORE spending; the fixture/zero-key adapters report cost_usd 0 (no real spend) but still exercise the estimate+confirm control path. Values are illustrative-as-of-fixture, not live pricing. ALL SYNTHETIC. See PROVENANCE.md.",
+  "brand": "acme-cosmos",
+  "currency": "USD",
+  "metered_actions": [
+    {
+      "action": "scrape",
+      "gated": true,
+      "when": "only if a scraper adapter is configured; manual/export submission is free and ungated (RD-9)",
+      "inputs": { "handles": 3, "max_items_per_handle": 200 },
+      "estimate": {
+        "max_items": 600,
+        "est_cost_usd": 0.0,
+        "note": "fixture adapter — zero spend; a real BYO adapter quotes its own per-item cost here"
+      },
+      "requires_confirm": true,
+      "fixture_actual": { "items_pulled": 16, "cost_usd": 0.0 }
+    },
+    {
+      "action": "dna-synthesis",
+      "gated": true,
+      "when": "only if a synthesis seat is wired; cold-start (no seat) degrades to the authoring template and is ungated (DD-21)",
+      "inputs": { "analysis_tokens_est": 1800 },
+      "estimate": {
+        "est_cost_usd": 0.0,
+        "note": "fixture seat — zero spend; a real host seat reports actual metered spend the §11.2 budget caps"
+      },
+      "requires_confirm": true,
+      "fixture_actual": { "cost_usd": 0.0 }
+    }
+  ],
+  "total_estimate_usd": 0.0,
+  "assertions": {
+    "estimate_presented_before_spend": true,
+    "confirm_required_for_each_metered_action": true,
+    "free_paths_ungated": ["manual-submission", "official-account-export", "cold-start-authoring-template"]
+  }
+}

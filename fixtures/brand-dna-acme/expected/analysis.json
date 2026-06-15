@@ -1,0 +1,103 @@
+{
+  "$comment": "BD-FIXTURES — GROUND TRUTH for the DETERMINISTIC corpus analyzer (release-spec §1.1/§1.2; the analysis is auditable stats with NO LLM — RD-2). A test runs the analyzer over the fixture corpora (own + 2 competitors, from corpora/acme-cosmos/ or the replayed scrape-responses.json — both yield this) and asserts these stats. Counts are exact and hand-verifiable from the 16 fixture items (8 own + 4 + 4 competitor). `archetype` uses the production 14-archetype taxonomy (HOW_TO added for this consumer-how-to brand). `engagement` lift = archetype median metric / account median metric (>1.0 over-performs; the §2.6 deterministic pattern). zone_u_only on competitors marks them untrusted (RD-8). ALL SYNTHETIC. See PROVENANCE.md.",
+  "schema_note": "Not bound to a published schema in this batch — it is the analyzer's expected OUTPUT shape, asserted field-by-field. The analyzer module + its output schema land in a sibling engine batch.",
+  "brand": "acme-cosmos",
+  "corpus": {
+    "own": {
+      "handle": "@acmecosmos",
+      "trust_class": "untrusted-scraped",
+      "item_count": 8,
+      "source_mix": { "export": 6, "manual": 2, "platform": 0 },
+      "with_metrics": 8,
+      "media_items": 0
+    },
+    "competitors": [
+      {
+        "name": "Stellar Optics Co",
+        "handle": "@stellaroptics",
+        "zone_u_only": true,
+        "item_count": 4,
+        "media_items": 0,
+        "with_metrics": 4
+      },
+      {
+        "name": "Orbit Outfitters",
+        "handle": "@orbitoutfitters",
+        "zone_u_only": true,
+        "item_count": 4,
+        "media_items": 1,
+        "with_metrics": 4
+      }
+    ],
+    "total_items": 16
+  },
+  "own_voice": {
+    "median_chars": 174,
+    "avg_chars": 175,
+    "exclamation_rate": 0.0,
+    "hype_term_rate": 0.0,
+    "top_terms": ["eyepiece", "25mm", "moon", "find", "tonight", "focus", "scope", "10mm", "red-dot", "first"],
+    "top_first_lines": [
+      "Astronomy, not astrology.",
+      "Three minutes to a sharp Moon, every time:",
+      "Clear sky tonight?",
+      "Introducing the ST-1 first-light walkthrough in the app.",
+      "First time my kid found Saturn's rings on their own."
+    ]
+  },
+  "archetypes": {
+    "taxonomy_version": "v3+how_to",
+    "own": {
+      "HOW_TO": 3,
+      "SKY_TONIGHT": 1,
+      "ANNOUNCEMENT": 1,
+      "FIELD_NOTES": 1,
+      "BEHIND_THE_GLASS": 1,
+      "THESIS_OR_RECEIPT": 1
+    },
+    "competitor": {
+      "stellar-optics-co": {
+        "TEASER": 1,
+        "SCARCITY_FOMO": 1,
+        "ANNOUNCEMENT": 1,
+        "ENGAGEMENT_BAIT": 1
+      },
+      "orbit-outfitters": {
+        "HOW_TO": 2,
+        "NUMBERED_THESIS": 1,
+        "VISUAL_SHOWCASE": 1,
+        "THESIS_OR_RECEIPT": 1
+      }
+    }
+  },
+  "engagement": {
+    "metric": "bookmarks",
+    "baseline_note": "lift = archetype median bookmarks / own-account median bookmarks. Own account median bookmarks = 475.",
+    "own_account_median_bookmarks": 475,
+    "own_archetype_lift": {
+      "HOW_TO": 1.43,
+      "THESIS_OR_RECEIPT": 2.06,
+      "SKY_TONIGHT": 1.14
+    },
+    "strongest_own_archetype": "HOW_TO",
+    "competitor_takeaways": [
+      {
+        "competitor": "stellar-optics-co",
+        "pattern": "scarcity + teaser + giveaway",
+        "signal": "reply-spiky, bookmark-poor",
+        "recommendation": "ANTI-PATTERN — do not adopt; conflicts with drama_dial low"
+      },
+      {
+        "competitor": "orbit-outfitters",
+        "pattern": "numbered how-to steps with a named payoff",
+        "signal": "high bookmark-lift",
+        "recommendation": "CONFIRMS own how-to strength; borrow the PATTERN (numbered steps + payoff), never the wording"
+      }
+    ]
+  },
+  "provenance": {
+    "all_items_zone": "U",
+    "competitor_use": "patterns-only",
+    "no_verbatim_republish": true
+  }
+}

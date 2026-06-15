@@ -1,0 +1,95 @@
+{
+  "$comment": "BD-FIXTURES — GROUND TRUTH for the ARCHETYPE CATEGORIZER (release-spec §1.2 Content Categorization: 'bucket content into specific Content Archetypes ... capture idea seeds and strong argument patterns, hooks'). The categorizer turns the deterministic analysis (expected/analysis.json) into a per-brand archetype catalog the matcher later selects from — one entry per archetype the brand should run, each carrying DERIVED seeds/hooks. CRITICAL (RD-9 risk): every seed/hook is a PATTERN abstracted from the corpus, NEVER a verbatim line — see `pattern_source` + the no-verbatim guarantee. Competitor-derived entries record `derived_from: competitor` and carry NO competitor copy. A sibling engine batch writes brands/<id>/archetypes/*.md from this catalog (templates/brand/archetypes.template.md shape). ALL SYNTHETIC — Acme Cosmos only. See PROVENANCE.md.",
+  "brand": "acme-cosmos",
+  "no_verbatim_guarantee": "Every hook/seed string below is a derived PATTERN, not a copied corpus line. The no-verbatim-check.json test asserts no hook/seed is a verbatim substring of any Zone-U competitor corpus item.",
+  "archetypes": [
+    {
+      "id": "how-to",
+      "display_name": "How-To",
+      "pillar": "how-to",
+      "derived_from": "own",
+      "own_share": 3,
+      "engagement_lift": 1.43,
+      "rank": 1,
+      "pattern_source": "own-corpus how-to items (blurry-Moon fix, three-minute Moon, eyepiece order)",
+      "hook_patterns": [
+        "Name the task and the payoff, then give the steps in order.",
+        "Lead with the single most common mistake, then the two-step fix."
+      ],
+      "must_include": ["a concrete object or task", "ordered steps", "the one common miss"],
+      "voice_note": "low drama; every step must work with the product as shipped"
+    },
+    {
+      "id": "sky-tonight",
+      "display_name": "Sky Tonight",
+      "pillar": "sky-tonight",
+      "derived_from": "own",
+      "own_share": 1,
+      "engagement_lift": 1.14,
+      "rank": 2,
+      "pattern_source": "own-corpus 'point at this now' items (Jupiter low east, Pleiades)",
+      "hook_patterns": [
+        "Ask the timing question, then name the object and where to point.",
+        "Give the one thing visible tonight and the finder step to reach it."
+      ],
+      "must_include": ["the object", "the time/direction", "a finder step"],
+      "voice_note": "present-tense, conditions-aware; no hype"
+    },
+    {
+      "id": "field-notes",
+      "display_name": "Field Notes",
+      "pillar": "field-notes",
+      "derived_from": "own",
+      "own_share": 1,
+      "engagement_lift": null,
+      "rank": 3,
+      "pattern_source": "own-corpus honest-miss items (clouds at 9:58, faint counts)",
+      "hook_patterns": [
+        "Open on the setback, close on what you caught anyway.",
+        "Tell the night plainly, including what went wrong."
+      ],
+      "must_include": ["a real observing moment", "honesty about conditions"],
+      "voice_note": "calm about failure; atmosphere allowed, no fabricated causation"
+    },
+    {
+      "id": "behind-the-glass",
+      "display_name": "Behind the Glass",
+      "pillar": "behind-the-glass",
+      "derived_from": "own",
+      "own_share": 1,
+      "engagement_lift": null,
+      "rank": 4,
+      "pattern_source": "own-corpus build-rationale items (why a 25mm default, why no motor)",
+      "hook_patterns": [
+        "State the design choice, then the beginner-first reason behind it.",
+        "Answer a 'why did you build it this way' with the trade-off."
+      ],
+      "must_include": ["the design decision", "the why"],
+      "voice_note": "we-voice; product claims must be true as shipped"
+    },
+    {
+      "id": "numbered-steps",
+      "display_name": "Numbered Steps (borrowed pattern)",
+      "pillar": "how-to",
+      "derived_from": "competitor",
+      "derived_competitor": "Orbit Outfitters",
+      "engagement_lift_observed": 2.76,
+      "rank": 5,
+      "pattern_source": "competitor numbered-how-to pattern (high bookmark-lift) — PATTERN borrowed, wording NOT",
+      "hook_patterns": [
+        "Number the steps explicitly and end on the payoff.",
+        "Promise a count of steps in the opener, then deliver them."
+      ],
+      "must_include": ["an explicit step count", "a named payoff at the end"],
+      "voice_note": "adopt the structure only; rewrite entirely in Acme voice — never reuse competitor wording"
+    }
+  ],
+  "anti_patterns": [
+    {
+      "label": "scarcity-teaser-giveaway",
+      "derived_competitor": "Stellar Optics Co",
+      "reason": "reply-spiky but bookmark-poor; conflicts with drama_dial low and the hard-no on manufactured urgency",
+      "action": "do not generate"
+    }
+  ]
+}

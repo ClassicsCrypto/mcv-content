@@ -82,9 +82,13 @@ Detailed walk: [`brand.md`](brand.md). In short:
 2. **Corpus intake (optional)** — manual submission (first-class), own-account export, or a BYO
    scraper adapter. All ingested corpora are trust-class-tagged at write time; the C2 verifier fails
    on any item missing a `trust_class`. See [`../data-policy.md`](../data-policy.md).
-3. **Author the Brand DNA** — agent-assisted authoring (not one-shot automation) into
-   `brands/<id>/brand-dna.md` plus an `archetypes/` catalog. For a brand with no history, take the
-   [`cold-start.md`](cold-start.md) path (manual authoring template + `cold_start: true`).
+3. **Author the Brand DNA** — two paths, same output (`brands/<id>/brand-dna.md` + an `archetypes/`
+   catalog). With a corpus, `engine generate-dna --brand <id>` runs a deterministic analysis (no LLM)
+   + a **metered host synthesis seat** (estimate-and-confirm, DD-18; competitor patterns never
+   verbatim, RD-9) and degrades to the authoring template when no seat/corpus is present — see
+   [`../brand-dna.md`](../brand-dna.md). Or author by hand into the template. For a brand with no
+   history, take the [`cold-start.md`](cold-start.md) path (manual authoring template +
+   `cold_start: true`).
 
 ```
 engine verify --setup c2

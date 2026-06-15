@@ -1,0 +1,10 @@
+{
+  "source": "platform",
+  "captured_at": "2099-02-07T20:00:00Z",
+  "text": "Saturn through our refractor last night. No caption needed.",
+  "url": "https://example.test/orbitoutfitters/status/orbit-003",
+  "media_refs": ["competitor-observed/orbit-saturn.jpg"],
+  "trust_class": "untrusted-scraped",
+  "retention_class": "transient",
+  "metrics": { "likes": 2050, "replies": 70, "reposts": 280, "bookmarks": 360, "impressions": 130000 }
+}

@@ -1,0 +1,69 @@
+{
+  "$comment": "BD-FIXTURES — GROUND TRUTH for the NO-VERBATIM-REPUBLISH check (release-spec §1.2 + RD-9 design-review risk: competitor content is analyzed for PATTERNS only and is NEVER republished verbatim; the law requires a check to ENFORCE this). A test loads every Zone-U COMPETITOR corpus item, extracts distinctive substrings, and asserts that NONE appears verbatim in any generated artifact (the synthesized brand-dna.md and every archetype-catalog hook/seed). `forbidden_substrings` are distinctive competitor phrases that MUST NOT leak into derived output; `checked_artifacts` lists what the check scans; `allowed_pattern_terms` are generic craft words that MAY legitimately recur (they are not copyrightable competitor expression) so the check does not false-positive on them. expected_violations is 0 for the shipped fixtures (the canned DNA + catalog are clean by construction). ALL SYNTHETIC. See PROVENANCE.md.",
+  "brand": "acme-cosmos",
+  "scope": "Zone-U competitor corpora only (own-corpus may be reused per its own trust_class/attestation; competitor copy may never be republished verbatim)",
+  "min_shingle_words": 6,
+  "case_insensitive": true,
+  "checked_artifacts": [
+    "recorded/dna-synthesis.json#acme-cosmos.brand_dna_md",
+    "expected/brand-dna.expected.md",
+    "expected/archetype-catalog.json (every hook_patterns[] and must_include[] string)"
+  ],
+  "forbidden_substrings": [
+    {
+      "phrase": "BIGGEST telescope launch of the YEAR is coming",
+      "from": "stellar-optics-co/comp-001",
+      "class": "competitor-verbatim"
+    },
+    {
+      "phrase": "Last chance before the window closes forever",
+      "from": "stellar-optics-co/comp-002",
+      "class": "competitor-verbatim"
+    },
+    {
+      "phrase": "the most revolutionary scope ever made",
+      "from": "stellar-optics-co/comp-003",
+      "class": "competitor-verbatim"
+    },
+    {
+      "phrase": "RT + tag three friends to win a NovaMax",
+      "from": "stellar-optics-co/comp-004",
+      "class": "competitor-verbatim"
+    },
+    {
+      "phrase": "NovaMax 9000",
+      "from": "stellar-optics-co/comp-003",
+      "class": "competitor-product-name"
+    },
+    {
+      "phrase": "face the Square of Pegasus, 2) hop to Mirach",
+      "from": "orbit-outfitters/comp-001",
+      "class": "competitor-verbatim"
+    },
+    {
+      "phrase": "The smudge is a trillion suns",
+      "from": "orbit-outfitters/comp-001",
+      "class": "competitor-verbatim"
+    },
+    {
+      "phrase": "Saturn through our refractor last night. No caption needed",
+      "from": "orbit-outfitters/comp-003",
+      "class": "competitor-verbatim"
+    },
+    {
+      "phrase": "a thirty-second laser check before each session",
+      "from": "orbit-outfitters/comp-004",
+      "class": "competitor-verbatim"
+    }
+  ],
+  "allowed_pattern_terms": [
+    "numbered steps",
+    "named payoff",
+    "the terminator",
+    "low power",
+    "collimation",
+    "Andromeda"
+  ],
+  "expected_violations": 0,
+  "pass_assertion": "No forbidden_substring (compared case-insensitively, ignoring whitespace runs) occurs in any checked_artifact. Generic craft terms in allowed_pattern_terms are permitted because they are patterns/common vocabulary, not copyrightable competitor expression."
+}

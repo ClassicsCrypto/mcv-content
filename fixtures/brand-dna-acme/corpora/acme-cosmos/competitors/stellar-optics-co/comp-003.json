@@ -1,0 +1,9 @@
+{
+  "source": "platform",
+  "captured_at": "2099-02-06T19:00:00Z",
+  "text": "Introducing the NovaMax 9000 — now live. The most revolutionary scope ever made, period.",
+  "url": "https://example.test/stellaroptics/status/stellar-003",
+  "trust_class": "untrusted-scraped",
+  "retention_class": "transient",
+  "metrics": { "likes": 140, "replies": 22, "reposts": 18, "bookmarks": 11, "impressions": 33000 }
+}

@@ -135,9 +135,16 @@ Order is fixed (DD-5): **integration/agents → ingestion → calibration → ca
    BYO scraper adapter. All ingested corpora are **trust-class-tagged at write**; scraped material —
    including the operator's own — enters as Zone U `untrusted-scraped` with an attestation path to
    promote curated subsets (RD-8). Cold-start is fully supported: skip the corpus.
-3. **Brand DNA:** v1 is **agent-assisted authoring, not one-shot automation**. Interview the operator
-   and/or analyze the corpus, then fill `templates/brand/brand-dna-authoring.md`. Output:
-   `brands/<id>/brand-dna.md` + an archetype catalog.
+3. **Brand DNA — two paths, same output.** *(a)* Automated (one command): `engine ingest-brand --brand <id>` ingests the operator + competitor corpus then generates; or, with a corpus already on disk, `engine generate-dna --brand <id>`
+   runs a **deterministic analysis (no LLM)** + archetype categorization, then — when a host
+   synthesis seat is wired — composes the voice prose and writes `brands/<id>/brand-dna.md` + the
+   archetype catalog + `brand.json` voice fields. Synthesis is a **host seat** (the engine never calls
+   a chain/analysis LLM, RD-2) and **metered** — show `--estimate-only`, then re-invoke with `--yes`
+   (DD-18). Competitor content informs **patterns only, never verbatim** (enforced, RD-9). It
+   **degrades**: corpus-but-no-seat ⇒ deterministic analysis + a prefilled authoring template; no
+   corpus ⇒ the cold-start template (DD-21, never blocked). *(b)* By hand: interview the operator
+   and/or read the analysis, then fill `templates/brand/brand-dna-authoring.md`. Output either way:
+   `brands/<id>/brand-dna.md` + an archetype catalog. See `docs/brand-dna.md`.
 4. **Background + competitors:** operator-supplied context + competitor handle list; competitor corpora
    are always Zone U.
 5. Verify: `engine verify --checkpoint C2`. Project state → `ingested`.
@@ -250,6 +257,8 @@ config, not in scheduler wrappers.**
 | `dispatch` | write one ad-hoc slot-run task record (no calendar entry needed) | `--family`, `--brand`, `--platform`, `--format`, `--mode`, `--force` |
 | `status` | the one-command operational surface (§9) | `--json` |
 | `calibrate --brand <id>` | the C3 calibration runner (estimate-and-confirm) | `--samples`, `--yes`, `--estimate-only`, `--result <json>` |
+| `ingest-brand --brand <id>` | the C2 one-command onboarding: ingest the operator + competitor corpus → deterministic analysis → host DNA synthesis → `brand-dna.md` + archetypes (the full flow; calls generate-dna). BYO/manual scraping (RD-9), Zone-U corpus, competitor patterns never verbatim, estimate-and-confirm | `--yes`, `--estimate-only`, `--manual`, `--competitors`, `--account`, `--since`, `--max`, `--force`, `--json` |
+| `generate-dna --brand <id>` | the C2 Brand DNA + archetype generator from the ingested corpus: deterministic analysis (no LLM) + a metered host synthesis seat; degrades to the authoring template with no seat/corpus (DD-21); competitor patterns never verbatim (RD-9). Estimate-and-confirm | `--yes`, `--estimate-only`, `--force` |
 | `index-library` | manage the media library: visual-tag/index (default), folder auto-sort (`--organize`), or character sheets (`--character-sheets`). Metered actions are estimate-and-confirm + dry-run; incremental, never re-bills; empty-library = no-op | `--yes`, `--estimate-only`, `--force`, `--no-hash`, `--organize [--apply]`, `--character-sheets [--generate --yes --apply]`, `--brand` |
 | `purge-corpora` | enforce corpus retention windows by `retention_class` (dry-run by default) | `--apply`, `--brand` |
 | `pause` / `resume` | the kill switch — engage / clear the PAUSED sentinel + config flag | `pause --reason "<text>"` |

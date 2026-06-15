@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "id": "acme-cosmos",
+  "display_name": "Acme Cosmos",
+  "account_class": "brand",
+  "drama_dial": "low",
+  "ingestion": {
+    "account_handles": [
+      { "platform": "twitter", "handle": "@acmecosmos" },
+      { "platform": "instagram", "handle": "@acme.cosmos" }
+    ],
+    "competitors": [
+      {
+        "name": "Stellar Optics Co",
+        "handles": [
+          { "platform": "twitter", "handle": "@stellaroptics" }
+        ]
+      },
+      {
+        "name": "Orbit Outfitters",
+        "handles": [
+          { "platform": "twitter", "handle": "@orbitoutfitters" },
+          { "platform": "instagram", "handle": "@orbit.outfitters" }
+        ]
+      }
+    ],
+    "manual_corpus_path": "corpora/acme-cosmos",
+    "retention_class": "standard"
+  },
+  "paths": {
+    "dna": "brands/acme-cosmos/brand-dna.md",
+    "archetypes": "brands/acme-cosmos/archetypes",
+    "corpora": "corpora/acme-cosmos"
+  },
+  "platforms": [
+    {
+      "platform": "twitter",
+      "publisher": "postiz",
+      "integration_ref": null,
+      "handle_placeholder": "@acmecosmos",
+      "rate_limit_per_day": 4,
+      "auto_publish": {
+        "enabled": false,
+        "qualifying_streak": 0,
+        "last_revocation": null,
+        "revocation_reason": null
+      }
+    }
+  ]
+}

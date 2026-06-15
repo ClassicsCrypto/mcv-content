@@ -398,6 +398,19 @@ function buildBindings() {
     { test: (p) => /^fixtures\/work-recap-acme\/commands\/.+\.json$/.test(p), schema: S('inputs/operator-command.schema.json'), mode: 'single' },
     { test: (p) => p === 'fixtures/work-recap-acme/private-terms.json', skip: true, reason: 'config-extendable private-term deny list (privacy-pre-pass control input, not a shipped artifact shape)' },
     { test: (p) => p === 'fixtures/work-recap-acme/expected/leak-check.json', skip: true, reason: 'privacy/leak-check ground truth (test control file, not a shipped artifact shape)' },
+
+    // brand-dna-acme data-ingestion / brand-identity fixtures (BD-FIXTURES). The brand.json binds to
+    // the brand config schema (exercising the new ingestion block); every ingested own + competitor
+    // corpus item binds to corpus-item (Zone-U, exercising the new optional metrics field). The
+    // recorded scrape/synthesis files are keyed REPLAY envelopes (fake-adapter/seat input maps), the
+    // system fragment is a partial config slice (not a full system.json), and the expected/* files
+    // are analyzer/check GROUND-TRUTH control shapes — all documented skips, never silently dropped.
+    { test: (p) => p === 'fixtures/brand-dna-acme/brand.json', schema: S('config/brand.schema.json'), mode: 'single' },
+    { test: (p) => /^fixtures\/brand-dna-acme\/corpora\/.+\.json$/.test(p), schema: S('inputs/corpus-item.schema.json'), mode: 'single' },
+    { test: (p) => p === 'fixtures/brand-dna-acme/system.brand-dna.json', skip: true, reason: 'partial system.json fragment (brand_dna + retention slice; not a complete system config — merged/sub-validated in tests)' },
+    { test: (p) => p === 'fixtures/brand-dna-acme/recorded/scrape-responses.json', skip: true, reason: 'recorded scrape replay envelope keyed by platform:handle (fake-scraper input map; embedded items mirror corpora/* which ARE bound and validated)' },
+    { test: (p) => p === 'fixtures/brand-dna-acme/recorded/dna-synthesis.json', skip: true, reason: 'recorded DNA-synthesis replay envelope keyed by brand (fake-seat output map, not a shipped artifact shape)' },
+    { test: (p) => /^fixtures\/brand-dna-acme\/expected\/.+\.json$/.test(p), skip: true, reason: 'brand-DNA analyzer/check ground-truth control shapes (analysis, archetype catalog, cost-estimate, cold-start, no-verbatim — asserted in tests, not shipped artifact shapes)' },
   ];
 }
 

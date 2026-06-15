@@ -205,6 +205,82 @@
         }
       }
     },
+    "brand_dna": {
+      "description": "The DATA-INGESTION & BRAND-IDENTITY pathway (release-spec §1.1 Data Ingestion & Brand Identity; §1.2 Context & Competitor Analysis; roadmap #2). CONFIG-GATED and OFF BY DEFAULT: the C2 setup checkpoint runs a ONE-COMMAND flow that ingests the operator account corpus + the competitor corpus, runs a DETERMINISTIC corpus analyzer (auditable stats — NO LLM), categorizes archetypes, then OPTIONALLY synthesizes a brand-dna.md via a HOST seat the runtime wires. ENGINE NEVER CALLS CHAIN/ANALYSIS LLMs DIRECTLY (RD-2): DNA synthesis is an injectable host seat (the §12.5 vision-seam pattern); it degrades gracefully to the manual authoring template (templates/brand/brand-dna-authoring.md) when no seat is wired (DD-21 cold-start — onboarding is NEVER blocked). SCRAPING POSTURE (RD-9): manual submission + official-account EXPORTS are first-class; scraping is BYO adapter — NO creds bundled, the operator is the data controller, ToS responsibility is the operator's. Ingested corpus is Zone U (RD-8, untrusted third-party incl. competitors), trust-class-tagged at write to $CONTENT_HOME/corpora/<brand>/ (corpus-item.schema.json) and governed by the system `retention` block (engine purge-corpora). Competitor content is analyzed for PATTERNS only — NEVER republished verbatim; a check enforces that the derived DNA/archetypes carry no copied competitor copy.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "The OFF-by-default gate (the LAW). Strictly true to enable the one-command ingestion+analysis flow in the C2 checkpoint; any other value keeps the pathway disabled (fail-closed). Even when false, the manual authoring path (templates/brand/brand-dna-authoring.md) and manual corpus submission still work — onboarding is never blocked (DD-21).",
+          "default": false
+        },
+        "scraper": {
+          "type": "object",
+          "description": "OPTIONAL BYO scraper adapter for corpus ingestion (RD-9). Absent means manual submission + official-account EXPORTS only (the first-class path). When present, the adapter is resolved BY NAME from the registry; its credential (if any) is resolved BY NAME via secrets.js — NO credential VALUE ever lives here, and the repo bundles NO creds. Scraping is a METERED action: the engine presents a pre-run cost estimate + confirm before any scrape (DD-18). The operator is the data controller and owns ToS responsibility (RD-9, disclosed in docs/data-policy.md).",
+          "additionalProperties": false,
+          "required": ["adapter"],
+          "properties": {
+            "adapter": {
+              "type": "string",
+              "description": "Registered scraper-adapter name (shipped: 'reference' for a BYO provider, 'fixture' for zero-key tests; or an operator-registered adapter). The manual-submission/export path needs no adapter.",
+              "minLength": 1,
+              "examples": ["reference", "fixture"]
+            },
+            "provider": {
+              "type": "object",
+              "description": "Adapter-specific provider configuration (a §12.5-style block, opaque to the engine; e.g. { endpoint, platform, auth_scheme }). The reference adapter resolves its credential BY NAME via secrets.js (RD-9 BYO); no credential VALUE ever lives here.",
+              "additionalProperties": true
+            },
+            "max_items_per_handle": {
+              "type": "integer",
+              "description": "Cap on items pulled per handle in one scrape (bounds the metered spend the cost estimate quotes). Default 200.",
+              "minimum": 1,
+              "default": 200
+            }
+          }
+        },
+        "synthesis": {
+          "type": "object",
+          "description": "OPTIONAL host DNA-SYNTHESIS seat wiring. The seat turns the deterministic analysis into brand-DNA voice prose; it is a HOST-runtime seat (RD-2), INJECTABLE for tests (the §12.5 vision-seam pattern). DNA synthesis is a METERED action: the engine presents a pre-run cost estimate + confirm before invoking the seat (DD-18). Absent / no seat wired => the flow degrades gracefully: it emits the deterministic analysis + the authoring template for the agent to finish (DD-21).",
+          "additionalProperties": false,
+          "properties": {
+            "seat": {
+              "type": "string",
+              "description": "Registered DNA-synthesis seat name the runtime wires (shipped: 'fixture' for zero-key tests; or a host-registered seat). When absent, the flow degrades to the manual authoring template.",
+              "minLength": 1,
+              "examples": ["fixture"]
+            },
+            "provider": {
+              "type": "object",
+              "description": "Seat-specific provider configuration (a §12.5-style block, opaque to the engine). Credentials resolve BY NAME via secrets.js (RD-2/RD-9); no credential VALUE here.",
+              "additionalProperties": true
+            }
+          }
+        },
+        "synthesis_usd": {
+          "type": "object",
+          "description": "OPTIONAL cost band (USD) the DD-18 pre-run estimate quotes for the metered DNA-synthesis seat. Falls back to config.cost.per_synthesis_usd, then an engine default. low/high bound the quoted estimate; the actual spend a real seat reports is capped by the §11.2 budget.",
+          "additionalProperties": false,
+          "required": ["low", "high"],
+          "properties": {
+            "low": { "type": "number", "minimum": 0 },
+            "high": { "type": "number", "minimum": 0 }
+          }
+        },
+        "verbatim_shingle_words": {
+          "type": "integer",
+          "description": "OPTIONAL word n-gram (shingle) width the no-verbatim-republish check uses to detect copied competitor copy in the generated DNA/archetypes (the RD-9 enforcement). Minimum 3; engine default applies when absent.",
+          "minimum": 3,
+          "default": 6
+        },
+        "private_terms": {
+          "$ref": "#/$defs/private_terms",
+          "description": "Extra redaction deny-list terms applied to the generated brand-dna.md / archetype catalog at write (the privacy pre-pass, §13.3). Public anti-targets (partner names / codenames), not secrets."
+        }
+      }
+    },
     "work_recap": {
       "description": "The WORK-RECAP / build-in-public SOURCE pathway (release-spec §2.1 seeding; §3.3 operator/founder/team accounts with flexible voice). CONFIG-GATED and OFF BY DEFAULT: the daily kickoff fills one build-in-public option per day per OPERATOR account from a CONFIGURED, SENSITIVE memory path. PRIVACY IS LOAD-BEARING — the source runs a redaction/privacy pre-pass (shared/redact + this private-term deny list) and the draft passes the gate's privacy/leak check BEFORE the human approval card (§2.4). The repo ships the MECHANISM pointed at a configured path; it NEVER bundles or commits real memory. Recaps fill RESERVED work_recap calendar slots, never out-of-calendar.",
       "type": "object",

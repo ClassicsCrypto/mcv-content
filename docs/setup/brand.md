@@ -48,14 +48,36 @@ quick-start defers this to the going-LIVE step.
 
 ## Author the Brand DNA (C2, step 3)
 
-v1 Brand DNA is **agent-assisted authoring, not one-shot automation.** The host agent interviews you
-and/or analyzes your ingested corpus, then fills `templates/brand/brand-dna-authoring.md`. The output
-is `brands/<id>/brand-dna.md` plus an `archetypes/` catalog. The authoring template captures
-identity, tone, voice rules, audience, taboos, the drama/dial preference (matching the `brand.json`
-`drama_dial`), and an example bank. Its frontmatter is schema-validated.
+There are **two paths to a Brand DNA**, and they share the same output and the same authoring
+template — pick whichever fits the brand:
 
-Automated end-to-end DNA generation is roadmap; the same authoring template is also the cold-start
-path below (see [`cold-start.md`](cold-start.md) for the full history-less walk).
+**A. Generate it from a corpus (the one-command flow).** If you have ingested a corpus (step 2),
+`engine generate-dna` runs a **deterministic corpus analysis (no LLM)**, categorizes archetypes, and
+— when a host synthesis seat is wired — composes the voice prose, writing `brands/<id>/brand-dna.md`,
+the `archetypes/` catalog, and the `brand.json` voice fields in one shot:
+
+```
+engine generate-dna --brand <id> --estimate-only   # see the metered-synthesis cost first (DD-18)
+engine generate-dna --brand <id> --yes             # confirm and generate
+```
+
+DNA *synthesis* is a **host-runtime seat** (the engine never calls a chain/analysis LLM directly,
+RD-2) and it is **metered** — without `--yes` the command halts with a cost estimate and writes
+nothing. Competitor content informs **patterns only and is never reproduced verbatim** (a check
+enforces this, RD-9). The flow **degrades gracefully**: corpus but no seat ⇒ it writes the
+deterministic analysis + a *prefilled* authoring template for the agent to finish; no corpus ⇒ the
+cold-start manual template. Onboarding is never blocked (DD-21). Full reference, the `brand_dna`
+config block, and the no-verbatim check: [`../brand-dna.md`](../brand-dna.md).
+
+**B. Author it by hand (agent-assisted).** The host agent interviews you and/or reads the
+deterministic analysis, then fills `templates/brand/brand-dna-authoring.md` directly. This is the
+path for a history-less brand and the always-available fallback.
+
+Either way the output is `brands/<id>/brand-dna.md` plus an `archetypes/` catalog, and the authoring
+template captures identity, tone, voice rules, audience, taboos, the drama/dial preference (matching
+the `brand.json` `drama_dial`), and an example bank. Its frontmatter is schema-validated. The same
+authoring template is the cold-start path below (see [`cold-start.md`](cold-start.md) for the full
+history-less walk).
 
 ### Corpus intake (optional, C2, step 2)
 

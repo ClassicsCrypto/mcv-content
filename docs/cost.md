@@ -19,9 +19,12 @@ There are two distinct cost regimes, and the engine can only see one of them:
   (`engine index-library` — it sends each library asset to the configured vision provider for a
   description + tags; character-sheet generation is similarly metered when a provider is configured).
   Each emits a spend event the engine can sum and cap.
-- **Host-runtime-owned spend** — the chain-seat LLM tokens (writer, gate, matcher, enricher). The
-  engine does **not** call these LLMs; your host runtime does, with your provider credentials. The
-  engine is structurally blind to this cost **unless** your runtime reports per-run cost back to it.
+- **Host-runtime-owned spend** — the chain-seat LLM tokens (writer, gate, matcher, enricher), **and
+  the Brand DNA synthesis seat** (`engine generate-dna`). The engine does **not** call these LLMs;
+  your host runtime does, with your provider credentials. The engine is structurally blind to this
+  cost **unless** your runtime reports per-run cost back to it. DNA synthesis is host-owned spend that
+  the engine nonetheless **gates** with its own estimate-and-confirm (DD-18) before invoking the seat
+  — see the estimators below.
 
 This split is load-bearing for budgets (below) and for [`observability.md`](observability.md). For
 most installs the chain-seat LLM tokens are the dominant cost, and they live outside the engine's
@@ -77,6 +80,17 @@ is the band `engine calibrate --estimate-only` multiplies by N to preface a cali
 config-overridable (`cost.per_sample_usd`). Treat all of these as starting points until you measure
 your own.
 
+Per-synthesis indicative band used by `engine generate-dna --estimate-only`: placeholder
+`$0.05–$0.40` per Brand DNA synthesis (one host-seat call), config-overridable via
+`brand_dna.synthesis_usd` (falls back to `cost.per_synthesis_usd`, then the engine default).
+
+> **Scraping is also metered.** When you opt into the BYO scraper for corpus ingestion
+> (`brand_dna.scraper` / the trend adapter), each scrape is a metered provider call you bring your own
+> key for. The ingestion path presents a pre-run cost estimate (items × an indicative per-item band)
+> and requires confirmation before any scrape (DD-18). The manual-submission and official-export
+> intake paths are always **free**. See [`brand-dna.md`](brand-dna.md#corpus-intake--three-paths-rd-9-posture-read-this)
+> and [`data-policy.md`](data-policy.md).
+
 ## Capping chain spend (host runtime)
 
 Because chain-seat LLM spend is host-owned, you cap it where your runtime lets you — not in this
@@ -94,13 +108,19 @@ When it does not, they mark spend **"engine-metered only (partial)"** — an hon
 ## The estimators (your source of current numbers)
 
 The estimate-and-confirm contract: a command presents a pre-run estimate and **requires confirmation
-before spending**. Two commands are live:
+before spending**. The live commands:
 
 - `engine calibrate --brand <id>` — your first real spend. Run `--estimate-only` to see the band, then
   `--yes` to confirm. See [`setup/brand.md`](setup/brand.md#calibrate-c3--the-mandatory-gate).
 - `engine index-library` — library media indexing. Run `--estimate-only` to see the band (item count ×
   the per-asset band), then `--yes` to confirm and index in resumable batches. See
   [`library.md`](library.md).
+- `engine generate-dna --brand <id>` — Brand DNA synthesis from the ingested corpus. The deterministic
+  corpus analysis is **free**; the metered action is the **one host synthesis seat call**, so the
+  estimate is a single synthesis × the per-synthesis band. Run `--estimate-only` to see it, then
+  `--yes` to confirm. With **no corpus** the cold-start template path spends nothing; with **no
+  synthesis seat** the deterministic-analysis + prefilled-template degrade spends nothing. See
+  [`brand-dna.md`](brand-dna.md).
 
 Both `--estimate-only` outputs reflect *your* configured chain and providers, so they are the
 authoritative current numbers; the bands above are only orientation.

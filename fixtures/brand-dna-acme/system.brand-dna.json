@@ -1,0 +1,20 @@
+{
+  "$comment": "BD-FIXTURES — synthetic system.json FRAGMENT exercising the brand_dna ingestion block (release-spec §1.1/§1.2; roadmap #2). NOT a full system.json (it omits the always-required reviewers/budget/publish/approval_surface/scheduler) — it is the brand_dna + retention slice a test merges over a base system config or validates against the brand_dna sub-schema. brand_dna.enabled=true turns ON the one-command flow; scraper.adapter='fixture' + synthesis.seat='fixture' wire the ZERO-KEY fakes (tests/helpers/fake-scraper-adapter.js + fake-dna-synthesis.js) — NO creds, NO network (RD-9/RD-12). retention governs how engine purge-corpora ages the ingested Zone-U corpus. ALL SYNTHETIC. See PROVENANCE.md.",
+  "brand_dna": {
+    "enabled": true,
+    "scraper": {
+      "adapter": "fixture",
+      "provider": { "platform": "twitter" },
+      "max_items_per_handle": 200
+    },
+    "synthesis": {
+      "seat": "fixture"
+    },
+    "private_terms": ["Nebula Nine Optics", "Project Dark Comet"]
+  },
+  "retention": {
+    "raw_corpus_days": 90,
+    "transient_days": 7,
+    "purge_schedule": "weekly"
+  }
+}

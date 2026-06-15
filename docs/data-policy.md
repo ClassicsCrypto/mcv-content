@@ -40,6 +40,34 @@ An **operator attestation** promotes a curated subset to `operator-curated` — 
 item's `attestation` field (who promoted it, when, why). Promotion is a deliberate human act, not a
 default.
 
+## Brand and competitor corpus as a sensitive Zone-U source
+
+The corpus you ingest for **Brand DNA generation** ([`brand-dna.md`](brand-dna.md)) — both your own
+account content and your competitors' — is one of the system's sensitive inputs, and it carries
+specific obligations:
+
+- **All of it is Zone U (untrusted), including your own scraped corpus.** It is third-party text, and
+  competitor corpus is by definition not yours. It is trust-class-tagged at write, enters seat prompts
+  only inside data fences, and can never modify rules/config except through a reviewed Learning
+  Record.
+- **Competitor content is analyzed for PATTERNS only — never republished verbatim.** `engine
+  generate-dna` derives *patterns* (the kinds of hooks, structures, and angles that work) into the
+  brand DNA and archetype catalog; it does **not** copy competitor copy. A **no-verbatim check
+  enforces this**: the engine strips any competitor-shingle overlap from the generated output and
+  refuses to write output with a residual confirmed leak (RD-9). The generated `brand-dna.md` and
+  archetypes carry derived patterns, not lifted text.
+- **The corpus is never committed and never shared.** Like all ingested corpora it lives under
+  `$CONTENT_HOME/corpora/<brand>/`, is governed by the retention windows below, and is on the
+  never-accepted list for contributions (see *Never committed, never shared*). Even your own *scraped*
+  corpus is instance data regardless of the trust-promotion outcome.
+- **Scraping is your responsibility.** The BYO scraper path carries the same operator-as-data-
+  controller and platform-ToS responsibility as any other scrape; manual submission and official
+  exports are the first-class, no-credential paths.
+- **Generated DNA gets a privacy pre-pass.** Your config-extendable `brand_dna.private_terms` deny
+  list (partner names, codenames a generic matcher cannot know) is redacted from the generated
+  `brand-dna.md` / archetype catalog at write — the same honest pattern + known-name redaction the
+  logs use, not semantic DLP.
+
 ## Project memory as a sensitive source
 
 The optional **work-recap / build-in-public** source ([`work-recap.md`](work-recap.md)) reads **your
@@ -127,6 +155,8 @@ holder lists, member profiling). Schemas of these ship; instances never do.
 
 ## See also
 
+- [`brand-dna.md`](brand-dna.md) — the brand-DNA / competitor-ingestion flow: deterministic analysis,
+  the host synthesis seat, the no-verbatim enforcement, and the `brand_dna` config block.
 - [`configuration.md`](configuration.md) — the `retention` block and the trust glossary.
 - [`work-recap.md`](work-recap.md) — project memory as a source: the four-layer privacy model in full.
 - [`trends.md`](trends.md) — the BYO trend pathway: Zone-U reports, manual-first, metered polling.

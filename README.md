@@ -93,7 +93,10 @@ The smallest path to a first approval card. Full narration:
    instantiate six seats (orchestrator, matcher, writer, gate, packager, publisher-liaison). **Postiz
    is not needed yet.**
 3. **C2 minimal:** one brand; **cold-start Brand DNA** via the authoring template — no scraping, no
-   corpus, no account connection yet.
+   corpus, no account connection yet. (To automate it, `engine ingest-brand --brand <id>` ingests the
+   operator + competitor corpus and generates the DNA + archetypes in one command; with a corpus
+   already on disk, `engine generate-dna --brand <id>` runs just the generation step — see
+   [`docs/brand-dna.md`](docs/brand-dna.md).)
 4. **C3:** `engine calibrate --brand <id>` (mandatory; confirm the cost estimate with `--yes`).
 5. **C4 minimal:** a 3-slot/week Twitter calendar; empty-library mode; no campaigns.
 6. **Install the daily trigger** from `templates/scheduler/`, or skip it and use step 7's command.
@@ -205,6 +208,16 @@ Two optional **content sources** ship in v1 as opt-in extensions. Both produce a
 through the same chain to the **human approval card** — neither bypasses the chain, and **nothing
 auto-publishes**. Both are disabled until you add their config block.
 
+A third opt-in pathway, **brand-DNA generation + competitor ingestion** (`config/system.json`
+`brand_dna` block), upgrades C2 onboarding into a one-command flow (`engine ingest-brand`): ingest the operator + competitor
+corpus, run a **deterministic analysis (no LLM)**, and — when a host synthesis seat is wired —
+generate `brand-dna.md` + an archetype catalog. DNA synthesis is a host-runtime seat (the engine
+never calls a chain/analysis LLM, RD-2) and is **metered**; it **degrades gracefully** to the manual
+authoring template when no seat or corpus is present (onboarding is never blocked). Scraping is BYO
+(no bundled credentials; you are the data controller), and competitor content is analyzed for
+**patterns only — never republished verbatim** (enforced). See
+[`docs/brand-dna.md`](docs/brand-dna.md).
+
 - **Automated trend pathway** — `config/system.json` `trends` block. A bring-your-own trend adapter
   polls a provider you supply on a 2/4/8/12 h cadence and writes Zone-U **Trend Reports** that seed
   **reserved trend calendar slots** (never out-of-calendar); a manual-submission path needs no keys.
@@ -220,8 +233,10 @@ auto-publishes**. Both are disabled until you add their config block.
 
 1. **Trend-pathway depth** — readout automation polish, additional providers, monthly competitor scan
    (the trend source itself is shipped above).
-2. **Automated Brand DNA generation + competitor ingestion flows** — upgrading the agent-assisted path
-   to one-command ingestion.
+2. **Automated Brand DNA generation + competitor ingestion flows** — *shipped* as the
+   config-gated brand-DNA pathway above (the one-command `engine ingest-brand` flow: ingest → analyze
+   → generate; `engine generate-dna` runs the generation step alone over an already-ingested corpus;
+   remaining roadmap depth: richer scraper adapters and tuning).
 3. **Governed self-improvement loop** — machine-applied learning records with their governance
    machinery (thresholds, canary, rollback) shipping together; never before the governance.
 4. **Improvement-sharing automation** — outbound sanitize/consent tooling + a maintainer evaluation

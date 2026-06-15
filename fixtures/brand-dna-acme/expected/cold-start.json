@@ -1,0 +1,47 @@
+{
+  "$comment": "BD-FIXTURES — GROUND TRUTH for the COLD-START / graceful-degradation paths (release-spec DD-21; the law: 'no seat but a corpus => emit the deterministic analysis + the authoring template for the agent to finish. Never block onboarding.'). Three cases a test asserts. Case A (no corpus, no scraper): the manual authoring path is offered, onboarding proceeds. Case B (corpus present, NO synthesis seat wired): the flow emits the deterministic analysis (expected/analysis.json) AND the authoring template (templates/brand/brand-dna-authoring.md) for the agent to finish — it does NOT fabricate DNA. Case C (corpus + seat wired): full synthesis (expected/brand-dna.expected.md). In every case onboarding is never blocked and nothing auto-publishes. ALL SYNTHETIC. See PROVENANCE.md.",
+  "brand": "acme-cosmos",
+  "cases": [
+    {
+      "id": "A_no_corpus_no_scraper",
+      "given": { "brand_dna_enabled": true, "corpus_items": 0, "scraper": null, "synthesis_seat": null },
+      "expect": {
+        "blocked": false,
+        "emits": ["templates/brand/brand-dna-authoring.md"],
+        "analysis_emitted": false,
+        "dna_synthesized": false,
+        "message_contains": "manual authoring"
+      },
+      "reason": "Pure cold start (DD-21). The manual Brand-DNA authoring template is the deliverable; the operator/agent fills it in. Onboarding continues."
+    },
+    {
+      "id": "B_corpus_no_seat",
+      "given": { "brand_dna_enabled": true, "corpus_items": 16, "scraper": "fixture", "synthesis_seat": null },
+      "expect": {
+        "blocked": false,
+        "emits": ["expected/analysis.json", "expected/archetype-catalog.json", "templates/brand/brand-dna-authoring.md"],
+        "analysis_emitted": true,
+        "dna_synthesized": false,
+        "message_contains": "no DNA-synthesis seat wired"
+      },
+      "reason": "Degrade gracefully (DD-21 + RD-2): with a corpus but no host seat, emit the deterministic analysis + archetype catalog + the authoring template for the agent to finish. The engine does NOT call an LLM itself and does NOT fabricate DNA prose."
+    },
+    {
+      "id": "C_corpus_and_seat",
+      "given": { "brand_dna_enabled": true, "corpus_items": 16, "scraper": "fixture", "synthesis_seat": "fixture" },
+      "expect": {
+        "blocked": false,
+        "emits": ["expected/analysis.json", "expected/archetype-catalog.json", "expected/brand-dna.expected.md", "brand.json voice fields"],
+        "analysis_emitted": true,
+        "dna_synthesized": true,
+        "metered_actions_gated": ["scrape", "dna-synthesis"]
+      },
+      "reason": "Full one-command flow: ingest -> deterministic analysis -> archetype catalog -> host-seat DNA synthesis. The two metered actions (scrape, synthesis) each present a pre-run cost estimate + confirm (DD-18) before spending."
+    }
+  ],
+  "invariants": {
+    "onboarding_never_blocked": true,
+    "engine_never_calls_analysis_llm_directly": true,
+    "nothing_auto_publishes": true
+  }
+}

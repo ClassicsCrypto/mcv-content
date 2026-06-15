@@ -24,6 +24,7 @@
  *   dispatch       write one slot-run task record    (orchestrator dispatchTask, RD-18)
  *   status         the §13.1 operational surface     (queue + ledger + mode + spend scope)
  *   calibrate      the C3 calibration runner         (estimate-and-confirm, DD-18/§2.5)
+ *   ingest-brand   the one-command C2 onboarding flow (ingest -> analyze -> generate-dna, §1.1/§1.2)
  *   purge-corpora  retention purge by retention_class (RD-9)
  *   pause / resume the kill switch                   (PAUSED sentinel + config, §15.4)
  *
@@ -64,13 +65,15 @@ const VERBS = {
   dispatch: { mod: require('../engine/cli/dispatch'), fn: 'run' },
   status: { mod: require('../engine/cli/status'), fn: 'run' },
   calibrate: { mod: require('../engine/cli/calibrate'), fn: 'run' },
+  'ingest-brand': { mod: require('../engine/cli/ingest-brand'), fn: 'run' },
+  'generate-dna': { mod: require('../engine/cli/generate-dna'), fn: 'run' },
   'index-library': { mod: require('../engine/cli/index-library'), fn: 'run' },
   'purge-corpora': { mod: require('../engine/cli/purge-corpora'), fn: 'run' },
   pause: { mod: require('../engine/cli/pause'), fn: 'pauseRun' },
   resume: { mod: require('../engine/cli/pause'), fn: 'resumeRun' },
 };
 
-const VERB_ORDER = ['init', 'verify', 'fixture-run', 'run-slot', 'kickoff', 'poll-trends', 'dispatch', 'status', 'calibrate', 'index-library', 'purge-corpora', 'pause', 'resume'];
+const VERB_ORDER = ['init', 'verify', 'fixture-run', 'run-slot', 'kickoff', 'poll-trends', 'dispatch', 'status', 'calibrate', 'ingest-brand', 'generate-dna', 'index-library', 'purge-corpora', 'pause', 'resume'];
 
 /** One-line summary per verb for the top-level help (kept short; --help <verb> has the full text). */
 const VERB_SUMMARY = {
@@ -83,6 +86,8 @@ const VERB_SUMMARY = {
   dispatch: 'write one pending slot-run task record (RD-18)',
   status: 'the one-command operational surface (§13.1)',
   calibrate: 'the C3 calibration runner (estimate-and-confirm)',
+  'ingest-brand': 'one-command brand onboarding: ingest -> analyze -> generate DNA (estimate-and-confirm)',
+  'generate-dna': 'generate Brand DNA + archetypes from the ingested corpus (estimate-and-confirm)',
   'index-library': 'index/sort the media library + character sheets (estimate-and-confirm)',
   'purge-corpora': 'enforce corpus retention windows (RD-9)',
   pause: 'engage the kill switch (PAUSED sentinel + config)',

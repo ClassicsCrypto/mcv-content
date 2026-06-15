@@ -294,6 +294,113 @@ test('calibrate --result grades against the C3 criteria and records C3 (a passin
 });
 
 // ---------------------------------------------------------------------------
+// ingest-brand (BD-CLI) — the one-command flow: ingest -> analyze -> generate
+// ---------------------------------------------------------------------------
+
+const ingestBrandVerb = require('../engine/cli/ingest-brand.js');
+
+test('ingest-brand is registered and routes through main() with a --help (exit 0)', async () => {
+  assert.ok(engine.VERB_ORDER.includes('ingest-brand'));
+  const { code, stdout } = await capture(() => engine.main(['node', 'engine.js', 'ingest-brand', '--help']));
+  assert.equal(code, 0);
+  assert.match(stdout, /one-command/i);
+});
+
+test('ingest-brand needs --brand (exit 2 usage)', async () => {
+  const result = await ingestBrandVerb.run({ flags: {}, env: { PATH: process.env.PATH } });
+  assert.equal(result.ok, false);
+  assert.equal(result.exitCode, 2);
+  assert.match(result.summary, /needs --brand/);
+});
+
+test('ingest-brand without --yes halts with the metered cost band, spends nothing (DD-18)', async () => {
+  const home = tempHome();
+  const target = path.join(home, 'i');
+  initVerb.run({ flags: { home: target, 'no-git': true }, env: { ...process.env } });
+  const env = { ...process.env, CONTENT_HOME: target };
+
+  const unconfirmed = await ingestBrandVerb.run({ flags: { brand: 'acme' }, env });
+  assert.equal(unconfirmed.ok, false);
+  assert.equal(unconfirmed.exitCode, 0); // refused-by-design, not an error
+  assert.equal(unconfirmed.data.awaiting_confirmation, true);
+  assert.match(unconfirmed.summary, /requires confirmation/);
+  // No brand-dna.md was written by the unconfirmed default.
+  assert.equal(fs.existsSync(path.join(target, 'brands', 'acme', 'brand-dna.md')), false);
+
+  const estOnly = await ingestBrandVerb.run({ flags: { brand: 'acme', 'estimate-only': true }, env });
+  assert.equal(estOnly.ok, true);
+  assert.equal(estOnly.data.confirmed, false);
+  // No corpus + no scraper configured => scrape: none, synthesis: cold-start (free).
+  assert.equal(estOnly.data.scrape.willScrape, false);
+});
+
+test('ingest-brand --yes with no corpus + no scraper degrades to the cold-start template (DD-21, exit 0)', async () => {
+  const home = tempHome();
+  const target = path.join(home, 'i');
+  initVerb.run({ flags: { home: target, 'no-git': true }, env: { ...process.env } });
+  const env = { ...process.env, CONTENT_HOME: target };
+
+  // Register a minimal brand.json so generate can update voice fields (and the verb reads ingestion).
+  const brandDir = path.join(target, 'brands', 'acme');
+  fs.mkdirSync(brandDir, { recursive: true });
+  fs.writeFileSync(path.join(brandDir, 'brand.json'), JSON.stringify({
+    id: 'acme', display_name: 'Acme Cosmos', account_class: 'brand',
+    platforms: [{ platform: 'twitter', publisher: 'manual' }],
+  }, null, 2));
+
+  const res = await ingestBrandVerb.run({ flags: { brand: 'acme', yes: true }, env });
+  assert.equal(res.ok, true);
+  assert.equal(res.exitCode, 0);
+  // Stage 1 ingest was skipped (off-by-default scraper); stage generate ran cold-start.
+  const ingestStage = res.data.stages.find((s) => s.stage === 'ingest');
+  assert.equal(ingestStage.skipped, true);
+  assert.match(ingestStage.reason, /OFF-by-default|manual\/export corpus only/);
+  assert.equal(res.data.generate_status, 'cold-start');
+  // The manual authoring template was written — onboarding is never blocked.
+  assert.ok(fs.existsSync(path.join(brandDir, 'brand-dna.md')));
+});
+
+test('ingest-brand --yes with a manual corpus + injected DNA seat generates DNA end-to-end (zero-key)', async () => {
+  const home = tempHome();
+  const target = path.join(home, 'i');
+  initVerb.run({ flags: { home: target, 'no-git': true }, env: { ...process.env } });
+  const env = { ...process.env, CONTENT_HOME: target };
+
+  const brandDir = path.join(target, 'brands', 'acme');
+  fs.mkdirSync(brandDir, { recursive: true });
+  fs.writeFileSync(path.join(brandDir, 'brand.json'), JSON.stringify({
+    id: 'acme', display_name: 'Acme Cosmos', account_class: 'brand',
+    platforms: [{ platform: 'twitter', publisher: 'manual' }],
+  }, null, 2));
+
+  // Drop an own-corpus item directly into corpora/acme/ (the manual path — no scraper, no keys).
+  const corpus = path.join(target, 'corpora', 'acme');
+  fs.mkdirSync(corpus, { recursive: true });
+  fs.writeFileSync(path.join(corpus, 'own-1.json'), JSON.stringify({
+    source: 'manual', captured_at: new Date().toISOString(),
+    text: 'We are building an open content engine in public, one honest update at a time.',
+    trust_class: 'untrusted-scraped', retention_class: 'retained',
+  }));
+
+  // Inject a host DNA seat (the §12.5-style seam — engine never calls an LLM itself, RD-2).
+  const dnaSeat = async () => ({
+    identity: 'A builder studio shipping in the open.',
+    tone: 'Plainspoken, confident, kind.',
+    voice: 'Short sentences. Concrete nouns. No hype.',
+    do: ['Show the work'], do_not: ['Overpromise'],
+    signature_moves: ['One honest update at a time'],
+    drama_dial: 'medium',
+  });
+
+  const res = await ingestBrandVerb.run({ flags: { brand: 'acme', yes: true }, env, dnaSeat });
+  assert.equal(res.ok, true);
+  assert.equal(res.exitCode, 0);
+  assert.match(res.data.generate_status, /generated/);
+  const dna = fs.readFileSync(path.join(brandDir, 'brand-dna.md'), 'utf8');
+  assert.match(dna, /A builder studio shipping in the open/);
+});
+
+// ---------------------------------------------------------------------------
 // run-slot — fail-closed on an unknown slot; dispatch-only by default
 // ---------------------------------------------------------------------------
 

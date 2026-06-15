@@ -420,21 +420,31 @@ function verifyC2(opts = {}) {
     }
     checks.push(pass(`brand:${id}:config`, 'brand.json structurally valid (§11.3)'));
 
-    // Brand DNA file present (DD-21 authoring template output, §2.4 step 3).
+    // Brand DNA file present (DD-21 authoring template output, §2.4 step 3). Two supported routes,
+    // either of which satisfies this check:
+    //   (1) ONE-COMMAND (release-spec §1.1/§1.2; roadmap #2): `engine ingest-brand --brand <id>`
+    //       ingests the corpus -> deterministic analysis -> generates brand-dna.md + the archetype
+    //       catalog (DNA synthesis via the host seat when wired; DD-18 estimate-and-confirm). The
+    //       generate-only verb `engine generate-dna --brand <id>` runs the analysis+generate half
+    //       over an already-ingested corpus.
+    //   (2) MANUAL / COLD-START (DD-21 — the no-op-safe DEFAULT that always works): fill
+    //       templates/brand/brand-dna-authoring.md by hand into brands/<id>/brand-dna.md. No corpus,
+    //       no seat, and no spend are required — onboarding is never blocked.
     const brandDir = paths.brandDir(id, env);
     const dnaCandidates = ['brand-dna.md', 'brand-dna-authoring.md', 'dna.md'];
     const dnaRel = (brand.paths && brand.paths.dna) ? path.join(brandDir, brand.paths.dna) : null;
     const dnaFound = (dnaRel && fs.existsSync(dnaRel)) ||
       dnaCandidates.some((f) => fs.existsSync(path.join(brandDir, f)));
     if (dnaFound) {
-      checks.push(pass(`brand:${id}:dna`, 'Brand DNA file present (DD-21 authoring path)'));
+      checks.push(pass(`brand:${id}:dna`, 'Brand DNA file present (one-command `engine ingest-brand`/`generate-dna` output OR the DD-21 manual authoring path)'));
     } else {
       allBrandsOk = false;
       checks.push(
         fail(
           `brand:${id}:dna`,
           'no Brand DNA file found for this brand',
-          'Fill templates/brand/brand-dna-authoring.md → brands/<id>/brand-dna.md (DD-21 cold-start path, §2.4 step 3).',
+          'One-command: `engine ingest-brand --brand <id>` (ingest → analyze → generate, DD-18 estimate-and-confirm; §1.1/§1.2). ' +
+            'Or the manual/cold-start DEFAULT (always works, no spend): fill templates/brand/brand-dna-authoring.md → brands/<id>/brand-dna.md (DD-21, §2.4 step 3).',
         ),
       );
     }

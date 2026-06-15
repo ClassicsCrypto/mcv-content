@@ -143,6 +143,33 @@ them before the approval card, plus a clean day that passes. See `fixtures/work-
 All planted "secrets", partner names, and codenames are **deliberately fake and obviously synthetic** —
 the planted credential (`FAKE_TOKEN_do_not_use_0000`) reads as a fake on sight and is never real-shaped.
 
+## `fixtures/brand-dna-acme/` — synthetic data-ingestion / brand-identity estate (release-spec §1.1, §1.2; roadmap #2)
+
+The zero-key fixtures + config + injectable fakes for the DATA-INGESTION & BRAND-IDENTITY feature: the
+one-command flow that ingests the operator account corpus + a competitor corpus, runs a DETERMINISTIC
+corpus analyzer (auditable stats — NO LLM), categorizes archetypes, and OPTIONALLY synthesizes
+`brand-dna.md` via a HOST seat (RD-2 — the engine never calls analysis LLMs directly; the seat is
+injectable like the §12.5 vision seam). Scraping is BYO + no bundled creds (RD-9); ingested corpus is
+Zone U (RD-8); competitor content is analyzed for PATTERNS only and never republished verbatim (a check
+enforces this); cold-start never blocks onboarding (DD-21); metered actions are cost-gated (DD-18);
+everything is brand-keyed (DD-10). The only operator brand is the fictional **Acme Cosmos**; the two
+competitors (**Stellar Optics Co**, **Orbit Outfitters**) are invented. See
+`fixtures/brand-dna-acme/PROVENANCE.md` for the full file table.
+
+| File / dir | What it is | Provenance |
+|---|---|---|
+| `brand-dna-acme/brand.json` | Brand config exercising the new `ingestion` block; validates against `schemas/config/brand.schema.json`. | Authored-synthetic |
+| `brand-dna-acme/system.brand-dna.json` | Partial system.json fragment exercising the new `brand_dna` + `retention` blocks. | Authored-synthetic |
+| `brand-dna-acme/corpora/acme-cosmos/own/*.json` (8) | Synthetic OWN-account corpus; each validates against `schemas/inputs/corpus-item.schema.json` and carries optional engagement `metrics`. | Authored-synthetic |
+| `brand-dna-acme/corpora/acme-cosmos/competitors/<name>/*.json` (4+4) | Two invented competitors' corpora; Zone U (untrusted-scraped, transient). | Authored-synthetic |
+| `brand-dna-acme/recorded/scrape-responses.json` | Recorded zero-key scraper replays keyed by `${platform}:${handle}` (incl. an empty-degrade case). | Authored-synthetic |
+| `brand-dna-acme/recorded/dna-synthesis.json` | Recorded zero-key DNA-synthesis seat output keyed by brand id (canned `brand-dna.md`). | Authored-synthetic |
+| `brand-dna-acme/expected/*.json` (5) | Ground truth: deterministic analysis, archetype catalog, no-verbatim check, cold-start cases, cost estimate. | Authored-synthetic |
+| `brand-dna-acme/expected/brand-dna.expected.md` | Expected synthesized Brand DNA (byte-identical to the recorded seat output). | Authored-synthetic |
+
+The consumer helpers are `tests/helpers/fake-scraper-adapter.js` (RD-9 scraper seam) and
+`tests/helpers/fake-dna-synthesis.js` (RD-2 DNA-synthesis host seat).
+
 ## Why no instance content migrates
 
 Per the release gap analysis, **zero** files from the private instance pass the §13.3 r1 test
