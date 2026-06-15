@@ -1,0 +1,21 @@
+{
+  "content_id": "thread-base-08",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "external_post_ref": "acme-thread-base-08",
+  "captured_at": "2099-04-04T12:00:00.000Z",
+  "checkpoint": "7d",
+  "type": "thread",
+  "format": "thread",
+  "theme": "sky-events",
+  "hook": "how-to-explainer",
+  "archetype": "how-to-explainer",
+  "content_type": "thread",
+  "metrics": {
+    "likes": 101,
+    "comments": 8,
+    "shares": 5,
+    "views": 2222,
+    "impressions": 3030
+  }
+}

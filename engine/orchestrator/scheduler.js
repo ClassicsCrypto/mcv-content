@@ -37,6 +37,7 @@ const runLock = require('./run-lock');
 const mode = require('./mode');
 const kickoff = require('./kickoff');
 const pollTrends = require('./poll-trends');
+const improveCli = require('../cli/improve');
 
 /** Tick defaults (the production-proven values; config-overridable via the scheduler block). */
 const DEFAULT_LOOKAHEAD_MINUTES = 120; // fire anything due in the next 2h
@@ -242,6 +243,69 @@ async function runTick(opts = {}) {
   return locked.result;
 }
 
+// ---------------------------------------------------------------------------
+// runImprovePass — the OPTIONAL periodic governed self-improvement pass (off by default)
+// ---------------------------------------------------------------------------
+
+/**
+ * The optional periodic GOVERNED self-improvement pass (release-spec roadmap #3; DD-6; §8.9 "ships
+ * WITH its governance machinery, never before"; §15.4 kill switch). DOUBLE OFF-BY-DEFAULT: it
+ * refuses unless BOTH the loop itself is enabled (config.self_improve.enabled === true — DD-6 (6))
+ * AND the scheduler is explicitly told to run it on cadence (config.self_improve.scheduler.
+ * periodic_enabled === true) — so enabling the loop for a MANUAL `engine improve` never silently
+ * starts auto-applying changes on a timer. The refusal is explicit, not silent (same posture as the
+ * §8.4 tick): an operator who enabled the loop but not the cadence gets told why nothing fired.
+ *
+ * It delegates wholesale to the SI-CLI improve handler (engine/cli/improve.run) — the engine never
+ * re-implements the governed loop; the scheduler is just another caller of the one thin runner. The
+ * pass DEFAULTS to dry-run (preview only); set config.self_improve.scheduler.apply === true to let
+ * the cadence perform governed application. Honors the PAUSED kill switch via the improve handler
+ * itself (it checks the sentinel first). `opts.force` overrides the periodic_enabled gate for an
+ * explicit operator/test run (it does NOT override the loop's own enabled/PAUSED guards).
+ *
+ * @param {object} [opts]
+ * @param {object} [opts.env]      environment (default process.env)
+ * @param {object} [opts.config]   parsed config (self_improve.{enabled,scheduler})
+ * @param {boolean}[opts.force]    run even when periodic_enabled is false (operator/test)
+ * @param {boolean}[opts.apply]    perform governed application (default: config flag, else dry-run)
+ * @param {number} [opts.now]      injected clock (ms) for deterministic record/canary timestamps
+ * @returns {Promise<object>}  { ran, disabled?, reason?, ...improveResult }
+ */
+async function runImprovePass(opts = {}) {
+  const env = opts.env || process.env;
+  const config = opts.config || {};
+  const si = (config.self_improve && typeof config.self_improve === 'object' && config.self_improve) || {};
+  const sched = (si.scheduler && typeof si.scheduler === 'object' && si.scheduler) || {};
+
+  const periodicEnabled = sched.periodic_enabled === true;
+  if (!periodicEnabled && !opts.force) {
+    return {
+      ran: false,
+      disabled: true,
+      reason: 'periodic self-improvement pass is OFF by default (DD-6 / §8.9). Set config self_improve.scheduler.periodic_enabled=true to run it on cadence; `engine improve` runs it manually. The loop itself must also be enabled (self_improve.enabled=true).',
+    };
+  }
+
+  // Dry-run unless the operator explicitly opted the cadence into application (defence-in-depth: the
+  // periodic pass previews by default even when both gates are on, unless apply is asked for).
+  const doApply = opts.apply === true || sched.apply === true;
+
+  const result = await improveCli.run({
+    flags: doApply ? { apply: true } : { 'dry-run': true },
+    env,
+    config,
+    now: opts.now,
+  });
+
+  return {
+    ran: result.data && result.data.ran !== false,
+    mode: doApply ? 'apply' : 'dry-run',
+    summary: result.summary,
+    ok: result.ok,
+    data: result.data,
+  };
+}
+
 // The kickoff state file is the shared dedup substrate; reuse its load/save by reading the same
 // path. kickoff exports the path accessor; loadKickoffState/saveKickoffState are module-private
 // there, so we re-implement a tolerant read/write against the same file.
@@ -269,6 +333,9 @@ module.exports = {
   nextOccurrence,
   isoWeekKey,
   runTick,
+  // SI-CLI: the optional periodic governed self-improvement pass (double off-by-default — the loop's
+  // own enabled flag AND self_improve.scheduler.periodic_enabled). Delegates to engine/cli/improve.
+  runImprovePass,
   // RD-14: the canonical daily run is kickoff.runKickoff — re-exported for one scheduler surface.
   runKickoff: kickoff.runKickoff,
   // §8.8 trend pathway: the config-gated trend pass (off by default) fills RESERVED trend slots on

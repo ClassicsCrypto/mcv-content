@@ -1,0 +1,18 @@
+{
+  "id": "lr-2099-04-08-a-calweight",
+  "created_at": "2099-04-08T06:00:00.000Z",
+  "source_signals": [
+    {
+      "type": "analytics",
+      "refs": [
+        "analytics/performance-report-2099-04-08-acme-cosmos.json"
+      ],
+      "count": 14
+    }
+  ],
+  "target_artifact": "calendar_weighting:acme-cosmos/sky-event-alert",
+  "target_mutability": "learnable",
+  "proposed_diff": "--- calendar/calendar-weights.json\n+++ calendar/calendar-weights.json\n@@\n-  \"sky-event-alert\": 0.20,\n+  \"sky-event-alert\": 0.30,\n",
+  "status": "proposed",
+  "shareability": "private"
+}

@@ -30,6 +30,13 @@ This split is load-bearing for budgets (below) and for [`observability.md`](obse
 most installs the chain-seat LLM tokens are the dominant cost, and they live outside the engine's
 meter.
 
+> **The governed self-improvement loop is free to run.** Its machinery (evidence/proposal,
+> apply/canary/rollback) is **deterministic engine code that calls no provider and no chain LLM** — it
+> derives proposals from analytics already on disk (RD-2). The only metered element is the **optional**
+> analyst seat: if you wire one, it is a **host-runtime-owned** seat (your provider tokens, like the
+> chain seats), and the loop runs identically — deterministic proposals only — when it is absent. The
+> loop is OFF by default. See [`self-improvement.md`](self-improvement.md).
+
 ### The two opt-in content sources, by cost regime
 
 The two config-gated content sources (both OFF by default) sit on opposite sides of this split:
@@ -142,6 +149,7 @@ authoritative current numbers; the bands above are only orientation.
 - [`configuration.md`](configuration.md#budget-spend-governance--required) — the `budget` key and its scope caveat.
 - [`trends.md`](trends.md) — trend polling (engine-metered, BYO provider) and the manual free path.
 - [`work-recap.md`](work-recap.md) — the local/free memory scan whose drafts are public-bound and must be reviewed.
+- [`self-improvement.md`](self-improvement.md) — the governed self-improvement loop (free deterministic machinery; only the optional analyst seat is metered, host-owned).
 - [`library.md`](library.md) — `engine index-library`, folder auto-sort, and character sheets in full.
 - [`observability.md`](observability.md) — the spend line in `engine status` and the digest, and the partial-spend marker.
 - [`runtimes/openclaw.md`](runtimes/openclaw.md) / [`runtimes/generic.md`](runtimes/generic.md) — capping and reporting chain spend.

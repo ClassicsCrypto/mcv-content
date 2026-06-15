@@ -411,6 +411,15 @@ function buildBindings() {
     { test: (p) => p === 'fixtures/brand-dna-acme/recorded/scrape-responses.json', skip: true, reason: 'recorded scrape replay envelope keyed by platform:handle (fake-scraper input map; embedded items mirror corpora/* which ARE bound and validated)' },
     { test: (p) => p === 'fixtures/brand-dna-acme/recorded/dna-synthesis.json', skip: true, reason: 'recorded DNA-synthesis replay envelope keyed by brand (fake-seat output map, not a shipped artifact shape)' },
     { test: (p) => /^fixtures\/brand-dna-acme\/expected\/.+\.json$/.test(p), skip: true, reason: 'brand-DNA analyzer/check ground-truth control shapes (analysis, archetype catalog, cost-estimate, cold-start, no-verbatim — asserted in tests, not shipped artifact shapes)' },
+    // self-improve-acme governed-loop fixtures (SI-FIXTURES). Learning records bind to the
+    // learning-record schema (they conform). The raw analytics checkpoints, the partial system
+    // fragment (its self_improve block is sub-validated against system.schema #/properties/self_improve
+    // in tests/self-improve-schema.test.js), and the applier/analyst control maps are documented skips.
+    { test: (p) => /^fixtures\/self-improve-acme\/learning-records\/.+\.json$/.test(p), schema: S('artifacts/learning-record.schema.json'), mode: 'single' },
+    { test: (p) => /^fixtures\/self-improve-acme\/analytics\/raw-.+\.json$/.test(p), skip: true, reason: 'raw engagement checkpoint inputs to the analyzer (per-content sample data, not a shipped artifact shape)' },
+    { test: (p) => p === 'fixtures/self-improve-acme/system.self-improve.json', skip: true, reason: 'partial system.json fragment (self_improve slice; its self_improve block is sub-validated against system.schema #/properties/self_improve in tests/self-improve-schema.test.js)' },
+    { test: (p) => p === 'fixtures/self-improve-acme/expected/applier-outcomes.json', skip: true, reason: 'governed-applier ground-truth control shape (asserted in tests, not a shipped artifact shape)' },
+    { test: (p) => p === 'fixtures/self-improve-acme/recorded/analyst-refinements.json', skip: true, reason: 'recorded analyst-seat refinement replay map (fake-seat input, not a shipped artifact shape)' },
   ];
 }
 

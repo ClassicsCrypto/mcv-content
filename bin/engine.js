@@ -69,11 +69,15 @@ const VERBS = {
   'generate-dna': { mod: require('../engine/cli/generate-dna'), fn: 'run' },
   'index-library': { mod: require('../engine/cli/index-library'), fn: 'run' },
   'purge-corpora': { mod: require('../engine/cli/purge-corpora'), fn: 'run' },
+  // The GOVERNED self-improvement loop (SI-CLI / DD-6 / §8.9): improve runs the governed pass (dry-run
+  // by default, --apply to perform), rollback reverts one machine change (DD-6 (5) one-step rollback).
+  improve: { mod: require('../engine/cli/improve'), fn: 'run' },
+  rollback: { mod: require('../engine/cli/improve'), fn: 'rollbackRun' },
   pause: { mod: require('../engine/cli/pause'), fn: 'pauseRun' },
   resume: { mod: require('../engine/cli/pause'), fn: 'resumeRun' },
 };
 
-const VERB_ORDER = ['init', 'verify', 'fixture-run', 'run-slot', 'kickoff', 'poll-trends', 'dispatch', 'status', 'calibrate', 'ingest-brand', 'generate-dna', 'index-library', 'purge-corpora', 'pause', 'resume'];
+const VERB_ORDER = ['init', 'verify', 'fixture-run', 'run-slot', 'kickoff', 'poll-trends', 'dispatch', 'status', 'calibrate', 'ingest-brand', 'generate-dna', 'index-library', 'purge-corpora', 'improve', 'rollback', 'pause', 'resume'];
 
 /** One-line summary per verb for the top-level help (kept short; --help <verb> has the full text). */
 const VERB_SUMMARY = {
@@ -90,6 +94,8 @@ const VERB_SUMMARY = {
   'generate-dna': 'generate Brand DNA + archetypes from the ingested corpus (estimate-and-confirm)',
   'index-library': 'index/sort the media library + character sheets (estimate-and-confirm)',
   'purge-corpora': 'enforce corpus retention windows (RD-9)',
+  improve: 'run the governed self-improvement loop (dry-run default; --apply; DD-6 / §8.9)',
+  rollback: 'revert one machine change — --last or --to-baseline <ref> (DD-6 (5))',
   pause: 'engage the kill switch (PAUSED sentinel + config)',
   resume: 'reverse the kill switch',
 };
