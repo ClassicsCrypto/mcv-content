@@ -163,6 +163,8 @@ This statement defines what "supported" means and is the basis for issue/PR tria
   [`docs/cost.md`](docs/cost.md), [`docs/library.md`](docs/library.md),
   [`docs/data-policy.md`](docs/data-policy.md),
   [`docs/observability.md`](docs/observability.md), [`docs/troubleshooting.md`](docs/troubleshooting.md).
+- [`docs/trends.md`](docs/trends.md), [`docs/work-recap.md`](docs/work-recap.md) — the two opt-in
+  content sources (trend automation; build-in-public from project memory).
 - [`docs/setup/`](docs/setup/) — quick-start, full-setup, cold-start.
 - [`docs/runtimes/`](docs/runtimes/) — OpenClaw fast path + the generic capability contract.
 - [`docs/platforms/`](docs/platforms/) — per-platform setup, incl. the TikTok manual path.
@@ -197,10 +199,27 @@ the maintainers' private environment. The public quality contract is the **shipp
 lightweight calibration harness**; user installs never execute or feed the private loop. There is no
 pretense that the public gates equal the maintainers' calibrated instance.
 
+### Shipped extensions (config-gated, OFF by default)
+
+Two optional **content sources** ship in v1 as opt-in extensions. Both produce a *seed* that flows
+through the same chain to the **human approval card** — neither bypasses the chain, and **nothing
+auto-publishes**. Both are disabled until you add their config block.
+
+- **Automated trend pathway** — `config/system.json` `trends` block. A bring-your-own trend adapter
+  polls a provider you supply on a 2/4/8/12 h cadence and writes Zone-U **Trend Reports** that seed
+  **reserved trend calendar slots** (never out-of-calendar); a manual-submission path needs no keys.
+  Metered and external; ships with a reference adapter (BYO key) and a zero-key fixture adapter. See
+  [`docs/trends.md`](docs/trends.md).
+- **Work-recap / build-in-public** — `config/system.json` `work_recap` block. Turns **your own
+  project memory** into founder/operator-voice build-in-public posts. **Privacy is load-bearing:**
+  memory is sensitive, so a redaction pre-pass + a gate privacy/leak check sit in front of the
+  mandatory human approval, the mechanism reads a configured memory path and **never bundles or
+  commits memory**, and nothing auto-publishes. See [`docs/work-recap.md`](docs/work-recap.md).
+
 ### Roadmap (in intended order; each lands only with its governance)
 
-1. **Automated trend pathway** — scheduled trend polling adapters, readout automation, sub-daily
-   cadences (the schemas ship in v1, so this is additive).
+1. **Trend-pathway depth** — readout automation polish, additional providers, monthly competitor scan
+   (the trend source itself is shipped above).
 2. **Automated Brand DNA generation + competitor ingestion flows** — upgrading the agent-assisted path
    to one-command ingestion.
 3. **Governed self-improvement loop** — machine-applied learning records with their governance

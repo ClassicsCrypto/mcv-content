@@ -384,6 +384,20 @@ function buildBindings() {
 
     // synthetic NFT metadata is collection metadata, not an engine artifact — documented skip.
     { test: (p) => /^fixtures\/nft-acme\/.+\.json$/.test(p), skip: true, reason: 'synthetic NFT token metadata (collection data, not an engine artifact)' },
+
+    // trends-acme trend-pathway fixtures (SRC-FIXTURES). Each standalone report binds to the trend
+    // report schema. The recorded poll-responses file is a keyed-by-query REPLAY envelope (a map of
+    // query-key → TrendReport[]), not a single shipped artifact shape — documented skip (the
+    // embedded reports mirror ../reports/*.json which ARE bound and validated).
+    { test: (p) => /^fixtures\/trends-acme\/reports\/.+\.json$/.test(p), schema: S('inputs/trend-report.schema.json'), mode: 'single' },
+    { test: (p) => p === 'fixtures/trends-acme/recorded/trend-poll-responses.json', skip: true, reason: 'recorded trend-poll replay envelope keyed by query (fake-adapter input map, not a single shipped artifact shape)' },
+
+    // work-recap-acme fixtures (SRC-FIXTURES). The sample command binds to the operator-command
+    // schema. The private-term deny list and the expected leak-check ground truth are privacy-test
+    // CONTROL files, not shipped artifact shapes — documented skips.
+    { test: (p) => /^fixtures\/work-recap-acme\/commands\/.+\.json$/.test(p), schema: S('inputs/operator-command.schema.json'), mode: 'single' },
+    { test: (p) => p === 'fixtures/work-recap-acme/private-terms.json', skip: true, reason: 'config-extendable private-term deny list (privacy-pre-pass control input, not a shipped artifact shape)' },
+    { test: (p) => p === 'fixtures/work-recap-acme/expected/leak-check.json', skip: true, reason: 'privacy/leak-check ground truth (test control file, not a shipped artifact shape)' },
   ];
 }
 

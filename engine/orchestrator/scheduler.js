@@ -36,6 +36,7 @@ const campaign = require('./campaign');
 const runLock = require('./run-lock');
 const mode = require('./mode');
 const kickoff = require('./kickoff');
+const pollTrends = require('./poll-trends');
 
 /** Tick defaults (the production-proven values; config-overridable via the scheduler block). */
 const DEFAULT_LOOKAHEAD_MINUTES = 120; // fire anything due in the next 2h
@@ -270,4 +271,9 @@ module.exports = {
   runTick,
   // RD-14: the canonical daily run is kickoff.runKickoff — re-exported for one scheduler surface.
   runKickoff: kickoff.runKickoff,
+  // §8.8 trend pathway: the config-gated trend pass (off by default) fills RESERVED trend slots on
+  // a 2/4/8/12h cadence (DD-16). Re-exported so the scheduler is the single trigger surface; the
+  // scheduler recipe installs `engine poll-trends` on the configured cadence.
+  runTrendPass: pollTrends.runTrendPass,
+  TREND_TRIGGER: pollTrends.TREND_TRIGGER,
 };

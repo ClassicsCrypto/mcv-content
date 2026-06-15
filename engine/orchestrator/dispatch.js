@@ -64,6 +64,9 @@ const TRIGGER = Object.freeze({
   RUN_SLOT: 'run-slot',
   KICKOFF_NOW: 'kickoff--now',
   RUN_CAMPAIGN: 'run-campaign',
+  // Source-pathway triggers (both config-gated, off by default — §8.8 / §3.3):
+  TREND_POLL: 'trend-poll',     // a config-gated trend pass fills RESERVED trend slots (DD-16)
+  WORK_RECAP: 'work-recap',     // the daily build-in-public option the kickoff fills (per account)
 });
 
 const VALID_TRIGGERS = new Set(Object.values(TRIGGER));

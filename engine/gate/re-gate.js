@@ -17,9 +17,17 @@
  *
  * The deterministic subset, composed from the engine's existing deterministic gates:
  *   - formatting / limits / banned-pattern / variant checks  → engine/gate/pre-gate-lint.js
+ *   - privacy/leak check on source-derived copy              → engine/gate/privacy-leak.js
  *   - per-platform packaging limits                          → engine/gate/platform-gates.js (optional)
  *   - audit-header / media-state / cooldown package gate     → engine/gate/validate-package.js (optional)
  *   - media reuse cooldown for an attached asset             → engine/library/usage-log.js
+ *
+ * The privacy/leak layer (SYS.PRIVATE_LEAK, engine/gate/privacy-leak.js) HARD-blocks an edit that
+ * re-introduces a secret shape, a sensitive structural shape, or a configured private term into the
+ * copy — the same defense-in-depth backstop the first-pass gate applies, re-run on the edit path so
+ * a reviewer edit can never slip a leak past the card (the human is the final backstop, §2.4). It
+ * runs whenever an edited draft is supplied; the configured deny set / source seed come from the
+ * caller's `seed`/`config`, so non-source edits run only the universal secret-shape scan.
  *
  * pre-gate-lint is always present (a release-blocking module). platform-gates and
  * validate-package are LATER-batch modules; they are required OPTIONALLY (a `try` around the
@@ -34,6 +42,7 @@
  */
 
 const preGateLint = require('./pre-gate-lint.js');
+const privacyLeak = require('./privacy-leak.js');
 const usageLog = require('../library/usage-log.js');
 
 // platform-gates.js / validate-package.js are later-batch modules (release-spec §1 tree). Load
@@ -73,6 +82,11 @@ function isImageRef(ref) {
  * @param {string}   [input.package_ref]        CONTENT_HOME-relative package path, for the package layer.
  * @param {object}   [input.rules]              rule config passed to pre-gate-lint (banned_patterns,
  *                                              target_chars, variant_count, env, …).
+ * @param {object}   [input.seed]               the originating content-source seed (work-recap /
+ *                                              trend) carrying privacy_flags + private_terms, threaded
+ *                                              into the privacy/leak layer for source-derived edits.
+ * @param {object}   [input.config]             resolved config/system.json (work_recap.private_terms,
+ *                                              work_recap.extra_secret_keys) for the privacy/leak layer.
  * @param {object}   [input.cooldown]           cooldown options ({hardDays, targetDays, env, now}).
  * @param {object}   [input.env]                env for path/ledger resolution (default process.env).
  * @returns {object} { ok, content_id, layers:[{layer, ok, reason?, detail?}], reasons:[] }
@@ -94,6 +108,27 @@ function reGate(input = {}) {
       ok: lintOk,
       reason: lintOk ? null : 'edited text failed the deterministic pre-gate',
       detail: lintResult.detected_codes,
+    });
+  }
+
+  // 1.5 Privacy / leak check (SYS.PRIVATE_LEAK) on the edited copy. Defense in depth: a reviewer
+  //     edit must not re-introduce a secret shape, a sensitive structural shape, or a configured
+  //     private term into the copy before the card. Runs on the edit path (when a draft is supplied);
+  //     the deny set / source flags come from input.seed + input.config (a non-source edit runs only
+  //     the universal secret-shape + structural scan). HARD failure returns the decision (DD-12).
+  if (input.draft) {
+    const privResult = privacyLeak.checkPrivacy({
+      draft: input.draft,
+      seed: input.seed,
+      config: input.config,
+      content_id: input.content_id,
+    });
+    const privOk = privResult.verdict !== 'FAIL';
+    layers.push({
+      layer: 'privacy-leak',
+      ok: privOk,
+      reason: privOk ? null : 'edited copy carries residual sensitive material (privacy/leak block)',
+      detail: privResult.detected_codes,
     });
   }
 

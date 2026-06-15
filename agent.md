@@ -184,14 +184,21 @@ without a record** — task records double as the run-attribution records `engin
 **Transport.** Every run — scheduled or ad hoc — is a **slot-run task record** (schema'd) written to
 `$CONTENT_HOME/ledger/tasks/` in state `pending`. Three things write them:
 
-- the **daily kickoff** (`engine kickoff`, installed on a scheduler) writes the day's records;
+- the **daily kickoff** (`engine kickoff`, installed on a scheduler) writes the day's records — and,
+  when `work_recap.enabled`, also the **daily build-in-public option** (one per operator account into a
+  reserved `work_recap` slot; §8.5);
 - **`engine run-slot <slot-id>`** writes one immediately (the on-demand verb — quick-start first run);
 - **`engine dispatch --family … --brand … --platform …`** writes one ad-hoc record without a calendar
-  entry.
+  entry;
+- the **trend pass** (`engine poll-trends`, config-gated, installed on a 2/4/8/12 h cadence) polls the
+  configured adapter and writes one record per fresh report into a reserved `trend` slot (§8.5; DD-16).
 
 Each record carries a **named trigger** (`morning-kickoff | calendar-tick | run-slot | kickoff--now |
-run-campaign`) and a stable `task_id`. Re-dispatching the same logical slot for the same date is
-**idempotent** — it returns the existing record, never a second run.
+run-campaign | trend-poll | work-recap`) and a stable `task_id`. Re-dispatching the same logical slot
+for the same date is **idempotent** — it returns the existing record, never a second run. The trend
+pass and work-recap option both run through THIS transport — they are content SOURCES that feed the
+chain, never a bypass: each produces a SEED that runs matcher → writer → the gate → queue → the human
+approval card, in SAFE by default.
 
 **Consumption — your hook.** You consume pending records through a per-runtime hook documented in
 `docs/runtimes/<runtime>.md`. The hook does exactly this:
@@ -238,7 +245,8 @@ config, not in scheduler wrappers.**
 | `verify` | the C0–C4 setup gate; record outcomes into `setup-state.json` | `--checkpoint C0..C4` (omit to walk the ladder) |
 | `fixture-run` | the zero-key deterministic end-to-end proof (CONTENT_HOME-free) | — |
 | `run-slot <slot-id>` | run one calendar slot on demand → dispatches a task record | `--mode`, `--date`, `--lane`, `--dispatch-only` |
-| `kickoff` | the canonical daily batch: dispatch the day's eligible slots under the single-runner lock | `--now`, `--date`, `--max <n\|all>`, `--brand`, `--dry-run` |
+| `kickoff` | the canonical daily batch: dispatch the day's eligible slots under the single-runner lock (also fills the daily work-recap option when `work_recap.enabled` — §8.5) | `--now`, `--date`, `--max <n\|all>`, `--brand`, `--dry-run` |
+| `poll-trends` | the config-gated trend pass (§8.5, OFF by default): poll the adapter, post the angles-only readout, dispatch fresh reports into reserved `trend` slots | `--brand`, `--adapter`, `--cadence`, `--content-form`, `--mode`, `--force`, `--dry-run` |
 | `dispatch` | write one ad-hoc slot-run task record (no calendar entry needed) | `--family`, `--brand`, `--platform`, `--format`, `--mode`, `--force` |
 | `status` | the one-command operational surface (§9) | `--json` |
 | `calibrate --brand <id>` | the C3 calibration runner (estimate-and-confirm) | `--samples`, `--yes`, `--estimate-only`, `--result <json>` |
@@ -265,6 +273,45 @@ is the operator's action** — the human, in the publisher UI. Once published th
 
 You will see this in `engine status` glossed exactly that way. Do not treat a `handed_off` backlog as
 broken — it means cards were approved and are sitting as drafts for the human to push live.
+
+---
+
+## 8.5 Optional content sources — trends + work-recap (config-gated, OFF by default)
+
+Two opt-in **content sources** can feed the chain in addition to calendar slots. **Both ship
+disabled**, both produce a *seed* that runs the **full chain to the human approval card**, and
+**neither bypasses the gate or auto-publishes** (SAFE is still the default). Each is enabled only by
+its config block in `config/system.json`.
+
+- **Trends** (`trends` block) — a bring-your-own trend adapter polls a provider the operator supplies
+  on a 2/4/8/12 h cadence and writes Zone-U **Trend Reports** under `$CONTENT_HOME/trends/`. Reports
+  seed **reserved `trend` calendar slots only** (never out-of-calendar — DD-16); `quote-retweet` is a
+  gated `content_form`; a stale trend **expires** rather than posting late (the freshness-window TTL,
+  DD-15). Trend slots **skip or fall back to evergreen** when no fresh report exists. A manual
+  submission path (a report file in `$CONTENT_HOME/trends/`, or `RUN_TREND_MANUAL`) needs no keys.
+  `trends.enabled` must be **strictly `true`**; while off, no provider is contacted and no credential
+  is read. **Scheduling:** install `engine poll-trends` on the same interval as `trends.cadence` (a
+  cron/PM2 line — see `templates/scheduler/`); each pass polls, posts an **angles-only readout** to
+  the optional `trend-readout` channel (it is **not** an approval surface), and dispatches one record
+  per fresh report into a free reserved `trend` slot (a slot already filled today is not refilled; a
+  report with no free reserved slot is reported `unslotted`, never posted out-of-calendar). The pass
+  runs under the kickoff's single-runner lock + PAUSED/budget preflight. Full doc:
+  [`docs/trends.md`](docs/trends.md).
+- **Work-recap / build-in-public** (`work_recap` block) — turns the operator's **own project memory**
+  into founder/operator-voice posts (targets `account_class: operator` accounts, §3.3).
+  **Privacy is load-bearing:** memory is sensitive, so the source runs a **redaction pre-pass**
+  (reusing `redact.js` + a config-extendable `private_terms` deny list) and the gate runs a
+  **privacy/leak check** — both **before** the mandatory human approval card. The engine reads a
+  **configured `memory_path`** and **never bundles or commits memory**; raw memory never enters the
+  seed (sanitized summaries only). `work_recap.enabled` must be **strictly `true`**; a missing/empty
+  memory path is a clean no-op. **Scheduling:** the **daily `engine kickoff` fills it** — one
+  build-in-public option per day per operator account into a reserved `work_recap` calendar slot (no
+  extra scheduler entry needed); per-account scoping via `work_recap.accounts[]`. Full doc:
+  [`docs/work-recap.md`](docs/work-recap.md).
+
+Both sources are **injectable for zero-key testing** (the trend fetch and the memory file reads are
+seams like §12.5), so the fixtures and tests run with no secrets. Config keys are in
+[`docs/configuration.md`](docs/configuration.md).
 
 ---
 
@@ -301,7 +348,8 @@ which codes, what did it spend** — without reading internals. It reports:
 The detailed runbooks live in [`docs/runbooks/`](docs/runbooks/): daily kickoff, approval/publish,
 weekly analytics, rotate-credentials, recover-from-stall. The deeper references live in `docs/`
 (`architecture.md`, `configuration.md`, `rule-authoring.md`, `extending.md`, `cost.md`, `library.md`,
-`data-policy.md`, `observability.md`, `troubleshooting.md`, `runtimes/`, `platforms/`).
+`data-policy.md`, `observability.md`, `troubleshooting.md`, `trends.md`, `work-recap.md`, `runtimes/`,
+`platforms/`).
 
 ---
 

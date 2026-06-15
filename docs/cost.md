@@ -14,7 +14,8 @@ third-party services. This doc explains what is metered, who pays for what, and 
 There are two distinct cost regimes, and the engine can only see one of them:
 
 - **Engine-metered spend** — actions the engine itself performs and can bill: the visual gate, media
-  generation, scraping/trend calls, publisher API calls, and **library indexing**
+  generation, **scraping/trend polls** (each poll of an enabled `trends` provider — see §"the two
+  opt-in content sources" below), publisher API calls, and **library indexing**
   (`engine index-library` — it sends each library asset to the configured vision provider for a
   description + tags; character-sheet generation is similarly metered when a provider is configured).
   Each emits a spend event the engine can sum and cap.
@@ -25,6 +26,24 @@ There are two distinct cost regimes, and the engine can only see one of them:
 This split is load-bearing for budgets (below) and for [`observability.md`](observability.md). For
 most installs the chain-seat LLM tokens are the dominant cost, and they live outside the engine's
 meter.
+
+### The two opt-in content sources, by cost regime
+
+The two config-gated content sources (both OFF by default) sit on opposite sides of this split:
+
+- **Trend polling is engine-metered and external.** When you enable the `trends` block, **every poll
+  is a metered provider call** (an Apify-/xAI-class request you bring your own key for) on the
+  configured 2/4/8/12 h cadence. Pick the **slowest cadence that meets your needs** — a faster cadence
+  means more provider calls. With no provider configured the pathway returns no reports and spends
+  nothing; the manual-submission path is always free. See [`trends.md`](trends.md).
+- **The memory scan is local and free — but it produces *public-bound* drafts.** The work-recap source
+  reads files on disk; the scan itself costs nothing and calls no provider. **But it seeds the same
+  chain as any content**, so the resulting draft incurs the host-runtime chain-seat LLM cost like any
+  other post, and — because it is built from **sensitive project memory** — every such draft **MUST be
+  reviewed by a human** before it publishes (the redaction pre-pass + gate privacy/leak check + the
+  mandatory approval card; nothing auto-publishes). Cheap to generate is **not** the same as safe to
+  ship: review is non-negotiable. See [`work-recap.md`](work-recap.md) and
+  [`data-policy.md`](data-policy.md#project-memory-as-a-sensitive-source).
 
 ## Budgets and what they bind
 
@@ -101,6 +120,8 @@ authoritative current numbers; the bands above are only orientation.
 ## See also
 
 - [`configuration.md`](configuration.md#budget-spend-governance--required) — the `budget` key and its scope caveat.
+- [`trends.md`](trends.md) — trend polling (engine-metered, BYO provider) and the manual free path.
+- [`work-recap.md`](work-recap.md) — the local/free memory scan whose drafts are public-bound and must be reviewed.
 - [`library.md`](library.md) — `engine index-library`, folder auto-sort, and character sheets in full.
 - [`observability.md`](observability.md) — the spend line in `engine status` and the digest, and the partial-spend marker.
 - [`runtimes/openclaw.md`](runtimes/openclaw.md) / [`runtimes/generic.md`](runtimes/generic.md) — capping and reporting chain spend.

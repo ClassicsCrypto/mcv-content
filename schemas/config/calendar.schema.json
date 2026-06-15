@@ -97,9 +97,9 @@
           "minLength": 1
         },
         "slot_type": {
-          "description": "Slot category. trend slots are reserved for trend passes; campaign slots are claimable by a campaign's slot_pattern; regular is the default pillar-driven slot.",
+          "description": "Slot category. trend slots are RESERVED for the config-gated trend pass (DD-16: trend content fills these, never out-of-calendar); work_recap slots are RESERVED for the config-gated daily build-in-public option (§3.3, operator/founder/team accounts); campaign slots are claimable by a campaign's slot_pattern; regular is the default pillar-driven slot. Both trend and work_recap pathways ship OFF by default; reserving a slot only enables filling once the matching config block is enabled.",
           "type": "string",
-          "enum": ["regular", "trend", "campaign"],
+          "enum": ["regular", "trend", "campaign", "work_recap"],
           "default": "regular"
         },
         "state": {

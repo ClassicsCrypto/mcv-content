@@ -47,6 +47,7 @@ const dispatch = require('./dispatch');
 const campaign = require('./campaign');
 const runLock = require('./run-lock');
 const mode = require('./mode');
+const workRecap = require('./work-recap');
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -301,6 +302,35 @@ async function runKickoff(opts = {}) {
     }
 
     if (state && !opts.dryRun) saveKickoffState(state, env);
+
+    // The DAILY WORK-RECAP option (§3.3; the build-in-public source the kickoff fills): one option
+    // per day, per operator account, CONFIG-GATED and OFF BY DEFAULT. It runs INSIDE the kickoff's
+    // single-runner lock (lock:false — we already hold it) and shares the day's slots + dedup state.
+    // A clean no-op when the feature is off / no memory path / nothing shippable; never gates the
+    // slot batch (a work-recap failure is recorded on the result, it does not fail the kickoff).
+    try {
+      const recap = await workRecap.runDailyWorkRecap({
+        env,
+        config,
+        slots,
+        date: dateISO,
+        mode: opts.mode,
+        force: opts.force,
+        dryRun: opts.dryRun,
+        lock: false, // the kickoff holds the single-runner lock for the whole batch
+      });
+      if (recap && recap.ran) {
+        result.work_recap = {
+          dispatched: recap.dispatched, unslotted: recap.unslotted, empty: recap.empty,
+          skipped: recap.skipped, failed: recap.failed, tasks: recap.tasks, errors: recap.errors,
+        };
+      } else if (recap && recap.disabled) {
+        result.work_recap = { disabled: true };
+      }
+    } catch (e) {
+      result.work_recap = { error: String(e && e.message ? e.message : e) };
+    }
+
     return result;
   };
 

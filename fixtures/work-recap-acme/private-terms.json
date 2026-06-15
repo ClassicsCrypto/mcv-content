@@ -1,0 +1,13 @@
+{
+  "$comment": "SRC-FIXTURES — synthetic config-extendable PRIVATE-TERM deny list for the work-recap privacy pre-pass (release-spec §13.3 redact-at-write; the work-recap privacy requirement: 'a config-extendable private-term deny list' on top of engine/shared/redact.js shape/known-name redaction). The operator points the work_recap config block at a list like this so instance-specific confidential material a generic shape-matcher CANNOT catch is masked BEFORE the draft. Two kinds: `terms` = confidential names (fake partner, unreleased codenames) that look like ordinary words; `secret_literals` = exact secret strings whose VALUE is sensitive but whose SHAPE is deliberately fake/non-credential (engine/shared/redact.js only masks credential-SHAPED or known-KEY values, so an obviously-fake token like FAKE_TOKEN_do_not_use_0000 in free-text markdown needs an explicit literal entry — this is exactly why the deny list is config-extendable). All entries are the FAKE Acme Cosmos items planted in this fixture's memory files; matching them proves the deny list fires. case_insensitive controls matching. ALL SYNTHETIC. See PROVENANCE.md.",
+  "case_insensitive": true,
+  "terms": [
+    "Nebula Nine Optics",
+    "Project Dark Comet",
+    "Stargate-Wizard"
+  ],
+  "secret_literals": [
+    "FAKE_TOKEN_do_not_use_0000",
+    "changeme_fake_not_real"
+  ]
+}

@@ -106,6 +106,43 @@ file table. The consumer helper is `tests/helpers/fake-vision.js`.
 | `library-acme/expected/vision-responses.json` | Recorded vision answers keyed by basename. | Authored-synthetic |
 | `library-acme/expected/index-entries.json` | Golden `archive-index-entry` outputs (schema-valid). | Authored-synthetic |
 
+## `fixtures/trends-acme/` — synthetic trend pathway + fake adapter (release-spec §8.8, §6.7, §3.3, §2.1)
+
+The zero-key fixtures + fake trend adapter for the trend-pathway content source. Synthetic Trend
+Reports plus recorded `poll(query)` responses a fake adapter (`tests/helpers/fake-trend-adapter.js`)
+replays so the source runs in CI with zero keys and zero network (RD-9 BYO adapter; RD-12 injectable
+seam). The trend pathway is a content source, not a publish bypass: reports become Zone-U pre-seeds
+(§2.1) that feed the existing chain through to the human approval card (§2.4); nothing auto-publishes.
+See `fixtures/trends-acme/PROVENANCE.md` for the full file table.
+
+| File / dir | What it is | Provenance |
+|---|---|---|
+| `trends-acme/reports/2099-04-08-clear-sky-window.json` | `manual`-method Trend Report (referenced by `brand-acme/commands/run-trend-manual.json`); validates against `schemas/inputs/trend-report.schema.json`. | Authored-synthetic |
+| `trends-acme/reports/2099-04-09-meteor-shower-peak.json` | `adapter`-method Trend Report; validates against the same schema. | Authored-synthetic |
+| `trends-acme/recorded/trend-poll-responses.json` | Recorded `poll(query)` responses keyed by `${platform}:${window}` the fake adapter replays. | Authored-synthetic |
+
+## `fixtures/work-recap-acme/` — synthetic project memory + injectable reader (release-spec §3.3, §2.1, §13.3)
+
+The zero-key fixtures + injectable memory reader for the work-recap content source (founder/operator
+accounts). A synthetic `MEMORY.md` + `memory/YYYY-MM-DD.md` daily logs of fictional Acme Cosmos work,
+read by a fake reader (`tests/helpers/fake-memory-reader.js`) pointed at a CONFIGURED memory path so
+the repo ships the MECHANISM and never bundles real memory (RD-12). **Privacy is load-bearing:** the
+memory DELIBERATELY PLANTS sensitive items (an obviously-fake secret, a fake partner, unreleased
+codenames) so a test proves the redaction pre-pass + private-term deny list + gate leak-check BLOCK
+them before the approval card, plus a clean day that passes. See `fixtures/work-recap-acme/PROVENANCE.md`.
+
+| File / dir | What it is | Provenance |
+|---|---|---|
+| `work-recap-acme/MEMORY.md` | Synthetic curated memory; mixes CLEAN-OK facts with PLANTED-SENSITIVE secrets/partner/codenames. | Authored-synthetic |
+| `work-recap-acme/memory/2099-04-07.md` | Synthetic daily log mixing clean work with planted-sensitive lines. | Authored-synthetic |
+| `work-recap-acme/memory/2099-04-08.md` | Synthetic CLEAN daily log — the pass case that seeds a valid recap. | Authored-synthetic |
+| `work-recap-acme/private-terms.json` | Config-extendable deny list (`terms` + `secret_literals`) the privacy pre-pass loads on top of `redact.js`. | Authored-synthetic |
+| `work-recap-acme/commands/run-work-recap.json` | RUN_SLOT command targeting a founder-account slot; validates against `schemas/inputs/operator-command.schema.json`. | Authored-synthetic |
+| `work-recap-acme/expected/leak-check.json` | Ground truth: the `must_block` fragments + the `clean_day` pass assertion. | Authored-synthetic |
+
+All planted "secrets", partner names, and codenames are **deliberately fake and obviously synthetic** —
+the planted credential (`FAKE_TOKEN_do_not_use_0000`) reads as a fake on sight and is never real-shaped.
+
 ## Why no instance content migrates
 
 Per the release gap analysis, **zero** files from the private instance pass the §13.3 r1 test

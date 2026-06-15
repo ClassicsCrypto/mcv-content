@@ -114,6 +114,12 @@ const paths = {
   brandCorpusDir: (brandId, env = process.env) =>
     underHome(env, 'corpora', brandId),
 
+  // Trend reports (release-spec §6.7 trend report; §8.8 trend pathway; the trend SOURCE writes
+  // schema-conformant reports here, always Zone U — the manual/adapter trend input artifact).
+  trendsDir: (env = process.env) => underHome(env, 'trends'),
+  brandTrendsDir: (brandId, env = process.env) =>
+    underHome(env, 'trends', brandId),
+
   // Queue (DD-4/DD-19) — the dir queue.js operates inside.
   queueDir: (env = process.env) => underHome(env, 'queue'),
   publishQueue: (env = process.env) =>

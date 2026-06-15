@@ -1,0 +1,46 @@
+{
+  "$comment": "SRC-FIXTURES — ground truth for the work-recap privacy/leak test (release-spec §13.3 redaction; the work-recap privacy requirement: redaction pre-pass + gate privacy/leak check BEFORE the approval card, human approval as final backstop). A test reads the synthetic memory (markdown, free text) via tests/helpers/fake-memory-reader.js, runs the redaction pre-pass = engine/shared/redact.js (credential-SHAPE + known-KEY masking) PLUS the config-extendable private-terms deny list in ../private-terms.json (its `terms` for confidential names and `secret_literals` for obviously-fake-but-still-secret strings), then a privacy/leak gate, and asserts: (1) every 'must_block' fragment is caught (redacted out of the draft AND flagged so the gate BLOCKS the draft before the card); (2) the 'clean_day' source yields NO leak flags and is safe to seed a recap. `caught_by` names the mechanism that fires in the FREE-TEXT path: the planted secrets are deliberately fake/non-credential-shaped (so redact.js shape patterns do NOT fire on them in free text — by design, to keep them obviously synthetic) and are caught by the deny list's `secret_literals`; the password value would ALSO be masked by redact.js's sensitive-KEY path if the memory were parsed as structured key/value. Fragments are matched as substrings. ALL SYNTHETIC — Acme Cosmos only. See ../PROVENANCE.md.",
+  "memory_files": [
+    "MEMORY.md",
+    "memory/2099-04-07.md",
+    "memory/2099-04-08.md"
+  ],
+  "must_block": [
+    {
+      "fragment": "FAKE_TOKEN_do_not_use_0000",
+      "class": "secret",
+      "caught_by": "private-terms-deny-list:secret_literals",
+      "reason": "Planted OBVIOUSLY-FAKE, non-credential-shaped token: redact.js shape patterns intentionally do NOT fire on it (that is what keeps it unmistakably synthetic), so the config-extendable deny list's secret_literals catches it. The gate must block any draft that still contains it."
+    },
+    {
+      "fragment": "changeme_fake_not_real",
+      "class": "secret",
+      "caught_by": "private-terms-deny-list:secret_literals",
+      "reason": "Planted fake password value in free-text markdown; caught by the deny list's secret_literals (and additionally by redact.js's sensitive-KEY path if memory is parsed as structured key/value)."
+    },
+    {
+      "fragment": "Nebula Nine Optics",
+      "class": "partner",
+      "caught_by": "private-terms-deny-list",
+      "reason": "Confidential partner name (NDA); not a secret SHAPE, so only the deny list catches it."
+    },
+    {
+      "fragment": "Project Dark Comet",
+      "class": "codename",
+      "caught_by": "private-terms-deny-list",
+      "reason": "Unreleased hardware codename; deny-list only."
+    },
+    {
+      "fragment": "Stargate-Wizard",
+      "class": "codename",
+      "caught_by": "private-terms-deny-list",
+      "reason": "Unreleased feature codename; deny-list only."
+    }
+  ],
+  "clean_day": {
+    "source": "memory/2099-04-08.md",
+    "expect_leak_flags": 0,
+    "safe_to_seed": true,
+    "reason": "Every line is shippable founder-recap material: no secrets, no partner names, no unreleased codenames. After the privacy pre-pass this day yields a valid pre-seed; it still passes through the chain to the HUMAN approval card (nothing auto-publishes)."
+  }
+}

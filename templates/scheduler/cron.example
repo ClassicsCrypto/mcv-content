@@ -13,9 +13,19 @@
 
 30 8 * * *  CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js kickoff >> <CONTENT_HOME>/logs/kickoff.cron.log 2>&1
 
+# OPTIONAL — the config-gated trend pass (release-spec section 8.8; OFF by default).
+# Enable trends.enabled + trends.adapter + trends.cadence in config/system.json, reserve
+# slot_type:trend calendar slots, then schedule poll-trends on the SAME interval as your
+# cadence. Example for a 4h cadence (the daily work-recap option needs NO extra line — the
+# kickoff above fills it when work_recap.enabled is true):
+#
+# 0 */4 * * *  CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js poll-trends >> <CONTENT_HOME>/logs/trend-poll.cron.log 2>&1
+
 # Notes:
 #   - Logs append to $CONTENT_HOME/logs/kickoff.cron.log; the engine redacts secrets at
 #     write time, but rotate/secure this file like any operational log.
 #   - Drop `--now` for the scheduled morning-kickoff trigger; add it only for an
 #     on-demand manual run.
 #   - cron uses the system timezone; align HH:MM with your calendar's scheduler.timezone.
+#   - The trend pass shares the kickoff's single-runner lock and PAUSED/budget preflight;
+#     overlapping fires skip safely and a reserved trend slot filled today is not refilled.

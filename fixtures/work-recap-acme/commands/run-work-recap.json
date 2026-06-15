@@ -1,0 +1,12 @@
+{
+  "command_family": "RUN_SLOT",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "format": "single-post",
+  "mode": "SAFE",
+  "routing_class": "TEXT_HEAVY",
+  "slot_ref": "acme-fri-01",
+  "pillar": "behind-the-glass",
+  "theme": "work recap — what we shipped this week (founder voice)",
+  "notes": "SRC-FIXTURES sample: a work-recap run targeting the OPERATOR/founder-account slot (release-spec §3.3 flexible founder voice). The work-recap source reads the CONFIGURED memory path (here the synthetic fixtures/work-recap-acme/ memory via tests/helpers/fake-memory-reader.js), runs the redaction pre-pass + private-terms deny list, and emits a pre-seed (§2.1). It does NOT bypass the chain: matcher -> brief -> writer -> the hybrid gate (incl. the privacy/leak check) -> package -> queue -> the HUMAN approval card. SAFE by default; nothing auto-publishes. Validates against schemas/inputs/operator-command.schema.json (RUN_SLOT requires slot_ref)."
+}

@@ -28,11 +28,36 @@ the kickoff command. Two things must be true:
 Replace `<ENGINE_DIR>` (this checkout) and `<CONTENT_HOME>` (your instance directory),
 and adjust the cron `schedule` to your preferred local run time.
 
+## Optional: the trend pass (config-gated, OFF by default)
+
+If you enable the trend pathway (`trends.enabled: true` + a `trends.adapter` +
+`trends.cadence` in `config/system.json`; release-spec §8.8), add a SECOND job that
+runs `engine poll-trends` on the SAME interval as your cadence. It dispatches trend
+seeds into RESERVED `trend` calendar slots (DD-16 — never out-of-calendar; nothing
+auto-publishes) and posts an angles-only readout to the `trend-readout` channel.
+
+```json
+{
+  "id": "content-engine-trend-poll",
+  "schedule": "0 */4 * * *",
+  "command": "node <ENGINE_DIR>/bin/engine.js poll-trends",
+  "env": {
+    "CONTENT_HOME": "<CONTENT_HOME>"
+  },
+  "description": "Open Content Engine trend pass — 4h cadence (release-spec section 8.8). OFF unless trends.enabled."
+}
+```
+
+The daily **work-recap** option (release-spec §3.3) needs NO extra job — the daily
+`engine kickoff` fills it when `work_recap.enabled: true`.
+
 ## Notes
 
 - The mode (SAFE / LIVE_PREVIEW / LIVE) is read from `config/system.json`, never from
   the job — keep posture in config.
 - The kickoff is idempotent under a single-runner lock; overlapping fires are safe.
+- The trend pass shares the kickoff's single-runner lock and PAUSED/budget preflight;
+  it is also idempotent (a reserved trend slot filled today is not refilled).
 - Validate by running the command once by hand with `CONTENT_HOME` set; it should print
   the dispatch summary and exit 0 before you rely on the schedule.
 - If your OpenClaw build exposes a different job schema (field names/format), keep the

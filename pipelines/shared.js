@@ -201,7 +201,24 @@ function lintRules(ctx, brief) {
   }
   if (brief && Number.isInteger(brief.variant_count)) rules.variant_count = brief.variant_count;
   if (brief && Array.isArray(brief.historical_entities)) rules.historical_entities = brief.historical_entities;
-  if (ctx.config && Array.isArray(ctx.config.banned_patterns)) rules.banned_patterns = ctx.config.banned_patterns;
+  // banned_patterns = the operator's global deny list UNIONED with the work-recap private-term deny
+  // set, so the FORWARD deterministic gate (pre-gate-lint LINT.BANNED_PATTERN) enforces
+  // config.work_recap.private_terms automatically — a writer-reintroduced configured private term is
+  // caught on the first gate (no LLM spend), not only the post-edit re-gate / LLM judge. This makes
+  // the privacy law's deterministic layer real on the forward path (§2.4 layer 3) without the
+  // operator having to also copy the terms into banned_patterns. private_terms accepts a flat array
+  // OR the { terms, secret_literals } object shape.
+  const bannedSet = [];
+  if (ctx.config && Array.isArray(ctx.config.banned_patterns)) bannedSet.push(...ctx.config.banned_patterns);
+  const wrTerms = ctx.config && ctx.config.work_recap && ctx.config.work_recap.private_terms;
+  if (Array.isArray(wrTerms)) {
+    bannedSet.push(...wrTerms);
+  } else if (wrTerms && typeof wrTerms === 'object') {
+    if (Array.isArray(wrTerms.terms)) bannedSet.push(...wrTerms.terms);
+    if (Array.isArray(wrTerms.secret_literals)) bannedSet.push(...wrTerms.secret_literals);
+  }
+  const cleanedBanned = bannedSet.map((t) => String(t == null ? '' : t).trim()).filter(Boolean);
+  if (cleanedBanned.length) rules.banned_patterns = cleanedBanned;
   if (ctx.config && ctx.config.gate && ctx.config.gate.variant_distinctness) {
     rules.variant_distinctness = ctx.config.gate.variant_distinctness;
   }

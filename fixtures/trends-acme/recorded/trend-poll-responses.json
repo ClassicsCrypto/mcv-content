@@ -1,0 +1,63 @@
+{
+  "$comment": "SRC-FIXTURES — recorded trend-adapter poll responses for the zero-key fake trend adapter (release-spec §8.8 trend pathway; §3.3 scraping/trend provider BYO per RD-9; §6.7 trend report; §12 injectable seams; RD-12 'CI holds no secrets — the external call MUST be dependency-injectable so tests run zero-key with a fake'). This is the trend-pathway counterpart of fixtures/library-acme/expected/vision-responses.json. A fake poll(query) function (tests/helpers/fake-trend-adapter.js) returns the canned TrendReport array recorded here instead of hitting any real trend/scraping provider — so the WHOLE source→seed path runs with zero keys and zero network. Responses are keyed by a normalized query key {platform}:{window}. Each response is an array of objects shaped like schemas/inputs/trend-report.schema.json (Zone U, angles-only). The reports are duplicated inline here (rather than $ref'd) so the recording is self-contained for replay; the same reports also live as standalone files under ../reports/ for the manual-submission path. ALL SYNTHETIC — Acme Cosmos only. See ../PROVENANCE.md.",
+  "twitter:daily": [
+    {
+      "period": { "start": "2099-04-07T00:00:00Z", "end": "2099-04-08T00:00:00Z" },
+      "platform": "twitter",
+      "topics": [
+        {
+          "topic": "clear-sky window over much of the northern hemisphere tonight",
+          "source_links": ["https://example.test/synthetic-trend/clear-sky-window"],
+          "suggested_angles": [
+            "what one object is worth pointing at first if you only get one clear hour",
+            "the fastest way to focus the Moon before clouds return"
+          ]
+        },
+        {
+          "topic": "Jupiter well-placed in the evening sky this week",
+          "source_links": ["https://example.test/synthetic-trend/jupiter-evening"],
+          "suggested_angles": [
+            "how to tell Jupiter from a star with the naked eye (it doesn't twinkle)",
+            "catching the four bright moons in a line at low power"
+          ]
+        }
+      ],
+      "freshness_window": { "duration": "PT18H", "expires_at": "2099-04-08T18:00:00Z" },
+      "provenance": { "trust_zone": "U", "method": "adapter", "submitted_at": "2099-04-08T00:05:00Z" }
+    },
+    {
+      "period": { "start": "2099-04-08T00:00:00Z", "end": "2099-04-09T00:00:00Z" },
+      "platform": "twitter",
+      "topics": [
+        {
+          "topic": "minor meteor shower peaking before dawn tomorrow",
+          "source_links": ["https://example.test/synthetic-trend/meteor-peak"],
+          "suggested_angles": [
+            "no telescope needed: where to look and how long to let your eyes adjust",
+            "why a wide dark patch of sky beats any eyepiece for meteors"
+          ]
+        }
+      ],
+      "freshness_window": { "duration": "P1D", "expires_at": "2099-04-10T06:00:00Z" },
+      "provenance": { "trust_zone": "U", "method": "adapter", "submitted_at": "2099-04-09T00:10:00Z" }
+    }
+  ],
+  "giphy:daily": [
+    {
+      "period": { "start": "2099-04-07T00:00:00Z", "end": "2099-04-08T00:00:00Z" },
+      "platform": "giphy",
+      "topics": [
+        {
+          "topic": "reaction-gif demand around clear-sky excitement",
+          "source_links": ["https://example.test/synthetic-trend/clear-sky-window"],
+          "suggested_angles": [
+            "a short looping 'finally clear' reaction tied to a nebula key-art frame"
+          ]
+        }
+      ],
+      "freshness_window": { "duration": "PT18H", "expires_at": "2099-04-08T18:00:00Z" },
+      "provenance": { "trust_zone": "U", "method": "adapter", "submitted_at": "2099-04-08T00:06:00Z" }
+    }
+  ],
+  "twitter:empty": []
+}

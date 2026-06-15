@@ -40,6 +40,35 @@ An **operator attestation** promotes a curated subset to `operator-curated` — 
 item's `attestation` field (who promoted it, when, why). Promotion is a deliberate human act, not a
 default.
 
+## Project memory as a sensitive source
+
+The optional **work-recap / build-in-public** source ([`work-recap.md`](work-recap.md)) reads **your
+own project memory** to seed founder-voice posts. **Project memory is one of the most sensitive
+inputs the system can touch** — it carries secrets, partner names, unreleased product details,
+codenames, financial figures, and internal IDs. The policy around it:
+
+- **Read-only, pointed at a configured path.** The repo ships the *mechanism*; it **never bundles,
+  copies, commits, or ships any real memory.** You configure `work_recap.memory_path` to a directory
+  **outside** the checkout (treat it like `$CONTENT_HOME` — keep it out of any repo with a remote).
+  With the source disabled (the default) or the path absent, **no memory is read at all.**
+- **Sanitize before it can become content.** Every memory-derived line passes a **redaction pre-pass**
+  before it becomes a shareable seed: secret-shaped values via the same `redact.js` the logs use, plus
+  neutral structural shapes (financial, internal-ID), plus **your config-extendable
+  `work_recap.private_terms` deny list** for the instance-specific confidential terms a generic matcher
+  cannot know (partner names, codenames). **Raw memory never enters the seed** — only sanitized
+  summaries travel.
+- **Honest scope:** this is pattern + known-name redaction, **not semantic DLP.** It cannot infer that
+  an unflagged proper noun is confidential. That is exactly why the deny list is yours to extend, why
+  a **gate privacy/leak check** re-verifies the draft and **hard-blocks residual leakage before the
+  approval card**, and why a **human reviewer is the mandatory final backstop**. Nothing
+  auto-publishes.
+- **Memory is never committed or shared.** Like all instance data, memory and any memory-derived run
+  residue stay under your instance directory and out of the repo (see *Never committed, never shared*
+  below; model §13.2).
+
+The full mechanism and the four privacy layers are documented in
+[`work-recap.md`](work-recap.md#2-the-privacy-model--read-this-first).
+
 ## Retention and deletion
 
 Each corpus item carries a `retention_class`. `engine purge-corpora` enforces the windows over
@@ -77,7 +106,7 @@ optional except Discord.
 | **Discord** (approval surface) | required in v1 | approval-card content (the variants, rationale, warnings), reviewer reactions, and any reviewer-attached media. It is your control plane — it sees the content you are about to publish. |
 | **Postiz** (publisher) | for Twitter/IG/FB/YT | the final post content + media you hand off as drafts, and the connected account credentials/integration you set up in Postiz. It also serves the analytics pull. |
 | **Giphy** (direct publisher) | Giphy lanes only | the GIF/media and caption you publish, plus your Giphy API credentials/username. |
-| **Scraping/trend provider** (BYO) | optional | the queries/accounts you ask it to fetch. Returns Zone-U corpus material; you are responsible for ToS compliance. |
+| **Scraping/trend provider** (BYO) | optional | the queries/accounts/themes you ask it to fetch — including when the optional `trends` pathway ([`trends.md`](trends.md)) polls it on a cadence. Returns Zone-U corpus/trend material; you are responsible for ToS compliance. Provider responses are redacted at write, so a token in a response never survives into a stored Trend Report. |
 | **LLM provider for the host runtime** | required (owned by the runtime) | the chain prompts and your content. **This is configured at your host runtime, not in this engine** — the engine never proxies chain-seat LLM credentials. Review your runtime/provider's data-handling terms. |
 | **Vision / media-generation provider** (engine-side) | optional | the image(s) the visual gate inspects or the prompts/inputs for media generation, via the §12.5 provider config block. Absent ⇒ the visual gate degrades to skip-with-warning; media degrades to reuse-only. |
 
@@ -99,6 +128,8 @@ holder lists, member profiling). Schemas of these ship; instances never do.
 ## See also
 
 - [`configuration.md`](configuration.md) — the `retention` block and the trust glossary.
+- [`work-recap.md`](work-recap.md) — project memory as a source: the four-layer privacy model in full.
+- [`trends.md`](trends.md) — the BYO trend pathway: Zone-U reports, manual-first, metered polling.
 - [`extending.md`](extending.md#4-scraper--trend-adapters) — the scraper adapter and the everything-Zone-U rule.
 - [`architecture.md`](architecture.md#5-trust-boundaries-zones-u--o--s--a) — zones U/O/S/A and data fences.
 - `CONTRIBUTING.md` — the never-accepted list.

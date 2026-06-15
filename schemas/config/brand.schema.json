@@ -52,6 +52,47 @@
       "enum": ["low", "medium", "high"],
       "default": "medium"
     },
+    "work_recap": {
+      "description": "OPTIONAL per-brand work-recap / build-in-public settings (release-spec §3.3). Meaningful only for account_class=operator brands (founder/operator/team accounts share the build in the open with flexible voice). CONFIG-GATED and OFF BY DEFAULT — enable the pathway in system.json work_recap; this block scopes a brand's own memory source and private-term deny list when system.json work_recap.accounts references it (or single-account mode points at this brand). PRIVACY IS LOAD-BEARING: the repo ships the MECHANISM pointed at a configured path; it NEVER bundles real memory.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Per-brand opt-in (still subject to the system.json work_recap.enabled master gate; both must be true). Defaults false.",
+          "default": false
+        },
+        "memory_path": {
+          "type": "string",
+          "description": "Path to this account's SENSITIVE memory the source scans (read-only; never copied into the repo)."
+        },
+        "files": {
+          "type": "array",
+          "description": "Files-glob relative to memory_path. Supports an exact file and a single 'dir/*.ext' wildcard. Default ['MEMORY.md', 'memory/*.md'].",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "lookback_days": {
+          "type": "integer",
+          "description": "How many days back the scan considers recent work. Default 3.",
+          "minimum": 1
+        },
+        "private_terms": {
+          "description": "Per-brand private-term deny list (partner names, codenames, unreleased feature names) — PUBLIC anti-targets to NOT print, unioned with the system-level list. Never secret VALUES. Either a flat string array or a { terms, secret_literals } object.",
+          "oneOf": [
+            { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "case_insensitive": { "type": "boolean", "default": true },
+                "terms": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+                "secret_literals": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              }
+            }
+          ]
+        }
+      }
+    },
     "paths": {
       "description": "CONTENT_HOME-relative locations of this brand's authored assets. Absolute paths are forbidden.",
       "type": "object",

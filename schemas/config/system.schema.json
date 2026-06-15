@@ -167,6 +167,102 @@
         }
       }
     },
+    "trends": {
+      "description": "The TREND SOURCE pathway (release-spec §8.8; DD-16). CONFIG-GATED and OFF BY DEFAULT: the config-gated trend pass polls the configured adapter on a 2/4/8/12h cadence, posts an angles-only readout to the trend-readout channel, and dispatches one seed per fresh report into a RESERVED trend calendar slot (slot_type=trend) — never out-of-calendar (DD-16). It NEVER auto-publishes; the seed runs the full chain to the human approval card (§2.4). Scraping is BYO (RD-9); no creds are bundled.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "The OFF-by-default gate (the LAW). Strictly true to enable; any other value keeps the pathway disabled (fail-closed).",
+          "default": false
+        },
+        "adapter": {
+          "type": "string",
+          "description": "Registered trend-source adapter name to poll (shipped: 'reference' for a BYO provider, 'fixture' for zero-key tests; or an operator-registered adapter). Required when enabled to poll an adapter; the manual-submission path (a trend-report file dropped into $CONTENT_HOME/trends/) needs no adapter.",
+          "minLength": 1,
+          "examples": ["reference", "fixture"]
+        },
+        "cadence": {
+          "$ref": "#/$defs/trend_cadence",
+          "description": "How often the scheduler recipe invokes the trend pass. Carried into the adapter poll and used as the report freshness-window basis (DD-15). Default 12h (the most conservative).",
+          "default": "12h"
+        },
+        "themes": {
+          "type": "array",
+          "description": "Optional theme/topic hints passed to the adapter to focus the poll.",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "provider": {
+          "type": "object",
+          "description": "Adapter-specific provider configuration (a §12.5-style block, opaque to the engine; e.g. { endpoint, platform, auth_scheme }). The reference adapter resolves its credential BY NAME via secrets.js (RD-9 BYO); no credential VALUE ever lives here.",
+          "additionalProperties": true
+        },
+        "private_terms": {
+          "$ref": "#/$defs/private_terms",
+          "description": "Extra redaction deny-list terms applied to report bodies at write (the privacy pre-pass, §13.3). Public anti-targets, not secrets."
+        }
+      }
+    },
+    "work_recap": {
+      "description": "The WORK-RECAP / build-in-public SOURCE pathway (release-spec §2.1 seeding; §3.3 operator/founder/team accounts with flexible voice). CONFIG-GATED and OFF BY DEFAULT: the daily kickoff fills one build-in-public option per day per OPERATOR account from a CONFIGURED, SENSITIVE memory path. PRIVACY IS LOAD-BEARING — the source runs a redaction/privacy pre-pass (shared/redact + this private-term deny list) and the draft passes the gate's privacy/leak check BEFORE the human approval card (§2.4). The repo ships the MECHANISM pointed at a configured path; it NEVER bundles or commits real memory. Recaps fill RESERVED work_recap calendar slots, never out-of-calendar.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "The OFF-by-default gate (the LAW). Strictly true to enable; any other value keeps the pathway disabled (fail-closed).",
+          "default": false
+        },
+        "memory_path": {
+          "type": "string",
+          "description": "Absolute or process-relative path to the SENSITIVE project memory the source scans (read-only; never copied into the repo). Block-level default; per-account entries may override it. Required (block- or account-level) when enabled."
+        },
+        "files": {
+          "type": "array",
+          "description": "Files-glob list relative to memory_path that the source scans. Supports an exact file and a single 'dir/*.ext' wildcard. Default ['MEMORY.md', 'memory/*.md'].",
+          "items": { "type": "string", "minLength": 1 },
+          "default": ["MEMORY.md", "memory/*.md"]
+        },
+        "lookback_days": {
+          "type": "integer",
+          "description": "How many days back the scan considers recent work. Default 3.",
+          "minimum": 1,
+          "default": 3
+        },
+        "max_items": {
+          "type": "integer",
+          "description": "Cap on extracted work items per seed (keeps a recap focused). Default 40.",
+          "minimum": 1,
+          "default": 40
+        },
+        "private_terms": {
+          "$ref": "#/$defs/private_terms",
+          "description": "The config-extendable private-term deny list (partner names, codenames, unreleased feature names). Threaded into the privacy pre-pass AND onto the seed so the gate's privacy/leak check enforces it. Public anti-targets to NOT print — not secrets themselves (secret VALUES are stripped by redaction)."
+        },
+        "extra_secret_keys": {
+          "type": "array",
+          "description": "Extra sensitive key NAMES the privacy/leak gate treats as secret-bearing (extends the built-in redact.js secret shapes for instance-specific key names). Names only, never secret values.",
+          "items": { "type": "string", "minLength": 1 },
+          "default": []
+        },
+        "brand": {
+          "type": "string",
+          "description": "Default operator/founder/team account this recap targets (registered as a brand with account_class=operator, §3.3/§6.4). Used when accounts[] is absent (single-account mode)."
+        },
+        "account": {
+          "type": "string",
+          "description": "Default operator/founder/team account handle/ref (Tier-3) the build-in-public post targets. Used when accounts[] is absent."
+        },
+        "accounts": {
+          "type": "array",
+          "description": "Per-account work-recap settings (§3.3: each operator/founder/team account gets its own daily build-in-public option). Each entry inherits the block-level memory_path/files/lookback_days/private_terms defaults unless it overrides them. When absent, the block's own brand/account is the single account.",
+          "items": { "$ref": "#/$defs/work_recap_account" }
+        }
+      }
+    },
     "cooldown": {
       "description": "Media reuse cooldown defaults (per-brand overridable in brand.json).",
       "type": "object",
@@ -345,6 +441,63 @@
       "type": "string",
       "description": "Duration token, an integer followed by a unit (h hours, d days, m minutes).",
       "pattern": "^\\d+[mhd]$"
+    },
+    "trend_cadence": {
+      "type": "string",
+      "description": "Trend-poll cadence token (§8.8). One of the supported polling intervals; off-list values are rejected fail-closed by the engine.",
+      "enum": ["2h", "4h", "8h", "12h"]
+    },
+    "private_terms": {
+      "type": "array",
+      "description": "A private-term deny list: PUBLIC anti-targets (terms NOT to print, e.g. partner names / codenames / unreleased feature names). NEVER secret VALUES — those are stripped by redaction. Either a flat string array, or a { terms, secret_literals } object (both forbidden-to-print).",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "case_insensitive": { "type": "boolean", "default": true },
+            "terms": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "secret_literals": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+          }
+        }
+      ]
+    },
+    "work_recap_account": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One operator/founder/team account's work-recap settings (§3.3). brand/account scope it; memory_path/files/lookback_days/private_terms override the block-level defaults when present.",
+      "properties": {
+        "brand": {
+          "type": "string",
+          "description": "The operator-class brand id this account's recap targets (account_class=operator)."
+        },
+        "account": {
+          "type": "string",
+          "description": "The account handle/ref (Tier-3) the build-in-public post targets."
+        },
+        "memory_path": {
+          "type": "string",
+          "description": "Per-account memory path override (else the block-level work_recap.memory_path)."
+        },
+        "files": {
+          "type": "array",
+          "description": "Per-account files-glob override (else the block-level default).",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "lookback_days": {
+          "type": "integer",
+          "description": "Per-account lookback override (else the block-level default).",
+          "minimum": 1
+        },
+        "private_terms": {
+          "$ref": "#/$defs/private_terms",
+          "description": "Per-account extra deny-list terms, UNIONED with the block-level private_terms."
+        }
+      }
     }
   }
 }

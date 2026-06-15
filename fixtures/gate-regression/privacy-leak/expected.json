@@ -1,0 +1,56 @@
+{
+  "rule_ref": "rule.sys.privacy-leak",
+  "gate": "sys",
+  "executed_in_ci": false,
+  "fixture_kind": "none",
+  "notes": "SYS.PRIVATE_LEAK is the deterministic privacy/leak backstop emitted by engine/gate/privacy-leak.js when source-derived copy (especially work-recap memory content) carries residual sensitive material into the human-visible draft/package — a secret/credential shape (reuses redact.js), a sensitive structural shape (financial amount, internal-id), or a configured work_recap.private_term. It HARD-blocks and routes back to the writer BEFORE the approval card (defense in depth; the human is the final backstop, §2.4). Although deterministic, the gate-regression runner has no driver for the 'sys' gate (its deterministic drivers are lint/package/platform), so SYS.PRIVATE_LEAK is pinned here STRUCTURALLY (executed_in_ci:false): every expected code is registered in rules/codes.md and RD-21-consistent. The LIVE per-class block/pass behavior is exercised by the dedicated suite engine/gate/__tests__/privacy-leak.test.js (4 block classes + clean classes) and the module --selftest. All cases are HARD/block, route writer. No input fixture is read for structural cases (so no schema-bound *.entry.json is shipped here).",
+  "cases": [
+    {
+      "name": "secret-shape-leak",
+      "kind": "positive",
+      "trigger": "Source-derived copy re-introduces a secret/credential shape (a token/bearer/signed-url/opaque-blob span) that redact.js patterns detect.",
+      "expected_codes": ["SYS.PRIVATE_LEAK"],
+      "code_tier": "hard",
+      "code_disposition": "block",
+      "route": "writer",
+      "notes": "Universal: a credential pasted into ANY draft is a leak (no source context required)."
+    },
+    {
+      "name": "financial-structural-leak",
+      "kind": "positive",
+      "trigger": "Copy carries a sensitive financial structural shape (currency-prefixed/magnitude-suffixed amount) the source pre-pass masks.",
+      "expected_codes": ["SYS.PRIVATE_LEAK"],
+      "code_tier": "hard",
+      "code_disposition": "block",
+      "route": "writer",
+      "notes": "Reuses the source privacy-filter structural pattern family 'financial'."
+    },
+    {
+      "name": "internal-id-structural-leak",
+      "kind": "positive",
+      "trigger": "Copy carries an internal-id structural shape (UPPER-PREFIX-ALNUM ticket/record id).",
+      "expected_codes": ["SYS.PRIVATE_LEAK"],
+      "code_tier": "hard",
+      "code_disposition": "block",
+      "route": "writer",
+      "notes": "Reuses the source privacy-filter structural pattern family 'internal_id'."
+    },
+    {
+      "name": "configured-private-term-leak",
+      "kind": "positive",
+      "trigger": "Copy contains a configured work_recap.private_term (partner name / codename / unreleased feature) verbatim.",
+      "expected_codes": ["SYS.PRIVATE_LEAK"],
+      "code_tier": "hard",
+      "code_disposition": "block",
+      "route": "writer",
+      "notes": "Deny set unions config.work_recap.private_terms with the originating source seed's private_terms/privacy_flags. The explanation never echoes the matched term back (no re-leak)."
+    },
+    {
+      "name": "clean-source-copy",
+      "kind": "negative",
+      "trigger": "Source-derived copy is clean even though the source's upstream privacy_flags.any_redacted is true (the pre-pass masked a different line). Only RESIDUAL leakage in the final copy blocks.",
+      "expected_codes": [],
+      "notes": "Negative case: clean final copy must PASS. The upstream flag is carried as evidence, not as a blocker."
+    }
+  ]
+}

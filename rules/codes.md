@@ -37,7 +37,7 @@ approval card, a gate report, or the event ledger, it is defined below. Families
 | `PKG.*`  | deterministic package/publish-edge gate (`validate-package.js`) | package integrity, variant/visual presence, media cooldown |
 | `PLAT.*` | per-platform deterministic gate (`platform-gates.js`) | per-platform packaging/limit rules |
 | `VIS.*`  | visual gate (`engine/gate/visual-check/`)         | image brand-fidelity, embedded text, provider state |
-| `SYS.*`  | runtime/integrity at the publish edge (`publish-executor.js`) | publish-time integrity, retry exhaustion, handoff/crash safety |
+| `SYS.*`  | runtime/integrity at the publish edge (`publish-executor.js`) + the privacy/leak backstop (`privacy-leak.js`) | publish-time integrity, retry exhaustion, handoff/crash safety, source-derived copy privacy/leak |
 
 **Tier → verdict (spec §14.2, §14.4):** any HARD code ⇒ `FAIL` (route back to the code's
 `route` seat). SOFT-only ⇒ `PASS_ALTERNATE_ONLY` when a soft code carries `bars_recommended`,
@@ -577,9 +577,13 @@ detection. The final verdict carries the union of every layer's codes.
 
 ## SYS.* — runtime / integrity at the publish edge
 
-> Enforcement: `engine/orchestrator/publish-executor.js` (and the readback integrity verifier).
-> These fire at the publish edge, not during content gating, so they are registered at the
-> publish-edge layer (`source: package`). They are emitted onto the queue entry / event ledger.
+> Enforcement: `engine/orchestrator/publish-executor.js` (and the readback integrity verifier) for
+> the publish-edge integrity codes, plus `engine/gate/privacy-leak.js` for the privacy/leak backstop
+> (`SYS.PRIVATE_LEAK`). All SYS codes register at the publish-edge layer (`source: package`) because
+> the validation-result/registry `source` enum has no privacy/system value. The integrity codes fire
+> at the publish edge and are emitted onto the queue entry / event ledger; `SYS.PRIVATE_LEAK` fires
+> in the content path (before the approval card) and routes back to the **writer** rather than the
+> publisher-liaison — a leaked draft is regenerated, never published.
 
 ```yaml
 - code: SYS.TEST_PUBLISH_BLOCKED
@@ -622,6 +626,14 @@ detection. The final verdict carries the union of every layer's codes.
   route: publisher-liaison
   description: The live approval card read back does not match the card the engine built (a foreign edit or render corruption). Integrity check fails closed — the item does not advance.
   rule_ref: rule.sys.publish-integrity
+- code: SYS.PRIVATE_LEAK
+  family: SYS
+  tier: hard
+  source: package
+  disposition: block
+  route: writer
+  description: A draft derived from a content source (especially the work-recap memory source) carries residual sensitive material into the human-visible copy — a secret/credential shape (reusing the redact.js patterns), a sensitive structural shape (financial amount, internal-id), or a configured work_recap.private_term (partner name, codename, unreleased feature). HARD-blocks and routes back to the writer so no human ever sees a leaked draft on the approval card (defense in depth; the human is the final backstop, §2.4). Enforced deterministically by engine/gate/privacy-leak.js, which re-verifies the copy the source pre-pass was supposed to keep clean. Registered source package (the publish-edge layer; the registry schema source enum has no privacy/system value).
+  rule_ref: rule.sys.privacy-leak
 ```
 
 ---
