@@ -1,0 +1,18 @@
+{
+  "id": "lr-2099-04-08-d-belowthreshold",
+  "created_at": "2099-04-08T06:15:00.000Z",
+  "source_signals": [
+    {
+      "type": "analytics",
+      "refs": [
+        "analytics/performance-report-2099-04-08-acme-cosmos.json"
+      ],
+      "count": 4
+    }
+  ],
+  "target_artifact": "calendar_weighting:acme-cosmos/longform-essay",
+  "target_mutability": "learnable",
+  "proposed_diff": "--- calendar/calendar-weights.json\n+++ calendar/calendar-weights.json\n@@\n-  \"longform-essay\": 0.10,\n+  \"longform-essay\": 0.13,\n",
+  "status": "proposed",
+  "shareability": "private"
+}

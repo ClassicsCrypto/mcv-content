@@ -39,6 +39,7 @@ const queue = require('../shared/queue');
 const dispatchMod = require('../orchestrator/dispatch');
 const ledger = require('../orchestrator/workflow-ledger');
 const setupState = require('../setup/setup-state');
+const rollbackMod = require('../self-improve/rollback');
 const util = require('./util');
 
 const HELP = `engine status
@@ -157,6 +158,44 @@ function safeGetSecret(name, env) {
 }
 
 /**
+ * Surface the GOVERNED self-improvement loop's machine changes (SI-CLI / DD-6 (6) auditable +
+ * reversible): is the loop enabled, and what has it changed — each change's id, target knob,
+ * governance_state (canary | promoted | rolled_back), and how to roll it back ("engine rollback").
+ * Read-only + tolerant: a half-set-up / loop-off instance reports `enabled:false, changes:[]`.
+ */
+function selfImproveSummary(env, config) {
+  const si = (config && typeof config.self_improve === 'object' && config.self_improve) || {};
+  const enabled = si.enabled === true;
+  let sidecars = [];
+  try { sidecars = rollbackMod.listSidecars(env); } catch { sidecars = []; }
+  const byState = { canary: 0, promoted: 0, rolled_back: 0 };
+  const changes = [];
+  for (const sc of sidecars) {
+    const state = sc.governance_state || 'unknown';
+    if (byState[state] != null) byState[state] += 1;
+    changes.push({
+      record_id: sc.record_id,
+      target_artifact: sc.target_artifact || null,
+      governance_state: state,
+      applied_at: sc.applied_at || null,
+      baseline_ref: sc.baseline_ref || null,
+      reversible: Boolean(sc.baseline_ref) || state === 'canary',
+    });
+  }
+  // Most-recent first so the operator sees the latest machine change at the top.
+  changes.sort((a, b) => String(b.applied_at || '').localeCompare(String(a.applied_at || '')));
+  return {
+    enabled,
+    total_changes: changes.length,
+    by_state: byState,
+    changes,
+    rollback_hint: changes.length
+      ? 'Revert the latest with "engine rollback --last", a specific one with "engine rollback --record <id>", or to a pinned baseline with "engine rollback --to-baseline <ref>".'
+      : null,
+  };
+}
+
+/**
  * @param {object} ctx  { flags, env, config }
  * @returns {{ ok, summary, detail?, data? }}
  */
@@ -172,6 +211,7 @@ function run(ctx = {}) {
   const q = queueSummary(env);
   const lg = ledgerSummary(env);
   const wiring = wiringSelfCheck(env, config);
+  const selfImprove = selfImproveSummary(env, config);
   let pending = [];
   try { pending = dispatchMod.listPending(env); } catch { pending = []; }
   let project_state = 'unknown';
@@ -201,6 +241,7 @@ function run(ctx = {}) {
     today: lg.today,
     failure_codes: lg.failure_codes,
     spend,
+    self_improve: selfImprove,
     wiring,
   };
 
@@ -218,6 +259,9 @@ function run(ctx = {}) {
       `last runs: ${lastRuns.length ? lastRuns.join(' | ') : '(none recorded)'}`,
       Object.keys(lg.failure_codes).length ? `failure codes today: ${Object.entries(lg.failure_codes).map(([c, n]) => `${c}×${n}`).join(', ')}` : null,
       `spend: ${spend.scope}${spend.monthly_cap != null ? ` (monthly_cap ${spend.monthly_cap})` : ''} — ${spend.note}`,
+      `self-improve: loop ${selfImprove.enabled ? 'ENABLED' : 'off (default)'}; machine changes ${selfImprove.total_changes} (canary ${selfImprove.by_state.canary}, promoted ${selfImprove.by_state.promoted}, rolled_back ${selfImprove.by_state.rolled_back})`,
+      ...selfImprove.changes.slice(0, 5).map((c) => `  Δ ${c.record_id} → ${c.target_artifact || '?'} [${c.governance_state}]${c.reversible ? ' (reversible)' : ''}`),
+      selfImprove.rollback_hint,
       `wiring: ${wiring.map((c) => `${c.ok ? '✓' : '✗'} ${c.name}`).join(' ')}`,
       ...wiringFails.map((c) => `  ✗ ${c.name}: ${c.detail}`),
     ].filter(Boolean),

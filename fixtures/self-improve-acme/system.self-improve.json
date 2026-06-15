@@ -1,0 +1,34 @@
+{
+  "$comment": "SI-FIXTURES — partial config/system.json fragment exercising the new `self_improve` block (release-spec roadmap #3 governed self-improvement; DD-6; §8.9; §15.4). Synthetic Acme Cosmos. The OFF-by-default gate is flipped ON here so the zero-key applier test runs the governed machine-application path; the fixture analyst seat is wired (degrades when absent). Merged with a base config + sub-validated against schemas/config/system.schema.json#/properties/self_improve in tests. NOT a full system.json (no reviewers/budget/etc — those are validated by their own fixtures).",
+  "self_improve": {
+    "enabled": true,
+    "analyst_seat": {
+      "seat": "fixture"
+    },
+    "evidence": {
+      "min_sample_size": 12,
+      "min_confidence": 0.8,
+      "min_effect_size": 0.2
+    },
+    "canary": {
+      "observe_cycles": 2,
+      "scope_fraction": 0.25,
+      "rollback_on_regression_pct": 0.1
+    },
+    "allowlist": {
+      "targets": [
+        "calendar_weighting",
+        "archetype_priority",
+        "content_type_priority",
+        "tunable_dial"
+      ],
+      "bounds": {
+        "max_weight_delta": 0.15,
+        "weight_range": { "min": 0, "max": 1 },
+        "dials": [
+          { "name": "drama_dial.acme-cosmos", "min": 0, "max": 3 }
+        ]
+      }
+    }
+  }
+}

@@ -168,6 +168,8 @@ This statement defines what "supported" means and is the basis for issue/PR tria
   [`docs/observability.md`](docs/observability.md), [`docs/troubleshooting.md`](docs/troubleshooting.md).
 - [`docs/trends.md`](docs/trends.md), [`docs/work-recap.md`](docs/work-recap.md) — the two opt-in
   content sources (trend automation; build-in-public from project memory).
+- [`docs/self-improvement.md`](docs/self-improvement.md) — the governed self-improvement loop and its
+  DD-6 governance (OFF by default; the machine touches only weightings/prioritization, never the gates).
 - [`docs/setup/`](docs/setup/) — quick-start, full-setup, cold-start.
 - [`docs/runtimes/`](docs/runtimes/) — OpenClaw fast path + the generic capability contract.
 - [`docs/platforms/`](docs/platforms/) — per-platform setup, incl. the TikTok manual path.
@@ -237,8 +239,14 @@ authoring template when no seat or corpus is present (onboarding is never blocke
    config-gated brand-DNA pathway above (the one-command `engine ingest-brand` flow: ingest → analyze
    → generate; `engine generate-dna` runs the generation step alone over an already-ingested corpus;
    remaining roadmap depth: richer scraper adapters and tuning).
-3. **Governed self-improvement loop** — machine-applied learning records with their governance
-   machinery (thresholds, canary, rollback) shipping together; never before the governance.
+3. **Governed self-improvement loop** — *shipped* (governance-first): machine-applied learning records
+   land **only** inside their DD-6 governance — a structural human-only boundary (guardrails/gate/
+   hard-fail thresholds are never machine-changed), the never-loosen invariant, an evidence threshold,
+   canary → observe → promote/auto-rollback, versioned one-step rollback via the instance repo, and
+   **OFF by default** behind the kill switch. The machine touches only calendar weightings and
+   archetype/content-type prioritization — never the gates. Deterministic engine code (no chain LLM);
+   an optional host analyst seat refines proposal prose only. See
+   [`docs/self-improvement.md`](docs/self-improvement.md).
 4. **Improvement-sharing automation** — outbound sanitize/consent tooling + a maintainer evaluation
    harness; v1 is manual, opt-in, sanitized rule-diff PRs only.
 5. **Monthly competitor scan + consent-gated voice calibration.**

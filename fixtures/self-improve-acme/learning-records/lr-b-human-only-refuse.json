@@ -1,0 +1,25 @@
+{
+  "id": "lr-2099-04-08-b-humanonly",
+  "created_at": "2099-04-08T06:05:00.000Z",
+  "source_signals": [
+    {
+      "type": "analytics",
+      "refs": [
+        "analytics/performance-report-2099-04-08-acme-cosmos.json"
+      ],
+      "count": 18
+    },
+    {
+      "type": "rejection",
+      "refs": [
+        "ledger/events.jsonl"
+      ],
+      "count": 6
+    }
+  ],
+  "target_artifact": "rules/core/claims-safety.md",
+  "target_mutability": "human-only",
+  "proposed_diff": "--- rules/core/claims-safety.md\n+++ rules/core/claims-safety.md\n@@\n-severity: hard\n-disposition: block\n+severity: soft\n+disposition: warn\n",
+  "status": "proposed",
+  "shareability": "private"
+}

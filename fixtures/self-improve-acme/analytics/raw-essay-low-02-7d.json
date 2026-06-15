@@ -1,0 +1,21 @@
+{
+  "content_id": "essay-low-02",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "external_post_ref": "acme-essay-low-02",
+  "captured_at": "2099-04-01T12:00:00.000Z",
+  "checkpoint": "7d",
+  "type": "longform-essay",
+  "format": "longform-essay",
+  "theme": "sky-events",
+  "hook": "deep-dive",
+  "archetype": "deep-dive",
+  "content_type": "longform-essay",
+  "metrics": {
+    "likes": 96,
+    "comments": 8,
+    "shares": 5,
+    "views": 2112,
+    "impressions": 2880
+  }
+}

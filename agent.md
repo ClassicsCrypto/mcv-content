@@ -261,7 +261,15 @@ config, not in scheduler wrappers.**
 | `generate-dna --brand <id>` | the C2 Brand DNA + archetype generator from the ingested corpus: deterministic analysis (no LLM) + a metered host synthesis seat; degrades to the authoring template with no seat/corpus (DD-21); competitor patterns never verbatim (RD-9). Estimate-and-confirm | `--yes`, `--estimate-only`, `--force` |
 | `index-library` | manage the media library: visual-tag/index (default), folder auto-sort (`--organize`), or character sheets (`--character-sheets`). Metered actions are estimate-and-confirm + dry-run; incremental, never re-bills; empty-library = no-op | `--yes`, `--estimate-only`, `--force`, `--no-hash`, `--organize [--apply]`, `--character-sheets [--generate --yes --apply]`, `--brand` |
 | `purge-corpora` | enforce corpus retention windows by `retention_class` (dry-run by default) | `--apply`, `--brand` |
-| `pause` / `resume` | the kill switch — engage / clear the PAUSED sentinel + config flag | `pause --reason "<text>"` |
+| `improve` † | the **governed self-improvement loop** (§11; OFF by default, behind `self_improve.enabled` + the kill switch): evaluate analytics → derive governed proposals → apply auto-applicable ones in **canary** → observe → promote/auto-rollback. Touches only weightings/prioritization; structurally refuses any human-only / gate-loosening / below-threshold / unversioned change | `--dry-run` (default, applies nothing), `--apply`, `--brand`, `--json` |
+| `rollback` | **one-step revert** of the most recent governed machine change to its pinned instance-repo baseline (or a named record / pinned ref) | `--last` (default), `--to-baseline <ref>`, `--record <id>`, `--reason "<text>"`, `--json` |
+| `pause` / `resume` | the kill switch — engage / clear the PAUSED sentinel + config flag (halts the self-improvement loop too, §11/§15.4) | `pause --reason "<text>"` |
+
+† `improve` / `rollback` are **wired in `bin/engine.js` and run live** — the governed self-improvement
+loop is deterministic engine machinery (`engine/self-improve/`), and the verbs are its entry point (a
+scheduler hook may also invoke the modules directly). The loop is **OFF by default**
+(`self_improve.enabled`); the DD-6 governance refusals are structural and hold regardless of how the
+loop is triggered.
 
 Every verb supports `--help` and `--json`. `engine --help` lists them. Exit codes: `0` success; `1`
 verb-level failure (a failed checkpoint, an erroring run); `2` usage/setup error; `3` a not-yet-present
@@ -385,3 +393,43 @@ shortcut. Full details: [`docs/runtimes/openclaw.md`](docs/runtimes/openclaw.md)
 A generic (non-OpenClaw) runtime follows the same contract via
 [`docs/runtimes/generic.md`](docs/runtimes/generic.md); only the seat-instantiation and run-dispatch
 hook instructions differ. Other runtimes are best-effort (DD-1(c)).
+
+---
+
+## 11. The governed self-improvement loop — and your autonomy boundary (§8.9; DD-6; roadmap #3)
+
+The engine learns from performance data. **v1's default behavior:** it writes **proposed** Learning
+Records and a **human applies every change by hand** (§9 weekly-analytics runbook). The
+**self-improvement loop** lets the engine *apply* a narrow class of improvements on its own —
+**but only inside a governance cage, OFF by default.** The governance is the whole point of the
+feature; it is enforced **structurally** (deterministic engine code that refuses and throws), not by
+asking you to behave.
+
+**The autonomy boundary — internalize this.** When the loop runs, the machine may re-weight
+**what to make more of**: calendar weightings, archetype/content-type prioritization, and explicitly
+bounded tunable dials. It may **never** change **what gets through the gate**: guardrail/safety rules,
+the gate, hard-fail or pass thresholds, the firewall, budget caps, the reviewer allowlist, publish
+posture, the mode ladder, or the kill switch — those are **human-only, always**. A machine change can
+**never** loosen a gate (the never-loosen invariant). These are not conventions you uphold; the
+applier `assertMachineChangeAllowed` (throws `EHUMANONLY`) and `assertNotGateLoosening` (throws
+`ENEVERLOOSEN`) make the unsafe action impossible. Your two reserved authorities — **approving content**
+and **publishing a draft** — are entirely outside this loop.
+
+**What you do as the agent:**
+
+- Treat the loop as **OFF unless the operator set `self_improve.enabled: true`**. Do not enable it on
+  your own; it is a risk-posture change, like auto-publish.
+- Run it with `engine improve --apply` (`--dry-run` is the default and changes nothing). Every
+  auto-applied change lands in a **limited canary**, is observed for N cycles, and is **promoted or
+  auto-rolled-back** — you do not hand-promote.
+- A change is auto-applied **only above the evidence bar** (sample size / confidence / effect size);
+  below it, it stays **proposed** for the human (the v1 behavior). Never lower the bar to force a change.
+- Every action is **versioned** (a commit to the instance repo) and **ledgered**; `engine rollback`
+  reverts the last machine change in one step. Surface refusals and rollbacks to the operator via
+  `engine status` — they are auditable, not silent.
+- `engine pause` halts the loop instantly regardless of `enabled` (§15.4).
+
+The loop **never calls a chain LLM**: proposals are derived deterministically from analytics. An
+optional host **analyst seat** may refine a proposal's *rationale prose* only — it cannot change a
+target, a value, the evidence, or a classification. Full reference, the six DD-6 invariants, the state
+machine, and the `self_improve` config block: [`docs/self-improvement.md`](docs/self-improvement.md).

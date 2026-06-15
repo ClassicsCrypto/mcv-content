@@ -1,0 +1,18 @@
+{
+  "id": "lr-2099-04-08-c-neverloosen",
+  "created_at": "2099-04-08T06:10:00.000Z",
+  "source_signals": [
+    {
+      "type": "analytics",
+      "refs": [
+        "analytics/performance-report-2099-04-08-acme-cosmos.json"
+      ],
+      "count": 13
+    }
+  ],
+  "target_artifact": "tunable_dial:gate.variant_distinctness.jaccard_threshold",
+  "target_mutability": "learnable",
+  "proposed_diff": "--- config/system.json\n+++ config/system.json\n@@ gate.variant_distinctness\n-      \"jaccard_threshold\": 0.45,\n+      \"jaccard_threshold\": 0.80,\n",
+  "status": "proposed",
+  "shareability": "private"
+}

@@ -111,6 +111,7 @@ validation error.
 | `card_ttl` | object | `{trend:"freshness-window-bound", evergreen_escalate_after:"72h"}` | approval-card TTL per slot type |
 | `retention` | object | `{raw_corpus_days:90, purge_schedule:"weekly"}` | corpus retention — see [`data-policy.md`](data-policy.md) |
 | `observability` | object | (see below) | digest timing + stall thresholds |
+| `self_improve` | object | `{enabled:false}` | the governed self-improvement loop — **OFF by default** (see below + [`self-improvement.md`](self-improvement.md)) |
 | `paused` | boolean | `false` | mirror of the `PAUSED` sentinel |
 
 ### `reviewers[]` (the approval allowlist)
@@ -179,6 +180,33 @@ Jaccard threshold 0.45, opener window 30 chars). These are generic starting poin
 values — the maintainer's calibrated heuristics, weights, and exemplar batteries are not shipped.
 Tune `gate.variant_distinctness` per brand voice if the defaults over- or under-fire on
 `LINT.VARIANT_DUP`.
+
+### The `self_improve` block (governed self-improvement)
+
+The config gate for the **governed self-improvement loop** (DD-6; full reference:
+[`self-improvement.md`](self-improvement.md)). `additionalProperties: false`; only `enabled` is
+required. **OFF by default and the whole block is fail-closed** — the loop machine-applies nothing
+unless `enabled` is **strictly `true`**, and the `PAUSED` kill switch overrides it even then.
+
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `enabled` | boolean | `false` | **THE LAW.** Strictly `true` to allow governed machine application; any other value keeps learning records human-applied (the v1 behavior) |
+| `evidence` | object | `{min_sample_size:12, min_confidence:0.8, min_effect_size:0.2}` | the auto-applicable bar (DD-6 (3)); below it a record stays `proposed`. `min_sample_size` is floored at **3** (the analytics outlier-sample floor) |
+| `canary` | object | `{observe_cycles:2, scope_fraction:0.25, rollback_on_regression_pct:0.1}` | canary → observe → promote/auto-rollback (DD-6 (4)); `observe_cycles` ≥ 1 |
+| `allowlist` | object | — | the **closed** machine-changeable set + human-set bounds (DD-6 (1)+(2)) |
+| `analyst_seat` | object | — | **optional** host seat that refines proposal *prose only*; degrades when absent (RD-2). `{ seat, provider }`; the provider block resolves credentials by name, never a value |
+
+`allowlist.targets[]` is a **closed enum** — `calendar_weighting`, `archetype_priority`,
+`content_type_priority`, `tunable_dial` — and **nothing else can be added**: a guardrail, the gate, or
+a hard-fail threshold is human-only by construction and refused structurally regardless of this block.
+`allowlist.bounds` = `{ max_weight_delta (default 0.15), weight_range {min, max} (default [0,1]),
+dials[] {name, min, max} }`; the applier **clamps every machine change into these human-set bounds**
+and refuses a proposal that would exit them (a within-bounds change can never reach a guardrail).
+
+Values that land via this loop carry the **`machine-learned`** provenance class
+([above](#provenance-is-first-class)) and are recorded as versioned, applied Learning Records in the
+instance repo (one-step `engine rollback`). The loop is deterministic engine code (no chain LLM); see
+[`self-improvement.md`](self-improvement.md) for the six DD-6 invariants and the state machine.
 
 ## 4. `brands/<id>/brand.json` (brand scope)
 

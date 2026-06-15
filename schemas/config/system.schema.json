@@ -392,6 +392,148 @@
         }
       }
     },
+    "self_improve": {
+      "description": "The GOVERNED SELF-IMPROVEMENT LOOP (release-spec roadmap #3; original-design-spec §2.6 auto-research/self-improvement; DD-6; §8.9 v1 boundary; §15.4 kill switch). CONFIG-GATED and OFF BY DEFAULT (fail-closed): v1 ships analytics + learning-record CREATION (human-applied) only — this block enables governed MACHINE application of improvements derived DETERMINISTICALLY from the existing analytics (engine/analytics/engagement baselines/outliers/recommendations; RD-2 — the engine NEVER calls chain LLMs, the governance + applier are deterministic engine code, RD-12 zero-key testable). THE GOVERNANCE IS THE WHOLE POINT and ships TOGETHER WITH application, never application without governance (DD-6 / §8.9 'when the automated loop ships it ships WITH its governance machinery, never before'). The applier MAY only ever touch the MACHINE-CHANGEABLE knobs declared in `allowlist` (calendar weightings, archetype/content-type prioritization, explicitly machine-tunable dials within human-set bounds) and MUST refuse — structurally, not by prompt — to write any rules/*.md carrying frontmatter mutability:human-only, the gate, hard-fail thresholds, or any guardrail (EHUMANONLY). The NEVER-LOOSEN invariant (original-design-spec §3.1) is structural: no machine change may make a gate/guardrail more permissive (ENEVERLOOSEN). A learning record is auto-applicable ONLY above `evidence` (min sample size, confidence, effect size); below it stays PROPOSED (the v1 human-applied behavior). An auto-applied change goes to a LIMITED `canary` scope, is observed for N cycles against baseline, then PROMOTED or AUTO-ROLLED-BACK on regression; every change is a versioned learning record committed to the instance repo with one-step `engine rollback`, logged to the event ledger, and surfaced in `engine status`. The PAUSED sentinel / kill switch (§15.4) halts the whole loop regardless of `enabled`.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "The OFF-by-default gate (the LAW). Strictly true to enable governed machine application; any other value keeps the loop disabled and learning records human-applied (the v1 behavior, fail-closed). Even when true, the PAUSED kill switch (§15.4) overrides and halts the loop.",
+          "default": false
+        },
+        "analyst_seat": {
+          "type": "object",
+          "description": "OPTIONAL host ANALYST seat wiring (RD-2: the engine NEVER calls chain LLMs; proposals are derived DETERMINISTICALLY from analytics, and an injectable host seat may only REFINE/annotate them). Absent / no seat wired => proposals are the deterministic analytics-derived set; the seat degrades gracefully (DD-21 pattern). The seat can NEVER widen the machine-changeable surface, lower a threshold, or loosen a gate — those are structural engine guarantees the seat output is re-checked against.",
+          "additionalProperties": false,
+          "properties": {
+            "seat": {
+              "type": "string",
+              "description": "Registered analyst-seat name the runtime wires (shipped: 'fixture' for zero-key tests; or a host-registered seat). When absent, the deterministic proposal set is used as-is.",
+              "minLength": 1,
+              "examples": ["fixture"]
+            },
+            "provider": {
+              "type": "object",
+              "description": "Seat-specific provider configuration (a §12.5-style block, opaque to the engine). Credentials resolve BY NAME via secrets.js (RD-2/RD-9); no credential VALUE here.",
+              "additionalProperties": true
+            }
+          }
+        },
+        "evidence": {
+          "type": "object",
+          "description": "EVIDENCE THRESHOLD (DD-6): a learning record is auto-applicable ONLY when its supporting analytics clear EVERY bar here; below threshold the record stays `proposed` (human-applied, the v1 behavior — never act on thin evidence). All bars are conservative-by-default.",
+          "additionalProperties": false,
+          "required": ["min_sample_size", "min_confidence", "min_effect_size"],
+          "properties": {
+            "min_sample_size": {
+              "type": "integer",
+              "description": "Minimum number of underlying content observations (n) the proposal's analytics must aggregate before it is auto-applicable. n below this stays PROPOSED. Must be at least the analytics outlier-sample floor (engine MIN_OUTLIER_SAMPLE=3); default conservative.",
+              "minimum": 3,
+              "default": 12
+            },
+            "min_confidence": {
+              "type": "number",
+              "description": "Minimum confidence (0..1) the deterministic analytics assign the effect (e.g. share of the rolling window agreeing on the direction). Below this stays PROPOSED.",
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "default": 0.8
+            },
+            "min_effect_size": {
+              "type": "number",
+              "description": "Minimum effect size the change must be backed by, expressed as the ratio of the observed metric to its baseline minus 1 (e.g. 0.2 = a 20% lift over baseline). A change with a smaller effect stays PROPOSED — not worth a machine change.",
+              "exclusiveMinimum": 0,
+              "default": 0.2
+            }
+          }
+        },
+        "canary": {
+          "type": "object",
+          "description": "CANARY -> OBSERVE -> PROMOTE/ROLLBACK (DD-6). An auto-applied change first lands in a LIMITED scope, is observed for N cycles against the pre-change baseline, then PROMOTED (kept) or AUTO-ROLLED-BACK (reverted) on regression.",
+          "additionalProperties": false,
+          "required": ["observe_cycles"],
+          "properties": {
+            "observe_cycles": {
+              "type": "integer",
+              "description": "Number of analytics cycles a canaried change is observed before a promote/rollback decision. Must be >= 1.",
+              "minimum": 1,
+              "default": 2
+            },
+            "scope_fraction": {
+              "type": "number",
+              "description": "Fraction (0..1) of eligible slots/brands the canary applies to before promotion (the LIMITED scope). Default small.",
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "default": 0.25
+            },
+            "rollback_on_regression_pct": {
+              "type": "number",
+              "description": "If the canary's primary metric drops by at least this fraction below the pre-change baseline during observation, the change is AUTO-ROLLED-BACK (one-step revert) rather than promoted.",
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "default": 0.1
+            }
+          }
+        },
+        "allowlist": {
+          "type": "object",
+          "description": "The MACHINE-CHANGEABLE allowlist + human-set bounds (DD-6 (1)+(2)). The applier may ONLY touch a target named here, and only within these bounds; ANY other target — and specifically any rules/*.md with frontmatter mutability:human-only, the gate, or hard-fail thresholds — is structurally refused (EHUMANONLY). No entry here can be a guardrail/threshold; that is the human-only boundary the applier never crosses.",
+          "additionalProperties": false,
+          "required": ["targets"],
+          "properties": {
+            "targets": {
+              "type": "array",
+              "description": "Machine-changeable target classes. Each names a knob the applier may tune within `bounds`. The enum is closed to the three DD-6-allowed classes; a record targeting anything else is refused.",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": ["calendar_weighting", "archetype_priority", "content_type_priority", "tunable_dial"],
+                "description": "calendar_weighting = per-slot/per-day calendar weightings; archetype_priority / content_type_priority = prioritization of archetypes / content-types; tunable_dial = an explicitly machine-tunable dial within human-set bounds (e.g. a per-account drama dial). NEVER a guardrail rule, the gate, or a hard-fail threshold."
+              }
+            },
+            "bounds": {
+              "type": "object",
+              "description": "Human-set bounds the applier clamps every machine change to. A proposed change outside its bound is refused (a within-bounds change can never reach a guardrail-loosening effect — DD-6 (2)). Each entry keys a target class to its allowed delta/range.",
+              "additionalProperties": false,
+              "properties": {
+                "max_weight_delta": {
+                  "type": "number",
+                  "description": "Maximum absolute change to a single calendar weighting per machine step (bounds how far one auto-apply can move a weighting). Default small.",
+                  "exclusiveMinimum": 0,
+                  "default": 0.15
+                },
+                "weight_range": {
+                  "type": "object",
+                  "description": "Hard floor/ceiling a calendar weighting or priority value may take; the applier clamps to this range and refuses a proposal that would exit it.",
+                  "additionalProperties": false,
+                  "required": ["min", "max"],
+                  "properties": {
+                    "min": { "type": "number", "minimum": 0, "default": 0 },
+                    "max": { "type": "number", "exclusiveMinimum": 0, "default": 1 }
+                  }
+                },
+                "dials": {
+                  "type": "array",
+                  "description": "Explicitly machine-tunable named dials and their human-set min/max. A dial NOT listed here is not machine-tunable. A dial that is itself a hard-fail threshold or guardrail may never appear here.",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["name", "min", "max"],
+                    "properties": {
+                      "name": { "type": "string", "minLength": 1, "description": "Dial id (e.g. a per-account drama dial)." },
+                      "min": { "type": "number", "description": "Human-set floor." },
+                      "max": { "type": "number", "description": "Human-set ceiling." }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "card_ttl": {
       "description": "Approval-card time-to-live per slot type (DD-15).",
       "type": "object",

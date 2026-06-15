@@ -1,0 +1,27 @@
+{
+  "$comment": "SI-FIXTURES — recorded zero-key ANALYST-seat replay (release-spec roadmap #3; RD-2 the engine NEVER calls chain LLMs — the analyst seat is an OPTIONAL host seat that may only REFINE/annotate the deterministically-derived proposals, never widen the machine-changeable surface, lower a threshold, or loosen a gate; RD-12 zero-key). Keyed by learning-record id. Consumed by tests/helpers/fake-analyst-seat.js. The refinement is advisory text + an optional (still within-bounds) tweak the engine RE-CHECKS against allowlist/bounds/never-loosen; it can only narrow or annotate, never expand. All synthetic Acme Cosmos.",
+  "lr-2099-04-08-a-calweight": {
+    "rationale": "sky-event-alert posts clear the thread baseline ~2.2x across 14 observations in the week; bumping its calendar weighting is supported. Refinement: keep the bump within the conservative bound rather than over-rotating the calendar on one strong week.",
+    "refined_diff": "--- calendar/calendar-weights.json\n+++ calendar/calendar-weights.json\n@@\n-  \"sky-event-alert\": 0.20,\n+  \"sky-event-alert\": 0.30,\n",
+    "confidence": 0.86,
+    "seat_meta": { "tokens_est": 0, "requires_key": false }
+  },
+  "lr-2099-04-08-b-humanonly": {
+    "rationale": "This proposal touches a human-only safety rule. The seat does NOT and CANNOT approve a guardrail change; flagging for human review only. The engine refuses it structurally before any seat output is consulted.",
+    "refined_diff": null,
+    "confidence": 0.0,
+    "seat_meta": { "tokens_est": 0, "requires_key": false }
+  },
+  "lr-2099-04-08-c-neverloosen": {
+    "rationale": "Even though this targets an allowlisted dial, raising the variant-dup threshold makes the gate more permissive. The seat will not endorse a loosening change; the engine refuses it under never-loosen regardless of seat output.",
+    "refined_diff": null,
+    "confidence": 0.0,
+    "seat_meta": { "tokens_est": 0, "requires_key": false }
+  },
+  "lr-2099-04-08-d-belowthreshold": {
+    "rationale": "longform-essay shows a faint positive signal but only 4 observations and a ~6% lift — far short of the evidence bar. The seat recommends keeping this PROPOSED for human judgment; it does not lower the threshold.",
+    "refined_diff": "--- calendar/calendar-weights.json\n+++ calendar/calendar-weights.json\n@@\n-  \"longform-essay\": 0.10,\n+  \"longform-essay\": 0.13,\n",
+    "confidence": 0.41,
+    "seat_meta": { "tokens_est": 0, "requires_key": false }
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "$comment": "SI-FIXTURES ground truth (release-spec roadmap #3; DD-6; original-design-spec §3.1 never-loosen). The expected outcome of the GOVERNED applier for each fixture learning record, plus the analytics facts each outcome derives from. Hand-verifiable from fixtures/self-improve-acme/analytics/* via the real engine (engine/analytics/engagement baselines + performance-report). All synthetic Acme Cosmos. The applier under test (deterministic, RD-2; zero-key, RD-12) MUST reproduce `decision` + `code` for each record. Refusal codes are structural (EHUMANONLY / ENEVERLOOSEN), not prompt requests; below-threshold is a non-error PROPOSED hold.",
+  "evidence_thresholds": {
+    "min_sample_size": 12,
+    "min_confidence": 0.8,
+    "min_effect_size": 0.2,
+    "source": "fixtures/self-improve-acme/system.self-improve.json -> self_improve.evidence"
+  },
+  "analytics_facts": {
+    "$comment": "Per-content-type / per-archetype aggregates the deterministic proposer reads, verified by running buildWeeklyReport over fixtures/self-improve-acme/analytics/* with weekEnding=2099-04-08. The baseline the lift is measured against is the broad `thread` population (mean 98).",
+    "baseline_content_type": "thread",
+    "baseline_likes_mean": 98,
+    "groups": {
+      "sky-event-alert/timely-observation": { "n": 14, "likes_mean": 215, "effect_size_vs_baseline": 1.19, "crosses_threshold": true },
+      "longform-essay/deep-dive": { "n": 4, "likes_mean": 104, "effect_size_vs_baseline": 0.06, "crosses_threshold": false }
+    }
+  },
+  "records": [
+    {
+      "record": "learning-records/lr-a-calendar-weight-auto-apply.json",
+      "label": "(a) MACHINE-ALLOWED, above threshold",
+      "target_class": "calendar_weighting",
+      "target_mutability": "learnable",
+      "decision": "auto_apply_canary",
+      "code": "OK",
+      "why": "target is machine-changeable (calendar_weighting in allowlist), the +0.10 bump is within bounds (max_weight_delta 0.15, stays within weight_range 0..1), the change is gate-neutral (a calendar weighting cannot loosen any gate/guardrail), and the backing analytics CROSS the evidence threshold (n=14>=12, effect 1.19>=0.2). Lands in a LIMITED canary (scope_fraction 0.25), observed observe_cycles=2 against baseline, then promote or auto-rollback. Committed as a versioned learning record (status->applied) with a rollback_ref; one-step `engine rollback` reverts it.",
+      "expected_status_after_apply": "applied",
+      "expected_canary": true,
+      "expected_reversible": true
+    },
+    {
+      "record": "learning-records/lr-b-human-only-refuse.json",
+      "label": "(b) HUMAN-ONLY target — MUST refuse",
+      "target_class": "rules/core/claims-safety.md (mutability:human-only, severity:hard, disposition:block)",
+      "target_mutability": "human-only",
+      "decision": "refuse",
+      "code": "EHUMANONLY",
+      "why": "the target is a guardrail/safety rule whose frontmatter is mutability:human-only (a hard-fail block rule). The applier refuses STRUCTURALLY — it never writes a human-only artifact — regardless of how strong the evidence is. Not a knob in the allowlist. No write, no canary.",
+      "expected_status_after_apply": "proposed",
+      "expected_canary": false,
+      "expected_reversible": true
+    },
+    {
+      "record": "learning-records/lr-c-never-loosen-refuse.json",
+      "label": "(c) GATE-LOOSENING — never-loosen MUST refuse",
+      "target_class": "tunable_dial:gate.variant_distinctness.jaccard_threshold",
+      "target_mutability": "learnable",
+      "decision": "refuse",
+      "code": "ENEVERLOOSEN",
+      "why": "the target names an allowlisted class (tunable_dial), so it clears the human-only check — but its EFFECT is gate-loosening: raising jaccard_threshold 0.45 -> 0.80 makes LINT.VARIANT_DUP fire LESS, i.e. the gate becomes more permissive. The NEVER-LOOSEN invariant (original-design-spec §3.1) refuses it STRUCTURALLY: a machine change can never make a gate/guardrail more permissive. This is the case that proves never-loosen is enforced INDEPENDENTLY of the human-only allowlist check (a loosening change can hide behind an allowed target class).",
+      "expected_status_after_apply": "proposed",
+      "expected_canary": false,
+      "expected_reversible": true
+    },
+    {
+      "record": "learning-records/lr-d-below-threshold-proposed.json",
+      "label": "(d) BELOW threshold — stays PROPOSED",
+      "target_class": "calendar_weighting",
+      "target_mutability": "learnable",
+      "decision": "hold_proposed",
+      "code": "EBELOWTHRESHOLD",
+      "why": "target and direction are machine-allowed and gate-neutral, but the backing analytics MISS the evidence threshold on BOTH bars: n=4 (< min_sample_size 12) and effect 0.06 (< min_effect_size 0.2). Below threshold the record stays `proposed` (the v1 human-applied behavior) — never act on thin evidence (DD-6 (3)). No write, no canary; a human may still apply it.",
+      "expected_status_after_apply": "proposed",
+      "expected_canary": false,
+      "expected_reversible": true
+    }
+  ],
+  "kill_switch": {
+    "$comment": "DD-6 (6) / §15.4: with the PAUSED sentinel present (or self_improve.enabled !== true), the WHOLE loop halts — even record (a) is held, no machine change occurs. The applier checks the sentinel first.",
+    "when_paused_decision_for_all": "hold_proposed",
+    "when_paused_code_for_all": "EPAUSED"
+  }
+}

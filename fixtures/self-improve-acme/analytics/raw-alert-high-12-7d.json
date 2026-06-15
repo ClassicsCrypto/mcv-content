@@ -1,0 +1,21 @@
+{
+  "content_id": "alert-high-12",
+  "brand": "acme-cosmos",
+  "platform": "twitter",
+  "external_post_ref": "acme-alert-high-12",
+  "captured_at": "2099-04-06T12:00:00.000Z",
+  "checkpoint": "7d",
+  "type": "sky-event-alert",
+  "format": "sky-event-alert",
+  "theme": "sky-events",
+  "hook": "timely-observation",
+  "archetype": "timely-observation",
+  "content_type": "sky-event-alert",
+  "metrics": {
+    "likes": 217,
+    "comments": 18,
+    "shares": 11,
+    "views": 4774,
+    "impressions": 6510
+  }
+}
