@@ -4,8 +4,9 @@ Open source does **not** mean free to run. The chain and several optional featur
 third-party services. This doc explains what is metered, who pays for what, and how to cap it.
 
 > **Numbers here are INDICATIVE.** The specific cost bands below are placeholders marked "measured
-> as of `<date>`" and are filled by a measurement pass. A stale band is a docs bug, not a release
-> blocker. For *current* numbers on your own install, use the pre-run estimators
+> as of `<date>`" and are filled by a measurement pass (see
+> [`runbooks/measurement-instance.md`](runbooks/measurement-instance.md)). A stale band is a docs
+> bug, not a release blocker. For *current* numbers on your own install, use the pre-run estimators
 > `engine calibrate --estimate-only` and `engine index-library --estimate-only` — they reflect your
 > configured chain and provider.
 

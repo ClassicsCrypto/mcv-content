@@ -5,7 +5,8 @@ failed with which codes, what did it spend* — without reading internals. This 
 surfaces that answer those questions and the KPI set that defines "what a healthy week looks like."
 
 > KPI reference ranges below are **INDICATIVE** — marked "measured as of `<date>`" and filled by a
-> measurement pass. A stale range is a docs bug, not a release blocker. Tune them per install.
+> measurement pass (see [`runbooks/measurement-instance.md`](runbooks/measurement-instance.md)). A
+> stale range is a docs bug, not a release blocker. Tune them per install.
 
 ## 1. Surfaces
 
