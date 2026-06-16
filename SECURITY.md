@@ -7,8 +7,8 @@ exists puts every operator at risk.
 
 Report privately using GitHub's
 [private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability)
-("Report a vulnerability" under the repository's **Security** tab), or email the maintainers at the
-address listed on the repository's security advisory page. Include:
+("Report a vulnerability" under the repository's **Security** tab), or email the maintainers at
+**jayb@marscatsvoyage.com**. Include:
 
 - a description of the issue and its impact;
 - the affected component(s) and version/commit;

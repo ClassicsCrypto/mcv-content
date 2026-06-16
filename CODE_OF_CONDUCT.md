@@ -26,10 +26,9 @@ in a public space.
 
 ## Enforcement
 
-Concerns may be reported privately to the maintainers using the contact listed in
-[`SECURITY.md`](SECURITY.md). (Before a public release, replace the placeholder contact there with
-your project's conduct/security address.) Reports will be reviewed promptly and fairly, and
-maintainers will respect the privacy and security of anyone who reports an incident.
+Concerns may be reported privately to the maintainers at **jayb@marscatsvoyage.com** (the same
+private channel described in [`SECURITY.md`](SECURITY.md)). Reports will be reviewed promptly and
+fairly, and maintainers will respect the privacy and security of anyone who reports an incident.
 
 ## Attribution
 
