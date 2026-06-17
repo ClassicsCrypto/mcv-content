@@ -47,16 +47,28 @@ Set these in your OpenClaw host configuration / the scheduled job's environment,
 `$CONTENT_HOME/.env`. They configure how OpenClaw *starts a seat*; the engine neither reads nor
 depends on them.
 
-## 4. Cost reporting (the optional capability that pays off)
+## 4. Discord approval surface
 
-OpenClaw can report **per-run token/cost** back to the engine. Wire that reporting so the engine
-ingests it into the spend ledger: then `engine status` and the daily digest show a **whole-system**
-spend figure instead of the "engine-metered only (partial)" marker, and the budget caps reflect chain
-spend. Without reporting, the caps still bound engine-metered actions and new-run dispatch (stopping
-new chain spend on a breach), but the chain-seat LLM tokens are out-of-band. Cap the chain spend at
-your LLM provider regardless. See [`../cost.md`](../cost.md).
+If the OpenClaw agent is already configured in the target Discord workspace/server, that connector
+satisfies the host-capability self-check for Discord read/post/react operations. Do not ask the
+operator to create a second bot just to talk to the same Discord server. Bind the approval channels in
+`approval_surface.channels`, keep `approval_surface.adapter: "discord"`, and use the existing
+OpenClaw Discord connector for approval cards and reactions. Only fall back to provisioning
+`DISCORD_BOT_TOKEN` when the OpenClaw connector cannot access the target server or the deployment
+intentionally separates the engine's approval adapter from the host runtime's Discord connector.
 
-## 5. Long-session tolerance
+## 5. Token and cost reporting (the optional capability that pays off)
+
+OpenClaw can report **per-run token use**, and cost when the provider exposes it, back to the engine.
+Wire that reporting so the first completed chain run can print approximate input/output token totals.
+For subscription-plan users of Claude Code, ChatGPT Codex, OpenClaw, Hermes, or similar harnesses,
+token volume is often the best practical way to understand what share of the plan a run consumes.
+Without reporting, the engine still honestly marks chain spend as "engine-metered only (partial)" and
+the caps still bound engine-metered actions and new-run dispatch, but the chain-seat LLM tokens are
+out-of-band. Cap or monitor the chain spend at your LLM provider or runtime regardless. See
+[`../cost.md`](../cost.md).
+
+## 6. Long-session tolerance
 
 Chain runs are minutes-to-hours (a full text-heavy run walks matcher → writer → gate → media →
 packager → publisher-liaison, with LLM stages in between). Configure OpenClaw's session/idle timeouts

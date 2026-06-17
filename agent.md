@@ -48,10 +48,10 @@ the result to the operator; if a **required** capability is missing, stop and sa
 | 1 | Persistent sessions/memory per agent seat across runs | required | one durable session per seat (§9.1 roster) |
 | 2 | Scheduling or schedulability (can be triggered externally) | required | a scheduler recipe (cron / Task Scheduler / PM2) fires the engine |
 | 3 | Tool/shell execution **for the setup session only** | required | pipeline seats run **tool-less** in operation (§2.1; Zone S) |
-| 4 | Discord channel operations (read/post/react) | required | for the seats that touch the approval surface |
+| 4 | Discord channel operations (read/post/react) | required | use the host runtime's existing Discord connector when already configured; otherwise provision a least-privilege bot for the approval surface |
 | 5 | Long-running session tolerance (chain runs take minutes-to-hours) | required | — |
 | 6 | **Run-dispatch consumption** — a hook that starts the orchestrator seat on a pending task record | required | see §5; the degenerate hook is "the operator prompts you with the pending task" |
-| 7 | Per-run token/cost reporting the engine can ingest | SHOULD (optional) | without it, `engine status` marks chain spend *engine-metered only (partial)* (§3.2 #7) |
+| 7 | Per-run token reporting, and cost reporting when available, that the engine can ingest | SHOULD (optional) | without it, `engine status` marks chain spend *engine-metered only (partial)* (§3.2 #7) |
 
 **Verify Node + git, then prove the engine runs with zero keys:**
 
@@ -106,11 +106,16 @@ Order is fixed (DD-5): **integration/agents → ingestion → calibration → ca
 1. `engine init --home <path>` — scaffolds `$CONTENT_HOME` (§1.2 layout), a SAFE-mode starter
    `config/system.json`, a starter `.env` to fill as you produce credentials, a **local-only git repo**
    (for learning-record rollback, DD-6), and `setup-state.json`. Idempotent.
-2. **Discord bot application:** create the application + bot user in the Discord developer portal,
+2. **Discord connector or bot application:** first check whether the host runtime already has an
+   approved Discord connector for the target workspace/server. If it does, do not ask the operator to
+   create a second bot; bind the approval surface to the runtime's Discord path per
+   `docs/runtimes/<runtime>.md` and keep `approval_surface.adapter: "discord"`. Only if the host has
+   no usable Discord connector, create the application + bot user in the Discord developer portal,
    generate the bot token into `$CONTENT_HOME/.env` as `DISCORD_BOT_TOKEN`, and invite the bot with the
    **minimum permission set** (read/send messages, embed links, attach files, add reactions, read
    history, threads where used — **no admin, no manage-guild**). `templates/channels.md` is the
-   end-to-end checklist for this — the most error-prone external procedure gets the most explicit guide.
+   end-to-end checklist for manual bot provisioning — the most error-prone external procedure gets the
+   most explicit guide.
 3. **Discord channels:** create the four channel roles manually — `content-review`,
    `content-published`, `content-ops`, `media-bank` (+ optional `trend-readout`). Record the created
    channel IDs; step 5 consumes them. (Auto-creation is not in v1.)
@@ -119,8 +124,12 @@ Order is fixed (DD-5): **integration/agents → ingestion → calibration → ca
    quick-start defers it to the going-LIVE step.
 5. **System configuration:** write `config/system.json` from the template, binding the now-known
    channel IDs (`approval_surface`). Setup MUST NOT proceed past C1 without: a **reviewer allowlist**
-   with at least one `approve` reviewer (DD-17); a **budget** block with hard caps (DD-18); a publish
-   posture (mode default **SAFE**).
+   with at least one `approve` reviewer (DD-17); an **engine-metered budget** block with hard caps for
+   provider/API actions the engine can meter (DD-18); a publish posture (mode default **SAFE**); and a
+   host-runtime token-reporting plan so each completed chain run can print approximate input/output
+   token use. For subscription-plan runtimes (for example Claude Code, ChatGPT Codex, OpenClaw, or
+   Hermes), token volume is usually the more useful startup metric than dollar caps; report both
+   token totals and any runtime-known cost when available.
 6. **Agent seats:** instantiate the seat roster from `agents/<seat>/AGENTS.template.md` into host
    sessions per `docs/runtimes/<runtime>.md`, **tool-less** (§3), including the **run-dispatch hook**
    (§5). Minimal text-only first run = six seats (orchestrator, matcher, writer, gate, packager,
@@ -349,14 +358,15 @@ which codes, what did it spend** — without reading internals. It reports:
   variable, never its value);
 - **spend**, honestly scoped: the engine meters **its own** actions; chain-seat LLM spend is
   **host-runtime-owned** and shows as *engine-metered only (partial)* unless your runtime reports
-  per-run cost. The `monthly_cap` bounds engine-metered actions + run dispatch — **not** whole-system
-  spend. Cap chain spend at your runtime (see `docs/cost.md` + `docs/runtimes/<runtime>.md`).
+  per-run token use/cost. The `monthly_cap` bounds engine-metered actions + run dispatch — **not**
+  whole-system spend. Cap or monitor chain spend at your runtime, and print approximate per-run token
+  totals once startup is complete (see `docs/cost.md` + `docs/runtimes/<runtime>.md`).
 
 **Failure playbook (common cases):**
 
 | You see | It means | Do |
 |---|---|---|
-| `status` wiring `✗ discord_token` | `DISCORD_BOT_TOKEN` missing/blank | fail-fast by design — set the token in `$CONTENT_HOME/.env`; never retry-loop an auth failure (§15.1) |
+| `status` wiring `✗ discord_token` | no configured host Discord connector and `DISCORD_BOT_TOKEN` missing/blank | fail-fast by design — either bind the runtime's Discord connector or set the token in `$CONTENT_HOME/.env`; never retry-loop an auth failure (§15.1) |
 | many items in `handed_off` | approved drafts awaiting publish | not broken — tell the operator to publish them in Postiz (§8) |
 | `dispatch refused (EPAUSED)` | the kill switch is engaged | `engine resume` when ready (§15.4) |
 | `dispatch refused (EBUDGET)` | spend cap breached | raise/adjust the budget block or wait for the window; new runs are halted by design |
