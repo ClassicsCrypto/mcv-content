@@ -70,10 +70,9 @@ test('C1 fails (not throws) when CONTENT_HOME is unset', () => {
   assert.match(res.remediation, /engine init/u);
 });
 
-test('C1 passes with valid config + token; publisher SKIPPED (not failed) when Postiz deferred', () => {
+test('C1 passes with valid config + host-managed approval surface; publisher SKIPPED when Postiz deferred', () => {
   const env = freshInstance();
   makeC1ValidConfig(env);
-  env.DISCORD_BOT_TOKEN = 'a-token-value'; // process-env resolution (§4.4)
 
   const res = checkpoints.verifyC1({ env });
   assert.equal(res.passed, true, JSON.stringify(res, null, 2));
@@ -81,27 +80,23 @@ test('C1 passes with valid config + token; publisher SKIPPED (not failed) when P
   assert.equal(findCheck(res, 'budget').status, 'pass');
   assert.equal(findCheck(res, 'channel_bindings').status, 'pass');
   assert.equal(findCheck(res, 'lock_dir_writable').status, 'pass');
-  assert.equal(findCheck(res, 'discord_token').status, 'pass');
+  assert.equal(findCheck(res, 'approval_surface_permissions').status, 'pass');
   // Postiz absent => skip-with-notice, never a fail (§2.3 step 7).
   assert.equal(findCheck(res, 'publisher').status, 'skip');
 });
 
-test('C1 fails fast on a missing DISCORD_BOT_TOKEN, naming the variable, never the value (§15.1)', () => {
+test('C1 does not require DISCORD_BOT_TOKEN when the approval surface is host-managed', () => {
   const env = freshInstance();
   makeC1ValidConfig(env);
-  // no DISCORD_BOT_TOKEN
 
   const res = checkpoints.verifyC1({ env });
-  assert.equal(res.passed, false);
-  const tok = findCheck(res, 'discord_token');
-  assert.equal(tok.status, 'fail');
-  assert.match(tok.detail, /DISCORD_BOT_TOKEN/u);
-  assert.match(tok.detail, /does not retry/u); // permanent-until-operator-acts contract
+  assert.equal(res.passed, true, JSON.stringify(res, null, 2));
+  assert.equal(findCheck(res, 'approval_surface_permissions').status, 'pass');
+  assert.equal(findCheck(res, 'discord_token'), undefined);
 });
 
 test('C1 fails when reviewers have only placeholder ids (no real approver — DD-17)', () => {
   const env = freshInstance(); // starter config ships <REVIEWER_ID> placeholder
-  env.DISCORD_BOT_TOKEN = 't';
   // leave the starter config's placeholder reviewers/channels in place
   const res = checkpoints.verifyC1({ env });
   assert.equal(res.passed, false);
@@ -112,7 +107,6 @@ test('C1 fails when reviewers have only placeholder ids (no real approver — DD
 test('C1 publisher check fails when Postiz is half-configured (key without url)', () => {
   const env = freshInstance();
   makeC1ValidConfig(env);
-  env.DISCORD_BOT_TOKEN = 't';
   env.POSTIZ_API_KEY = 'k'; // no POSTIZ_API_URL
   const res = checkpoints.verifyC1({ env });
   assert.equal(findCheck(res, 'publisher').status, 'fail');
@@ -121,7 +115,6 @@ test('C1 publisher check fails when Postiz is half-configured (key without url)'
 test('C1 publisher PASSES when both Postiz creds present', () => {
   const env = freshInstance();
   makeC1ValidConfig(env);
-  env.DISCORD_BOT_TOKEN = 't';
   env.POSTIZ_API_KEY = 'k';
   env.POSTIZ_API_URL = 'https://postiz.example';
   const res = checkpoints.verifyC1({ env });

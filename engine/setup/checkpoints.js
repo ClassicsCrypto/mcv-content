@@ -30,8 +30,8 @@
  * crash-loop counter-example. Credential resolution goes through engine/shared/secrets.js only.
  *
  * Scope honesty: these verifiers are DETERMINISTIC and do not place live API calls in v1 (CI
- * runs zero-key — §16.5; live integration tests are out of scope, RD-12). "Bot/publisher
- * reachable" is verified at the configuration + credential-presence layer: the token/credentials
+ * runs zero-key — §16.5; live integration tests are out of scope, RD-12). Publisher
+ * reachability is verified at the configuration + credential-presence layer: credentials
  * are present and well-formed, the channel bindings are set, the lock dir is writable. Actual
  * round-trip reachability (posting/reacting in a channel) is the operator's runtime concern; a
  * future live-probe is roadmap. Each check states which layer it asserts so the contract is honest.
@@ -195,8 +195,7 @@ function verifyC0(opts = {}) {
 /**
  * C1 verifies the integration layer: the instance dir exists, config/system.json is present and
  * structurally valid (mode, reviewers allowlist with approve rights, budget caps, publish posture,
- * Discord channel bindings), the lock dir is writable, the Discord bot token is present
- * (fail-fast §15.1), and publisher reachability when Postiz credentials are present (skipped-with-
+ * Discord channel bindings), the lock dir is writable, and publisher reachability when Postiz credentials are present (skipped-with-
  * notice while deferred — §2.3 step 7).
  */
 function verifyC1(opts = {}) {
@@ -310,20 +309,7 @@ function verifyC1(opts = {}) {
       : fail('lock_dir_writable', 'queue/locks is not writable', 'Ensure CONTENT_HOME/queue/locks exists and is writable (re-run `engine init`).'),
   );
 
-  // Discord bot token present (fail-fast, §15.1) — names the variable, never the value.
-  try {
-    secrets.requireSecret('DISCORD_BOT_TOKEN', 'approval-surface adapter (Discord)', env);
-    checks.push(pass('discord_token', 'DISCORD_BOT_TOKEN is present (approval-surface adapter)'));
-  } catch (err) {
-    // CredentialMissingError already names the variable and the no-retry contract.
-    checks.push(
-      fail(
-        'discord_token',
-        err.message,
-        'Create the Discord bot application + token (C1 step 2) and set DISCORD_BOT_TOKEN in $CONTENT_HOME/.env (§4.1).',
-      ),
-    );
-  }
+  checks.push(pass('approval_surface_permissions', 'approval delivery is host-managed; ensure the runtime can post/read/react in the bound channels'));
 
   // Publisher reachability — skipped-with-notice while Postiz creds are deferred (§2.3 step 7).
   const postizKey = secrets.getSecret('POSTIZ_API_KEY', { env });

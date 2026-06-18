@@ -72,8 +72,10 @@ Full diagram and state machine: [`docs/architecture.md`](docs/architecture.md).
 
 ## What it costs to run
 
-Open source does **not** mean free to run. The chain and several optional features call metered
-third-party services. There are two spend regimes, and the docs always say which one you are in:
+Open source does **not** mean free to run. The chain is expected to run through the operator's
+host-runtime subscription plan, not through API keys stored in this repo. Several optional features
+call metered third-party services. There are two spend regimes, and the docs always say which one you
+are in:
 
 - **Engine-metered spend** — the visual gate, media generation, scraping, publisher calls, and
   **library indexing** (`engine index-library`, now shipped — it visual-tags assets through the same
@@ -98,10 +100,9 @@ The smallest path to a first approval card. Full narration:
 [`docs/setup/quick-start.md`](docs/setup/quick-start.md).
 
 1. **C0:** `git clone …` → `npm ci` → `node bin/engine.js fixture-run` (zero keys — the proof).
-2. **C1 minimal:** `engine init --home <path>`; use the host runtime's existing Discord connector
-   when available, otherwise create the Discord bot application + token + invite; one server, four
-   channels; `config/system.json` with one reviewer, engine-metered budget caps, SAFE mode, and a
-   host-runtime token-reporting plan;
+2. **C1 minimal:** `engine init --home <path>`; bind one server and four Discord channels the host
+   runtime can post/read/react in; `config/system.json` with one reviewer, engine-metered budget
+   caps, SAFE mode, and a host-runtime token-reporting plan;
    instantiate six seats (orchestrator, matcher, writer, gate, packager, publisher-liaison). **Postiz
    is not needed yet.**
 3. **C2 minimal:** one brand; **cold-start Brand DNA** via the authoring template — no scraping, no

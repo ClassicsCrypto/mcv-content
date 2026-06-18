@@ -63,7 +63,7 @@ function run(ctx = {}) {
     detail: [
       ...created,
       ...(gitNote ? [gitNote] : []),
-      'Next: C1 — create the Discord bot + token, the four channels, and fill config/system.json (§2.3).',
+      'Next: C1 — create or choose the Discord channels, confirm host runtime permissions, and fill config/system.json (§2.3).',
     ],
     data: {
       ok: true,

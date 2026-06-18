@@ -128,8 +128,8 @@ never the retry path). Misclassifying auth as outage is the recorded crash-loop 
 ## 7. Wiring failure
 
 If `engine status`'s self-check shows a `✗` (e.g. `content_home`, `config_present`, `reviewers`,
-`discord_token`, `publisher`), the named line carries the remediation. A missing reviewer-with-approve
-blocks the approval flow; a missing `DISCORD_BOT_TOKEN` blocks the approval surface; an unresolvable
+`channel_bindings`, `approval_surface_permissions`, `publisher`), the named line carries the remediation. A missing reviewer-with-approve
+blocks the approval flow; missing host Discord permissions block the approval surface; an unresolvable
 `CONTENT_HOME` blocks everything. Fix the named item, restart the affected consumer, re-check.
 
 ## See also

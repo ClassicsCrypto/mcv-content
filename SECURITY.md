@@ -67,7 +67,7 @@ This is a defense-in-depth design, not a sandbox. Understand the boundaries befo
 
 - Keep `$CONTENT_HOME/.env` off version control and off shared storage (the shipped `.gitignore` and
   the instance-directory design make this the default — keep it that way).
-- Use the **minimum** Discord bot permission set (no admin, no manage-guild).
+- Use the **minimum** Discord channel permissions for your host runtime (no admin, no manage-guild).
 - Rotate credentials when they may be exposed; see the rotate-credentials runbook
   ([`docs/runbooks/rotate-credentials.md`](docs/runbooks/rotate-credentials.md)).
 - You are the data controller for any corpus you ingest; see

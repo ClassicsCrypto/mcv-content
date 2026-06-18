@@ -29,7 +29,7 @@ content.
 
 Set `CONTENT_HOME` in your process environment afterward (the scheduler recipes do this for you).
 
-> The rest of C1 — the Discord bot + channels, the publisher integration (deferrable until LIVE),
+> The rest of C1 — Discord channels + host runtime permissions, the publisher integration (deferrable until LIVE),
 > and writing `config/system.json` (reviewer allowlist, budget caps, SAFE mode) — is covered in
 > [`discord.md`](discord.md) and [`platforms.md`](platforms.md). `engine
 > verify --setup c1` gates all of it.

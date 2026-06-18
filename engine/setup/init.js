@@ -21,7 +21,7 @@
  *   4. Copy the repo's .env.example → $CONTENT_HOME/.env for the operator to fill as later C1
  *      steps produce credentials (§2.3 step 1), without overwriting an existing .env. If the
  *      repo has no .env.example yet (authored by a sibling batch), write a minimal starter .env
- *      naming the two core variables (§4.1) so the operator is never blocked.
+ *      naming the core publisher/provider variables (§4.1) so the operator is never blocked.
  *   5. Initialize $CONTENT_HOME as a LOCAL-ONLY git repo with no remote (SHOULD — §1.2): this
  *      gives DD-6 versioned learning records + one-step rollback. Best-effort: a missing git
  *      binary downgrades to a notice, never a hard failure.
@@ -135,7 +135,7 @@ function starterSystemConfig() {
 
 /**
  * The minimal starter .env body, written only when the repo ships no .env.example yet. Names
- * the two core §4.1 variables; CONTENT_HOME itself is intentionally NOT settable here (it lives
+ * the core setup variables; CONTENT_HOME itself is intentionally NOT settable here (it lives
  * in the process environment — §4.1 placement rule — and is documented as such).
  */
 function starterEnvBody() {
@@ -147,14 +147,18 @@ function starterEnvBody() {
     '# NOTE: CONTENT_HOME is NOT set here — it must live in your process environment (shell',
     '# profile, service definition, or scheduler recipe), because it is what locates this file (§4.1).',
     '',
-    '# Tier 1 secret — the Discord approval-surface bot token (required for the v1 approval surface).',
-    '# Consumer: approval-surface adapter only (listener, card poster). Created at C1 step 2.',
-    'DISCORD_BOT_TOKEN=',
-    '',
     '# Tier 1 secret + config — Postiz publisher backend (required before the flagship lane publishes;',
     '# deferrable until LIVE — C1 step 4 / quick-start step 8).',
     'POSTIZ_API_KEY=',
     'POSTIZ_API_URL=',
+    '',
+    '# Tier 1 secrets — optional trend/scraping providers.',
+    'APIFY_API_KEY=',
+    'XAI_API_KEY=',
+    '',
+    '# Tier 1 secret + Tier 3 identifier — optional Giphy direct lane.',
+    'GIPHY_API_KEY=',
+    'GIPHY_USERNAME=',
     '',
   ].join('\n');
 }

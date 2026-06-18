@@ -16,8 +16,8 @@
  *     count (the RD-18 run transport);
  *   - the resolved mode (mode.js — the ONE ladder) + the PAUSED sentinel (§15.4 paused/active);
  *   - a wiring self-check (the production verify-wiring pattern, generalized): is CONTENT_HOME
- *     resolvable, is config present + schema-shaped, is the Discord token present (fail-fast names
- *     the variable, never the value — §15.1), are publisher creds present-or-deferred.
+ *     resolvable, is config present + schema-shaped, is the approval surface host-managed with
+ *     channel ids bound, are publisher creds present-or-deferred.
  *
  * Spend (RD-19 honesty — the load-bearing scope note): the engine meters its OWN actions
  * (indexing, visual gate, media gen, scraping, publisher calls) into the ledger; chain-seat LLM
@@ -140,9 +140,21 @@ function wiringSelfCheck(env, config) {
   const reviewersOk = Array.isArray(config.reviewers) && config.reviewers.some((r) => r && Array.isArray(r.rights) && r.rights.includes('approve'));
   push('reviewers', reviewersOk, reviewersOk ? 'allowlist has an approver (DD-17)' : 'no reviewer with approve rights (DD-17)');
 
-  // Credentials: name the variable, never the value (§15.1).
-  const token = safeGetSecret('DISCORD_BOT_TOKEN', env);
-  push('discord_token', Boolean(token), token ? 'present' : 'DISCORD_BOT_TOKEN missing (approval surface) — fail-fast §15.1');
+  const requiredChannels = ['content-review', 'content-published', 'content-ops', 'media-bank'];
+  const channels = (config.approval_surface && config.approval_surface.channels) || {};
+  const missingChannels = requiredChannels.filter((role) => {
+    const id = channels[role];
+    return typeof id !== 'string' || id.trim() === '' || /^<[A-Z_]+>$/u.test(id.trim());
+  });
+  push(
+    'channel_bindings',
+    missingChannels.length === 0,
+    missingChannels.length === 0
+      ? 'required approval channels are bound'
+      : `missing or placeholder channel roles: ${missingChannels.join(', ')}`,
+  );
+
+  push('approval_surface_permissions', true, 'host runtime must have post/read/react access in the bound approval channels');
 
   const pKey = safeGetSecret('POSTIZ_API_KEY', env);
   const pUrl = safeGetSecret('POSTIZ_API_URL', env);

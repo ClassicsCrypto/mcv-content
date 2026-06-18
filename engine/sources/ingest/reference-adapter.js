@@ -16,8 +16,8 @@
  * gate (the scraper path is off by default — the LAW).
  *
  * What "BYO" means here (RD-9 / DR Risk 17 — the design-review risk):
- *   - the operator supplies provider access — an Apify-class or xAI/Grok-class key — under one of
- *     the §4.3 NAMES (APIFY_API_KEY | XAI_API_KEY | GROK_API_KEY). The adapter reads it BY NAME via
+ *   - the operator supplies provider access — an Apify-class or xAI-class key — under one of
+ *     the §4.3 NAMES (APIFY_API_KEY | XAI_API_KEY). The adapter reads it BY NAME via
  *     secrets.js and NEVER from a hardcoded value, a bundled file, or a path list.
  *   - the provider endpoint + request shape live in the operator's `ingest.provider` config block
  *     (§12.5-style: { kind, endpoint, key_env, timeout_ms, options }) — not baked per call-site
@@ -55,7 +55,7 @@ const CONSUMER = 'ingestion adapter (reference)';
 const DEFAULT_TIMEOUT_MS = 120_000; // a corpus pull can be slower than a trend poll
 
 /** The §4.3 provider key NAMES this adapter knows how to resolve, in preference order. */
-const KNOWN_KEY_ENVS = Object.freeze(['APIFY_API_KEY', 'XAI_API_KEY', 'GROK_API_KEY']);
+const KNOWN_KEY_ENVS = Object.freeze(['APIFY_API_KEY', 'XAI_API_KEY']);
 
 /**
  * Resolve the provider credential by NAME via secrets.js. The name comes from the operator's

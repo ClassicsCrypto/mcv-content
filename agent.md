@@ -142,16 +142,10 @@ Order is fixed (DD-5): **integration/agents → ingestion → calibration → ca
 1. `engine init --home <path>` — scaffolds `$CONTENT_HOME` (§1.2 layout), a SAFE-mode starter
    `config/system.json`, a starter `.env` to fill as you produce credentials, a **local-only git repo**
    (for learning-record rollback, DD-6), and `setup-state.json`. Idempotent.
-2. **Discord connector or bot application:** first check whether the host runtime already has an
-   approved Discord connector for the target workspace/server. If it does, do not ask the operator to
-   create a second bot; bind the approval surface to the runtime's Discord path per
-   `docs/runtimes/<runtime>.md` and keep `approval_surface.adapter: "discord"`. Only if the host has
-   no usable Discord connector, create the application + bot user in the Discord developer portal,
-   generate the bot token into `$CONTENT_HOME/.env` as `DISCORD_BOT_TOKEN`, and invite the bot with the
-   **minimum permission set** (read/send messages, embed links, attach files, add reactions, read
-   history, threads where used — **no admin, no manage-guild**). `templates/channels.md` is the
-   end-to-end checklist for manual bot provisioning — the most error-prone external procedure gets the
-   most explicit guide.
+2. **Discord approval surface:** create or choose the channels and confirm the host runtime can
+   post/read/react there. Do not ask for a separate Discord bot token when the runtime already has
+   Discord access. `templates/channels.md` is the end-to-end checklist for this — the most
+   error-prone external procedure gets the most explicit guide.
 3. **Discord channels:** create the four channel roles manually — `content-review`,
    `content-published`, `content-ops`, `media-bank` (+ optional `trend-readout`). Record the created
    channel IDs; step 5 consumes them. (Auto-creation is not in v1.)
@@ -390,7 +384,7 @@ which codes, what did it spend** — without reading internals. It reports:
 - **last run per named trigger** (DD-19);
 - **pending task records** (queued-but-not-yet-run);
 - a **wiring self-check** (CONTENT_HOME resolvable, config present + schema-shaped, an approver in the
-  allowlist, `DISCORD_BOT_TOKEN` present, Postiz creds present-or-deferred — it names a missing
+  allowlist, approval channels bound, Postiz creds present-or-deferred — it names a missing
   variable, never its value);
 - **spend**, honestly scoped: the engine meters **its own** actions; chain-seat LLM spend is
   **host-runtime-owned** and shows as *engine-metered only (partial)* unless your runtime reports
@@ -402,7 +396,7 @@ which codes, what did it spend** — without reading internals. It reports:
 
 | You see | It means | Do |
 |---|---|---|
-| `status` wiring `✗ discord_token` | no configured host Discord connector and `DISCORD_BOT_TOKEN` missing/blank | fail-fast by design — either bind the runtime's Discord connector or set the token in `$CONTENT_HOME/.env`; never retry-loop an auth failure (§15.1) |
+| `status` wiring `✗ channel_bindings` | channel ids missing/placeholders | bind the approval channel ids in `config/system.json`; Discord posting permission is host-runtime-owned |
 | many items in `handed_off` | approved drafts awaiting publish | not broken — tell the operator to publish them in Postiz (§8) |
 | `dispatch refused (EPAUSED)` | the kill switch is engaged | `engine resume` when ready (§15.4) |
 | `dispatch refused (EBUDGET)` | spend cap breached | raise/adjust the budget block or wait for the window; new runs are halted by design |

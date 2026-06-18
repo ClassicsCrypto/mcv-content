@@ -142,7 +142,7 @@ test('verify --checkpoint C0 passes CONTENT_HOME-free (the zero-key fit check)',
   assert.equal(result.ok, true);
 });
 
-test('verify --checkpoint C1 FAILS on a fresh home missing the Discord token (fail-fast §15.1)', () => {
+test('verify --checkpoint C1 does not require a Discord bot token when channels are host-managed', () => {
   const home = tempHome();
   const env = initVerb.run({ flags: { home: path.join(home, 'i'), 'no-git': true }, env: { ...process.env } }).data
     ? { ...process.env, CONTENT_HOME: path.join(home, 'i') }
@@ -150,10 +150,10 @@ test('verify --checkpoint C1 FAILS on a fresh home missing the Discord token (fa
   assert.ok(env, 'init should have produced a home');
   const result = verifyVerb.run({ flags: { checkpoint: 'C1' }, env });
   assert.equal(result.ok, false);
-  // The token check names the variable, never a value.
-  const tokenCheck = result.data.checks.find((c) => c.name === 'discord_token');
-  assert.ok(tokenCheck);
-  assert.match(JSON.stringify(result.data), /DISCORD_BOT_TOKEN/);
+  const permissionCheck = result.data.checks.find((c) => c.name === 'approval_surface_permissions');
+  assert.ok(permissionCheck);
+  assert.equal(permissionCheck.status, 'pass');
+  assert.doesNotMatch(JSON.stringify(result.data), /DISCORD_BOT_TOKEN/);
   assert.doesNotMatch(JSON.stringify(result.data), /sk-|Bot [A-Za-z0-9]/); // no value-shaped leak
 });
 

@@ -77,8 +77,8 @@ test('redact-at-write: secrets never reach the record or the event stream', () =
   ledger.recordEvent(
     'c-6',
     'dispatch',
-    { run: { DISCORD_BOT_TOKEN: token, note: `Bearer ${token}` } },
-    { DISCORD_BOT_TOKEN: token },
+    { run: { POSTIZ_API_KEY: token, note: `Bearer ${token}` } },
+    { POSTIZ_API_KEY: token },
     env,
   );
   const recRaw = fs.readFileSync(
