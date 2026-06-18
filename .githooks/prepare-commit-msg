@@ -1,0 +1,30 @@
+#!/usr/bin/env sh
+# Auto-append a DCO Signed-off-by trailer that matches your git identity, when one is missing.
+#
+# Why: CI requires every commit to carry a `Signed-off-by:` line naming its author (the DCO check;
+# see CONTRIBUTING.md). This hook adds it for you, so a commit can never be rejected for a missing
+# sign-off — handy when an agent or tool makes commits on your behalf.
+#
+# Enable it ONCE per clone (it is NOT active until you do this):
+#     git config core.hooksPath .githooks
+#
+# It signs off using your configured git identity, so set that to match how you author commits:
+#     git config user.name  "Your Name"
+#     git config user.email "you@example.com"
+
+msg_file="$1"
+[ -n "$msg_file" ] || exit 0
+
+name="$(git config user.name 2>/dev/null || true)"
+email="$(git config user.email 2>/dev/null || true)"
+
+# No identity configured -> nothing we can sign with; leave the message untouched.
+[ -n "$name" ] && [ -n "$email" ] || exit 0
+
+# `git interpret-trailers` adds the trailer with correct blank-line handling. `--if-exists doNothing`
+# means we never add a second Signed-off-by when one is already present (e.g. you used `git commit -s`,
+# or you are amending an already-signed commit).
+git interpret-trailers \
+  --if-exists doNothing \
+  --trailer "Signed-off-by: ${name} <${email}>" \
+  --in-place "$msg_file"
