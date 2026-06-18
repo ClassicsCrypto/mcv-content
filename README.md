@@ -5,6 +5,11 @@ your agent at [`agent.md`](agent.md), and it drives setup and operation: produci
 social posts through a fixed agent chain, gating every draft, and requiring a human approval before
 anything publishes.
 
+> **👋 New here, or not very technical?** Start with
+> **[`docs/setup/START-HERE.md`](docs/setup/START-HERE.md)** — it gets the engine running on your
+> computer in about 10 minutes, in plain language, with no jargon, and shows you the easy
+> AI-assistant setup path.
+
 It is shipped as a **kit plus a thin runner**: markdown agent contracts, rules, schemas, and templates
 that an operator-supplied AI runtime executes, plus deterministic Node.js engine code at the edges
 (scheduling, queue persistence, validation, approval capture, and publishing). It gates every draft
