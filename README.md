@@ -75,11 +75,16 @@ third-party services. There are two spend regimes, and the docs always say which
   metered provider seam). The engine meters these and enforces your budget caps against them.
 - **Host-runtime-owned chain spend** — the writer/gate/matcher LLM tokens. These belong to your host
   runtime's own LLM configuration; the engine is blind to them unless your runtime reports per-run
-  cost. Your `monthly_cap` bounds engine-metered actions and run dispatch — **not** whole-system spend.
+  token use/cost. Your `monthly_cap` bounds engine-metered actions and run dispatch — **not**
+  whole-system spend.
 
-Cost bands are **indicative** and marked "measured as of `<date>`"; for current numbers use the
-pre-run estimators `engine calibrate --estimate-only` and `engine index-library --estimate-only`
-(both reflect your configured chain and providers). Full disclosure, including how to cap chain spend
+For subscription-plan runtimes such as Claude Code, ChatGPT Codex, OpenClaw, or Hermes, the most
+useful startup metric is often approximate chain token volume rather than a dollar estimate. Once
+startup is complete, run one chain pass and print the input/output token totals the host runtime
+reports; after a few days of real use, add a measured README band for typical token volume and any
+known provider costs. Cost bands are **indicative** and marked "measured as of `<date>`"; for current
+engine-metered numbers use the pre-run estimators `engine calibrate --estimate-only` and
+`engine index-library --estimate-only`. Full disclosure, including how to cap or monitor chain spend
 at your runtime: [`docs/cost.md`](docs/cost.md).
 
 ## Quick start
@@ -88,8 +93,10 @@ The smallest path to a first approval card. Full narration:
 [`docs/setup/quick-start.md`](docs/setup/quick-start.md).
 
 1. **C0:** `git clone …` → `npm ci` → `node bin/engine.js fixture-run` (zero keys — the proof).
-2. **C1 minimal:** `engine init --home <path>`; create the Discord bot application + token + invite;
-   one server, four channels; `config/system.json` with one reviewer, budget caps, SAFE mode;
+2. **C1 minimal:** `engine init --home <path>`; use the host runtime's existing Discord connector
+   when available, otherwise create the Discord bot application + token + invite; one server, four
+   channels; `config/system.json` with one reviewer, engine-metered budget caps, SAFE mode, and a
+   host-runtime token-reporting plan;
    instantiate six seats (orchestrator, matcher, writer, gate, packager, publisher-liaison). **Postiz
    is not needed yet.**
 3. **C2 minimal:** one brand; **cold-start Brand DNA** via the authoring template — no scraping, no

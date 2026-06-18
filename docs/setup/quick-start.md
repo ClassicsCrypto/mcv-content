@@ -33,12 +33,14 @@ local-only git repo, and `setup-state.json`). It refuses a path inside the code 
 
 Then, the minimal C1:
 
-1. **Discord bot + token + invite, four channels.** Create the bot application, set
-   `DISCORD_BOT_TOKEN` in `$CONTENT_HOME/.env`, invite with the minimum permission set, create the
-   four channels, and record their ids in `system.json` → `approval_surface.channels`. Full
-   checklist: [`discord.md`](discord.md).
-2. **Write `config/system.json`:** one reviewer in the allowlist, budget caps (`monthly_cap`,
-   `daily_cap`, `per_item_generation_limit`), `mode: SAFE`.
+1. **Discord connector or bot, plus four channels.** If your host runtime is already configured in the
+   target Discord workspace/server, use that existing connector for approval cards and reactions. If
+   not, create the bot application, set `DISCORD_BOT_TOKEN` in `$CONTENT_HOME/.env`, invite with the
+   minimum permission set, create the four channels, and record their ids in `system.json` →
+   `approval_surface.channels`. Full checklist: [`discord.md`](discord.md).
+2. **Write `config/system.json`:** one reviewer in the allowlist, engine-metered budget caps
+   (`monthly_cap`, `daily_cap`, `per_item_generation_limit`), `mode: SAFE`, and a host-runtime
+   token-reporting plan so the first completed chain run prints approximate input/output token use.
 3. **Instantiate the six seats** (orchestrator, matcher, writer, gate, packager, publisher-liaison) —
    the chain your host runtime runs.
 
@@ -73,9 +75,10 @@ engine calibrate --brand <id> --estimate-only     # see the cost band first
 engine calibrate --brand <id> --yes               # confirm, then run
 ```
 
-Calibration is the **mandatory gate** and your first real spend, so it is estimate-and-confirm: the
-runner shows a pre-run estimate and will not spend without `--yes`. Generation runs through your host
-runtime. Record the judged result, then verify:
+Calibration is the **mandatory gate** and your first real engine-metered spend, so it is
+estimate-and-confirm: the runner shows a pre-run estimate and will not spend without `--yes`.
+Generation runs through your host runtime; record the host-reported input/output tokens for the run
+alongside any runtime-known cost. Record the judged result, then verify:
 
 ```
 engine calibrate --brand <id> --result '{"sample_count":10,"gate_clear":9,"on_voice":7,"fabrication_codes":0}'
