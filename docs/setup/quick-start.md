@@ -20,6 +20,17 @@ node bin/engine.js fixture-run
 credentials and no spend**. A green run is the proof the engine works on your box before you touch any
 external service. Nothing here writes to a `$CONTENT_HOME`.
 
+Before C1, ask the operator for the missing operating context:
+
+- source library and approved asset locations;
+- competitor lists, benchmark data, and off-limits sources;
+- canonical brand facts, voice rules, forbidden claims, and current priorities;
+- review channels, publisher accounts, analytics sources, and approver IDs;
+- credentials, connectors, folder permissions, or human approvals still missing.
+
+If those answers are not ready, continue only with zero-key and SAFE-mode steps that do not require
+them. Do not invent brand facts, competitor lists, approval rules, or publishing access.
+
 ## C1 (minimal) — scaffold + the approval surface
 
 ```

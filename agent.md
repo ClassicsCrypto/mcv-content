@@ -86,6 +86,42 @@ must enforce it. `docs/runtimes/<runtime>.md` states how for your runtime.
 
 ---
 
+## 3.5 Operator onboarding questions - ask before C1
+
+Do not treat startup as complete just because the engine passes the zero-key proof. Before writing
+real config, ask the operator for the operating context that the repository cannot infer. Record each
+answer in `$CONTENT_HOME` or the host runtime's durable notes before you proceed.
+
+Ask for:
+
+- **Source library access:** where approved assets, media banks, prompt frameworks, raw footage,
+  character references, and reusable templates live.
+- **Competitor data:** current competitor handles/lists, benchmark examples, positioning notes,
+  monthly scan preferences, and any sources that are off-limits.
+- **Brand data:** canonical brand facts, voice rules, forbidden claims, lore limits, product facts,
+  active priorities, platform handles, and approval gates.
+- **Publishing paths:** review channels, publisher accounts, Postiz status, platform integrations,
+  analytics sources, and who can approve content.
+- **Research sources:** Discord channels, websites, Notion pages, docs, repos, trend feeds, and
+  operator memory paths that may feed content.
+- **Access gaps:** credentials, connectors, folders, bot permissions, reviewer IDs, or human approvals
+  still missing.
+
+Default first-run questions:
+
+1. What folders or tools contain the approved source library and brand assets?
+2. Where is competitor research stored, and who are the current competitors for each brand?
+3. Where should I read the canonical brand facts, voice rules, forbidden claims, and current
+   priorities?
+4. What tools or channels can I access for publishing, review, analytics, and approvals?
+5. What should I avoid touching, scraping, saying, or spending against until you approve it?
+
+If the operator cannot answer yet, continue only with the zero-key and SAFE-mode setup steps that do
+not require the missing context. Do not invent brand facts, competitor lists, approval rules, or
+publishing access.
+
+---
+
 ## 4. Setup — the C0–C4 state machine (§2)
 
 Setup is **idempotent and resumable**. Progress is recorded per-step in
