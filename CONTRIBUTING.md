@@ -24,6 +24,29 @@ Signed-off-by: Your Name <you@example.com>
 CI checks for the sign-off; PRs without it cannot be merged. Use your real name and a reachable email.
 If you forgot, amend (`git commit --amend -s`) or rebase to add sign-offs and force-push your branch.
 
+### Sign off automatically (recommended — especially for agents and bots)
+
+If a tool or agent makes commits on your behalf, the surest way to never trip the DCO check is to let
+a hook add the sign-off for you. This repo ships one. Enable it **once** in your clone:
+
+```
+git config core.hooksPath .githooks
+```
+
+After that, every `git commit` in this clone gets a `Signed-off-by:` trailer matching your configured
+git identity — no `-s` to remember, nothing to fix later. The sign-off must **match the commit
+author**, so set that identity to the one your commits are authored under:
+
+```
+git config user.name  "Your Name"            # an agent might use, e.g., "OpenClaw Agent"
+git config user.email "you@example.com"       # e.g., "openclaw-agent@noreply.local"
+```
+
+The hook is [`.githooks/prepare-commit-msg`](.githooks/prepare-commit-msg); it only adds a trailer
+when one is missing (it never duplicates or overwrites an existing sign-off), and it does nothing if
+no git identity is configured. `core.hooksPath` is per-clone and not committed, so each clone opts in
+explicitly — nothing runs on your machine until you enable it.
+
 ## What is **never** accepted (this is the boundary, not a guideline)
 
 This is a public, instance-free repository. The following MUST NOT appear in any contribution —
