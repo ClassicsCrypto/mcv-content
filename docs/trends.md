@@ -135,7 +135,7 @@ Two adapters ship, and you can register your own:
 
 | Adapter (`trends.adapter`) | What it does | Keys |
 |---|---|---|
-| `reference` | Reads a configured trend/scraper provider over HTTP through an injectable fetch. Resolves the credential **by name** via `secrets.js` (one of `APIFY_API_KEY` / `XAI_API_KEY` / `GROK_API_KEY`, or your `provider.key_env`). | BYO provider key |
+| `reference` | Reads a configured trend/scraper provider over HTTP through an injectable fetch. Resolves the credential **by name** via `secrets.js` (one of `APIFY_API_KEY` / `XAI_API_KEY`, or your `provider.key_env`). | BYO provider key |
 | `fixture` | Returns deterministic **synthetic** ("Acme Cosmos") reports. Zero network, zero credentials — for the zero-key fixture run and for trying the pathway end to end. | none |
 | *(your own)* | Implements the one-method `poll(...)` contract and self-registers through the seam. | yours |
 

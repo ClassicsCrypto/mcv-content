@@ -26,7 +26,8 @@ surfaces that answer those questions and the KPI set that defines "what a health
 - **Pending task records** — queued-but-not-yet-run count (the dispatch transport).
 - **Spend line** — honestly scoped (see [Spend](#5-the-spend-line)).
 - **Wiring self-check** — `content_home` resolvable, config present + shaped, reviewer allowlist has
-  an approver, `DISCORD_BOT_TOKEN` present (named, never valued), publisher creds present-or-deferred.
+  an approver, approval channels are bound, host runtime permissions are expected, publisher creds
+  present-or-deferred.
 
 `engine status` is read-only and tolerant: each substrate degrades to "unavailable" rather than
 throwing, so it works on a half-set-up instance (the "where am I" use). `--json` emits the full

@@ -30,15 +30,10 @@ const MASK = '[REDACTED]';
  */
 const SENSITIVE_KEYS = [
   // §4.1 / §4.2 / §4.3 named credentials (Tier 1 secrets).
-  'DISCORD_BOT_TOKEN',
   'POSTIZ_API_KEY',
   'GIPHY_API_KEY',
   'APIFY_API_KEY',
   'XAI_API_KEY',
-  'GROK_API_KEY',
-  'OPENROUTER_API_KEY',
-  'GEMINI_API_KEY',
-  'OPENAI_API_KEY',
   // Generic secret-bearing field-name fragments (substring match, lower-cased).
   'token',
   'secret',
@@ -65,7 +60,7 @@ const SENSITIVE_KEYS = [
 const VALUE_PATTERNS = [
   // Bearer tokens in Authorization-style strings: "Bearer <token>".
   { re: /\b[Bb]earer\s+[A-Za-z0-9._~+/=-]{8,}/g, to: `Bearer ${MASK}` },
-  // Discord bot tokens: three dot-separated base64url segments (24+.6+.27+ -ish).
+  // Three dot-separated base64url token shapes (common bot/session token family).
   {
     re: /\b[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{20,}\b/g,
     to: MASK,

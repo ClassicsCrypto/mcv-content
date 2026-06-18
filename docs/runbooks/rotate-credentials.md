@@ -31,21 +31,10 @@ the shell). See [`../configuration.md`](../configuration.md#5-secrets-env). The 
 engine status
 ```
 
-The self-check line shows e.g. `✓ discord_token`, `✓ publisher`, or the matching `✗` with a named
+The self-check line shows e.g. `✓ publisher` or the matching `✗` with a named
 remediation. The exit is non-zero only when a wiring check fails.
 
 ## By credential
-
-### Discord bot token — `DISCORD_BOT_TOKEN`
-
-The approval surface (the reviewer-decision listener) reads this. Rotate the token at the Discord
-developer portal, update `DISCORD_BOT_TOKEN` in `$CONTENT_HOME/.env`, then **restart the listener**.
-A stale token produces an immediate, named "missing or invalid" failure — not a silent hang. Confirm
-`engine status` shows `✓ discord_token` and that a fresh approval card still posts.
-
-> If you run more than one process that needs the token (a listener **and** a separate daemon), update
-> the **one** `$CONTENT_HOME/.env` they both read and restart **both** — a rotation that reaches one
-> process but not the other crash-loops the one left on the old value.
 
 ### Publisher (Postiz) — `POSTIZ_API_KEY` + `POSTIZ_API_URL`
 
@@ -59,10 +48,10 @@ failure.
 
 ### Other provider keys
 
-Provider keys consumed by adapters and host-runtime seats follow the same env-only pattern (e.g. the
-Giphy publisher reads `GIPHY_API_KEY` / `GIPHY_USERNAME`; scraping reads `APIFY_API_KEY`; host-runtime
-chain-seat model keys such as `OPENAI_API_KEY` / `OPENROUTER_API_KEY` are read by the runtime, not the
-engine — RD-2). The variable names are the canonical ones in `.env.example`. For every one: rotate at
+Provider keys consumed by engine adapters follow the same env-only pattern: the Giphy publisher reads
+`GIPHY_API_KEY` / `GIPHY_USERNAME`, scraping/trend adapters read `APIFY_API_KEY` or `XAI_API_KEY`.
+Host-runtime model access is configured through the runtime/subscription plan, not through engine
+`.env` keys. The variable names are the canonical ones in `.env.example`. For every one: rotate at
 the provider, replace the value in `$CONTENT_HOME/.env`, restart the consumer. Do not invent
 alternate variable names — the resolver looks up the exact `.env.example` name.
 

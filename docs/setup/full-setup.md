@@ -43,10 +43,11 @@ code checkout. Layout reference: [`../configuration.md`](../configuration.md#con
 
 ### Step 2 — the Discord approval surface
 
-Create the bot application + token, invite it with the **minimum** permission set (no admin / no
-manage-guild), create the four channels, and bind their ids in `system.json` →
-`approval_surface.channels`. This is the most error-prone external procedure in setup; follow the full
-checklist in [`discord.md`](discord.md) (and [`../../templates/channels.md`](../../templates/channels.md)).
+Create or choose the four channels, make sure your host runtime can post/read/react there, and bind
+their ids in `system.json` → `approval_surface.channels`. If your runtime already has a Discord
+connector, do not create a separate bot token for the engine. This is the most error-prone external
+procedure in setup; follow the full checklist in [`discord.md`](discord.md) (and
+[`../../templates/channels.md`](../../templates/channels.md)).
 
 ### Step 3 — write `config/system.json`
 
@@ -69,8 +70,9 @@ your host runtime runs as the chain. The media and analyst seats are deferrable.
 engine verify --setup c1
 ```
 
-C1 covers: `discord_token` present, all required `channel_bindings` mapped to non-placeholder ids, the
-reviewer allowlist non-empty, budget caps set, the SAFE publish posture, and lock-dir writability.
+C1 covers: all required `channel_bindings` mapped to non-placeholder ids, host-managed approval
+surface permissions, the reviewer allowlist non-empty, budget caps set, the SAFE publish posture, and
+lock-dir writability.
 
 ## C2 — brand, Brand DNA, (optional) corpus
 

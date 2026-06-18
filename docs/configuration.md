@@ -261,14 +261,17 @@ learn the variable surface. The resolver (`engine/shared/secrets.js`) reads `pro
 
 Tier glossary (used in every `.env.example` comment):
 
-- **Tier 1** — credentials and secrets (e.g. `DISCORD_BOT_TOKEN`, `POSTIZ_API_KEY`).
+- **Tier 1** — credentials and secrets (e.g. `POSTIZ_API_KEY`, `GIPHY_API_KEY`, `APIFY_API_KEY`,
+  `XAI_API_KEY`).
 - **Tier 2** — secret-adjacent (signed URLs, session artifacts) — never appears in config or logs.
 - **Tier 3** — instance identifiers and constants (channel/reviewer ids, handles, paths) — these
   live in `system.json`/`brand.json`, not in `.env`.
 
-Core variables: `CONTENT_HOME` (config; the one variable that must be in the process environment),
-`DISCORD_BOT_TOKEN` (Tier 1; the approval-surface adapter only). Publisher and optional-provider
-variables are per-platform/per-feature — see `.env.example` and [`setup/platforms.md`](setup/platforms.md).
+Core variable: `CONTENT_HOME` (config; the one variable that must be in the process environment).
+Discord approval delivery is host-runtime permissioning, not an engine secret. Publisher and
+optional-provider variables are per-platform/per-feature — see `.env.example` and
+[`setup/platforms.md`](setup/platforms.md). The public engine path documents only Postiz, Giphy,
+Apify, and XAI keys; general LLM/model access belongs to the host runtime/subscription plan.
 
 ### Diagnostic overrides (§4.5)
 

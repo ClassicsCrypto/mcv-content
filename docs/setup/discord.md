@@ -1,58 +1,39 @@
 # Discord setup
 
-Discord is the v1 reference **approval surface**: the engine posts approval cards to a channel, a
-named reviewer reacts to approve/edit/reject, and a listener captures the attributed decision. This
+Discord is the v1 reference **approval surface**: the host runtime posts approval cards to a channel,
+a named reviewer reacts to approve/edit/reject, and the runtime/adapter captures the attributed decision. This
 is the most error-prone external procedure in setup, so it gets the most explicit checklist. The
 canonical, step-by-step checklist lives in [`../../templates/channels.md`](../../templates/channels.md);
 this doc is the agent-first narration around it and the why.
 
-> Channel auto-creation is **not** in v1. The supported path is the manual checklist plus the
-> `engine verify --setup c1` verifier. (Auto-creation is on the roadmap.)
+> Channel auto-creation is runtime-owned. If your host runtime can create channels, use that live
+> connector. Otherwise use the manual checklist plus the `engine verify --setup c1` verifier.
 
 ## What you will produce
 
-1. A Discord **bot application** with a token, invited to your server with a **minimum** permission
-   set (no admin, no manage-guild).
-2. Four channels mapped to roles (plus one optional), whose ids you record into
+1. Four channels mapped to roles (plus one optional), whose ids you record into
    `config/system.json`'s `approval_surface.channels`.
+2. Host-runtime Discord permissions to post/read/react in those channels.
 
-You will set `DISCORD_BOT_TOKEN` in `$CONTENT_HOME/.env` and the channel ids in `system.json`. The
-C1 verifier confirms the token is present and every required channel role is bound to a real id.
+You will set channel ids in `system.json`. The C1 verifier confirms every required channel role is
+bound to a real id; actual Discord posting permission is owned by the host runtime.
 
-## Step 1 — Create the bot application and token
+## Step 1 — Confirm host Discord access
 
-In the Discord developer portal:
+Use the Discord connector built into your host runtime or subscription plan. Confirm it can:
 
-1. **New Application** — name it anything (this is your bot, not a brand).
-2. **Bot** tab → add a bot user. Copy the **bot token** and put it in `$CONTENT_HOME/.env`:
+- view/read the bound channels;
+- send messages;
+- attach files;
+- add/read reactions;
+- read message history.
 
-   ```
-   DISCORD_BOT_TOKEN=<your-bot-token>
-   ```
+**Do not grant Administrator or Manage Server / Manage Guild unless your operating policy explicitly
+requires it.** The approval surface needs to read, post, react, and attach in its bound channels —
+nothing more. Permission sufficiency is verified by posting/reacting in each bound channel during
+your first `LIVE_PREVIEW` run.
 
-   The token is a Tier-1 secret consumed *only* by the approval-surface adapter (listener, card
-   poster, readback) — never by pipeline agents. If you ever rotate it, update this `.env` and
-   restart the listener; a missing/invalid token fails fast (the engine does **not** retry credential
-   resolution — see [`../troubleshooting.md`](../troubleshooting.md#bot-token-invalid--rotation)).
-
-## Step 2 — Invite the bot with the minimum permission set
-
-Generate an invite (OAuth2 URL) with the bot scope and **only** these permissions:
-
-- View Channels / Read Messages
-- Send Messages
-- Embed Links
-- Attach Files
-- Add Reactions
-- Read Message History
-- Use Threads (only where you use threads)
-
-**Do not grant Administrator or Manage Server / Manage Guild.** The approval surface needs to read,
-post, react, and attach in its bound channels — nothing more. The C1 verifier's `discord_token`
-check confirms the token is present; the permission set is verified sufficient by being able to
-post/react in each bound channel during your first `LIVE_PREVIEW` run.
-
-## Step 3 — Create the channels and record their ids
+## Step 2 — Create the channels and record their ids
 
 Create four channels and map each to a role. Use whatever names you like; the *role* is what
 `system.json` binds, by id:
@@ -83,16 +64,15 @@ Enable Developer Mode in Discord, right-click each channel → **Copy Channel ID
 Channel ids are Tier-3 instance constants — they live in `system.json`, never in code, and the
 templates ship `<CHANNEL_ID>` placeholders. The C1 verifier rejects leftover placeholders.
 
-## Step 4 — Verify
+## Step 3 — Verify
 
 ```
 engine verify --setup c1
 ```
 
-The `channel_bindings` check passes when all four required roles are bound to non-placeholder ids;
-`discord_token` passes when `DISCORD_BOT_TOKEN` resolves. (Other C1 checks cover the reviewer
-allowlist, budget caps, the publish posture, and lock-dir writability — see
-[`brand.md`](brand.md).)
+The `channel_bindings` check passes when all four required roles are bound to non-placeholder ids.
+Other C1 checks cover the reviewer allowlist, budget caps, the publish posture, and lock-dir
+writability — see [`brand.md`](brand.md).
 
 ## Approval semantics (what the reviewer does)
 

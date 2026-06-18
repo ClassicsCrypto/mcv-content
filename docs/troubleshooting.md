@@ -7,7 +7,7 @@ is defined in [`architecture.md`](architecture.md) and [`../rules/codes.md`](../
 ## Missing or invalid credential (fail-fast, no retry)
 
 **Symptom:** a component refuses to start naming a variable; `engine status`'s wiring self-check
-shows `✗ discord_token` (or `✗ publisher`).
+shows `✗ publisher` or a publisher adapter names a missing credential.
 
 A missing or **invalid** credential is **permanent** — the engine does *not* retry credential
 resolution (this avoids the crash-loop where a bad token is retried forever). The error names the
@@ -15,26 +15,19 @@ variable and its consumer, never the value.
 
 - **Check:** is the variable set in `process.env` or `$CONTENT_HOME/.env`? Resolution reads
   `process.env` first, then `$CONTENT_HOME/.env`, and stops — there is no other path.
-- **Fix:** set the named variable (e.g. `DISCORD_BOT_TOKEN`, `POSTIZ_API_KEY` + `POSTIZ_API_URL`) and
-  **restart** the consuming component.
-
-### Bot token invalid / rotation
-
-If you rotate the Discord bot token, the listener will fail fast with "missing or invalid" until you
-update `$CONTENT_HOME/.env` and restart it. Update the `.env`, restart the listener, and confirm
-`engine status` shows `✓ discord_token`. A token left stale produces an immediate, named failure —
-not a silent hang.
+- **Fix:** set the named variable (e.g. `POSTIZ_API_KEY` + `POSTIZ_API_URL`, `GIPHY_API_KEY`,
+  `APIFY_API_KEY`, or `XAI_API_KEY`) and **restart** the consuming component.
 
 ## Discord misconfiguration
 
-**Symptom:** `engine verify --setup c1` fails `channel_bindings` or `discord_token`; no cards appear
+**Symptom:** `engine verify --setup c1` fails `channel_bindings`; no cards appear
 in the review channel.
 
 - `channel_bindings` lists **unbound or placeholder** roles → you left a `<CHANNEL_ID>` (or a
   `0000…` template value) in `config/system.json`. Replace each required role
   (`content-review`, `content-published`, `content-ops`, `media-bank`) with the real channel id and
   re-run.
-- Cards never post → confirm the bot is **in the server** and has channel-level View/Send/Embed/
+- Cards never post → confirm the host runtime has channel-level View/Send/Embed/
   Attach/React permissions in the bound channels (server-wide is not enough), and that you are in
   `LIVE_PREVIEW` or `LIVE` (in `SAFE` no cards are posted — that is correct).
 - See [`setup/discord.md`](setup/discord.md) and [`../templates/channels.md`](../templates/channels.md).

@@ -46,13 +46,15 @@ export CONTENT_HOME=<path>            # PowerShell: $env:CONTENT_HOME = "<path>"
 local-only git repo, and `setup-state.json`). It refuses a path inside the code checkout. See
 [`../configuration.md`](../configuration.md#content_home-layout) for the layout.
 
+`CONTENT_HOME` is the local instance/state folder: queue, brands, config, logs, workspaces, and
+secrets. It is deliberately outside the repo so commits never capture private instance data.
+
 Then, the minimal C1:
 
-1. **Discord connector or bot, plus four channels.** If your host runtime is already configured in the
-   target Discord workspace/server, use that existing connector for approval cards and reactions. If
-   not, create the bot application, set `DISCORD_BOT_TOKEN` in `$CONTENT_HOME/.env`, invite with the
-   minimum permission set, create the four channels, and record their ids in `system.json` →
-   `approval_surface.channels`. Full checklist: [`discord.md`](discord.md).
+1. **Discord channel access, four channels.** Create or choose the channels, grant your host runtime
+   permission to post/read/react there, and record their ids in `system.json` →
+   `approval_surface.channels`. No Discord bot token is required by the engine when the host runtime
+   already owns the Discord connector. Full checklist: [`discord.md`](discord.md).
 2. **Write `config/system.json`:** one reviewer in the allowlist, engine-metered budget caps
    (`monthly_cap`, `daily_cap`, `per_item_generation_limit`), `mode: SAFE`, and a host-runtime
    token-reporting plan so the first completed chain run prints approximate input/output token use.

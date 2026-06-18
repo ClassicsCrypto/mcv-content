@@ -27,8 +27,8 @@
  *   - the caller-supplied arbitrary `paths` list is gone; the only .env consulted is the one
  *     paths.js locates at $CONTENT_HOME. Repo-tracked secrets are never read.
  *
- * Names referenced by callers are the §4 public variable names (e.g. DISCORD_BOT_TOKEN,
- * POSTIZ_API_KEY) — this module hardcodes NO credential values.
+ * Names referenced by callers are the §4 public variable names (e.g. POSTIZ_API_KEY,
+ * GIPHY_API_KEY) — this module hardcodes NO credential values.
  */
 
 const fs = require('fs');
@@ -41,7 +41,7 @@ const paths = require('./paths');
  */
 class CredentialMissingError extends Error {
   /**
-   * @param {string} name      the §4 variable name (e.g. 'DISCORD_BOT_TOKEN').
+   * @param {string} name      the §4 variable name (e.g. 'POSTIZ_API_KEY').
    * @param {string} [consumer] the component that needs it (e.g. 'publisher adapter (postiz)').
    */
   constructor(name, consumer) {

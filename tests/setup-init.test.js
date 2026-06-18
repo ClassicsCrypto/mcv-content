@@ -64,7 +64,10 @@ test('initHome seeds a schema-valid SAFE-mode starter system.json + a starter .e
   }
 
   const envBody = fs.readFileSync(paths.envFile(env), 'utf8');
-  assert.match(envBody, /DISCORD_BOT_TOKEN=/);
+  assert.doesNotMatch(envBody, /DISCORD_BOT_TOKEN=/);
+  assert.match(envBody, /POSTIZ_API_KEY=/);
+  assert.match(envBody, /APIFY_API_KEY=/);
+  assert.match(envBody, /XAI_API_KEY=/);
   // CONTENT_HOME must NOT be settable in the instance .env (§4.1 placement rule).
   assert.doesNotMatch(envBody, /^CONTENT_HOME=/mu);
 
@@ -79,7 +82,7 @@ test('initHome is idempotent: a re-run never overwrites operator-edited config o
   const sysFile = paths.systemConfig(first.env);
   const envFile = paths.envFile(first.env);
   fs.writeFileSync(sysFile, JSON.stringify({ mode: 'LIVE_PREVIEW', mine: true }), 'utf8');
-  fs.writeFileSync(envFile, 'DISCORD_BOT_TOKEN=operator-real-value\n', 'utf8');
+  fs.writeFileSync(envFile, 'POSTIZ_API_KEY=operator-real-value\n', 'utf8');
 
   const second = init.initHome({ home, git: false });
   assert.equal(second.created['config/system.json'], 'kept');
