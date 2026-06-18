@@ -8,6 +8,10 @@ checkpoint that owns it. For the full C0–C4 checkpoint walk with every verifie
 This is written agent-first: an agent runs the commands; you read along and make the human decisions
 (reviewer identity, the cost confirmation, the approval reaction).
 
+> **Brand new to this, or want the no-jargon version?** Read **[`START-HERE.md`](START-HERE.md)**
+> first — it walks an absolute beginner from a clean clone to a working engine, then back here (or to
+> an AI assistant) for the rest.
+
 ## C0 — prove the engine runs (zero keys)
 
 ```
