@@ -37,6 +37,7 @@
 
 const checkpoints = require('./checkpoints');
 const setupState = require('./setup-state');
+const providers = require('./providers');
 
 const { CHECKPOINTS, LIFECYCLE } = setupState;
 
@@ -300,6 +301,32 @@ const STEP_GUIDE = Object.freeze({
           },
         ],
       },
+      {
+        id: 'media-models',
+        type: 'choice',
+        label: 'Media models (optional) — generate/understand images & video',
+        help: 'All optional; absent ones simply skip. The live status of each is shown above under "media models". Configure in config/system.json → providers.',
+        options: [
+          {
+            id: 'image-gen',
+            label: 'Image generation',
+            help: 'Renders images (character sheets, generated media). If your host model already makes images (e.g. a Codex-class CLI), point a kind:"cli" block at it; otherwise set an image API. Configure providers.image_gen.',
+            command: 'edit $CONTENT_HOME/config/system.json → providers.image_gen { kind, model, endpoint_env }',
+          },
+          {
+            id: 'vision',
+            label: 'Vision (read/tag images)',
+            help: 'Lets the engine describe + tag your library images for retrieval. Configure providers.visual.',
+            command: 'edit $CONTENT_HOME/config/system.json → providers.visual { kind, model, endpoint_env }',
+          },
+          {
+            id: 'video',
+            label: 'Video generation — e.g. Hyperframes (optional)',
+            help: 'Optional video/animation generation via a Hyperframes-class endpoint. BYO key by name (endpoint_env); no credentials are bundled. Configure providers.video.',
+            command: 'edit $CONTENT_HOME/config/system.json → providers.video { kind:"http", model, endpoint_env:"HYPERFRAMES_API_KEY", options:{ url } }',
+          },
+        ],
+      },
     ],
     doc: 'docs/setup/quick-start.md',
   },
@@ -357,6 +384,36 @@ function buildProgress(env, activeCheckpoint, justPassed = []) {
   };
 }
 
+/**
+ * Detect the media-model providers (vision / image-gen / video) and shape them for the frame's
+ * optional `media_models` block — the setup driver's model-detection surface. Read-only + tolerant
+ * (never throws; never returns a credential value, only the env-var NAME). Attached to the C4 (media)
+ * frame and the done frame so an operator sees what's wired and what's optional.
+ */
+function buildMediaModels(env) {
+  let d;
+  try {
+    d = providers.detectProviders({ env });
+  } catch {
+    return null;
+  }
+  const trim = (p) => ({
+    capability: p.capability,
+    configured: p.configured,
+    kind: p.kind,
+    model: p.model,
+    endpoint_env: p.endpoint_env,
+    source: p.source,
+  });
+  return {
+    summary: d.summary,
+    any_configured: d.any_configured,
+    visual: trim(d.visual),
+    image_gen: trim(d.image_gen),
+    video: trim(d.video),
+  };
+}
+
 /** The single most useful command for this frame (the first runnable action, else the verify re-check). */
 function pickNextCommand(actions) {
   const runnable = actions.find((a) => (a.type === 'run' || a.type === 'input') && a.command);
@@ -383,7 +440,7 @@ function guidedFrame(checkpoint, result, env, justPassed, stateReadable) {
   };
   const actions = [...(guide.actions || []).map((a) => ({ ...a })), verifyAction];
 
-  return {
+  const frame = {
     schema_version: FRAME_SCHEMA_VERSION,
     generated_for: checkpoint,
     done: false,
@@ -402,11 +459,18 @@ function guidedFrame(checkpoint, result, env, justPassed, stateReadable) {
       ? null
       : 'CONTENT_HOME is not set yet, so progress is not being saved between runs. That is expected before `engine init` — set CONTENT_HOME after init and progress will persist.',
   };
+  // The C4 (calendar + library + media) step is where media models matter — attach live detection.
+  if (checkpoint === 'C4') {
+    const mm = buildMediaModels(env);
+    if (mm) frame.media_models = mm;
+  }
+  return frame;
 }
 
 /** Assemble the terminal "you're set up" frame. */
 function doneFrame(env, justPassed) {
   const progress = buildProgress(env, null, justPassed);
+  const mediaModels = buildMediaModels(env);
   return {
     schema_version: FRAME_SCHEMA_VERSION,
     generated_for: 'done',
@@ -453,6 +517,7 @@ function doneFrame(env, justPassed) {
     just_passed: (justPassed || []).slice(),
     doc: 'docs/setup/quick-start.md',
     note: null,
+    ...(mediaModels ? { media_models: mediaModels } : {}),
   };
 }
 

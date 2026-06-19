@@ -726,9 +726,67 @@
       "type": "boolean",
       "description": "Mirror of the PAUSED sentinel. When true, all autonomous loops are paused (kill switch, §15.4).",
       "default": false
+    },
+    "providers": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "OPTIONAL media-model provider seams (§12.5 LLM/vision/media/video provider block). Each is a BYO seam: the engine ships the interface + degrades gracefully when absent (DD-21), and bundles NO vendor credentials. Credentials resolve BY NAME via secrets.js (endpoint_env) — never a credential VALUE here. All three are OPTIONAL: absent ⇒ that capability degrades to skip (e.g. no image_gen ⇒ character sheets/media generation are skipped, not failed). The setup driver (`engine setup`) detects which are configured and surfaces the gaps.",
+      "properties": {
+        "visual": {
+          "$ref": "#/$defs/provider_block",
+          "description": "The VISION provider that READS images to describe/tag them (the visual gate + library auto-index). Also accepted at the legacy top-level key `visual_provider`."
+        },
+        "image_gen": {
+          "$ref": "#/$defs/provider_block",
+          "description": "The image-GENERATION provider that renders images (character sheets, generated media). If your host model already does image generation (e.g. a Codex-class CLI), point a `kind:\"cli\"` block at it; otherwise configure an image API. Also accepted at the legacy top-level key `image_gen`."
+        },
+        "video": {
+          "$ref": "#/$defs/provider_block",
+          "description": "OPTIONAL video-GENERATION provider that renders short video/animation (e.g. a Hyperframes-class endpoint). BYO + off until configured; the engine degrades to skip when absent."
+        }
+      }
+    },
+    "visual_provider": {
+      "$ref": "#/$defs/provider_block",
+      "description": "Legacy/alias top-level home for the VISION provider (equivalent to providers.visual). Read by the visual gate + indexer. Prefer the `providers` block in new configs."
+    },
+    "image_gen": {
+      "$ref": "#/$defs/provider_block",
+      "description": "Legacy/alias top-level home for the image-GENERATION provider (equivalent to providers.image_gen). Prefer the `providers` block in new configs."
     }
   },
   "$defs": {
+    "provider_block": {
+      "type": "object",
+      "description": "A §12.5 media-provider block. `kind` selects the transport (cli | http); an absent/unknown kind ⇒ no provider ⇒ degrade-to-skip. `endpoint_env` NAMES the env var holding the credential/endpoint (resolved via secrets.js) — never a credential value. `options` is provider-specific and opaque to the engine.",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["cli", "http"],
+          "description": "Transport: 'cli' spawns a configured command (prompt via stdin, shell:false); 'http' POSTs to an endpoint. Anything else (or absent) ⇒ no provider ⇒ degrade-to-skip."
+        },
+        "model": {
+          "type": "string",
+          "description": "Model id passed to the provider (CLI flag / HTTP body field). For a Hyperframes-class video provider, the video model id."
+        },
+        "endpoint_env": {
+          "type": "string",
+          "description": "The NAME of the env var whose value is the provider credential/endpoint (resolved via secrets.js). Never a credential VALUE.",
+          "minLength": 1
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "description": "Hard ceiling on the provider call in milliseconds.",
+          "minimum": 1
+        },
+        "options": {
+          "type": "object",
+          "description": "Provider-specific knobs (cli: command/args/model_flag/output_flag/ref_flag/style_anchor; http: url/headers). Opaque to the engine.",
+          "additionalProperties": true
+        }
+      }
+    },
     "reviewer": {
       "type": "object",
       "additionalProperties": false,

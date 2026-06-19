@@ -173,6 +173,31 @@ lives in scheduler wrappers** — it lives here in declared config. See
 - `observability`: `{ digest_time, stall_thresholds: { no_content_produced_hours: 24,
   queue_age_alert_hours: 24, undelivered_card_backlog: 10 } }`. See [`observability.md`](observability.md).
 
+### `providers` (media-model seams — vision / image-gen / video)
+
+The optional §12.5 media-model provider seams, all BYO and OFF until configured (the engine bundles
+no vendor credentials; absent ⇒ that capability degrades to skip, never fails — DD-21):
+
+```jsonc
+"providers": {
+  "visual":    { "kind": "cli",  "model": "...", "endpoint_env": "...", "options": { "command": "..." } },
+  "image_gen": { "kind": "cli",  "model": "...", "endpoint_env": "...", "options": { "command": "..." } },
+  "video":     { "kind": "http", "model": "<hyperframes-model>", "endpoint_env": "HYPERFRAMES_API_KEY", "options": { "url": "..." } }
+}
+```
+
+- **`visual`** — the vision provider that **reads** images (the visual gate + library auto-index).
+- **`image_gen`** — the **image-generation** provider (character sheets, generated media). If your host
+  model already generates images (e.g. a Codex-class CLI), point a `kind:"cli"` block at it; otherwise
+  configure an image API.
+- **`video`** — **optional** video/animation generation (e.g. a **Hyperframes**-class endpoint). The
+  engine ships the seam + detection; a video-generation pipeline is roadmap.
+
+Each block is a §12.5 provider block: `{ kind: "cli"|"http", model?, endpoint_env?, timeout_ms?,
+options? }`. `endpoint_env` NAMES the env var holding the credential (resolved via `.env`); **a
+credential value never lives in config.** The legacy top-level keys `visual_provider` and `image_gen`
+are still accepted. `engine setup` detects which are wired and surfaces the gaps under "media models."
+
 ### `gate` (deterministic-gate tunables)
 
 The engine ships **generic day-one defaults in code** (e.g. variant-distinctness shingle size 5,

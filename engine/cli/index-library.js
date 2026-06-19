@@ -110,7 +110,13 @@ function loadConfig(env, brand) {
     ...brandCfg,
     character_sheets: { ...(sys.character_sheets || {}), ...(brandCfg.character_sheets || {}) },
     cost: { ...(sys.cost || {}), ...(brandCfg.cost || {}) },
-    image_gen: brandCfg.image_gen || sys.image_gen || sys.imageGen || undefined,
+    image_gen:
+      brandCfg.image_gen
+      || (brandCfg.providers && brandCfg.providers.image_gen)
+      || sys.image_gen
+      || sys.imageGen
+      || (sys.providers && sys.providers.image_gen)
+      || undefined,
   };
 }
 

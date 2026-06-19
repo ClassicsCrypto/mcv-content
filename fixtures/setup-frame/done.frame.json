@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "generated_for": "done",
+  "done": true,
+  "title": "You’re set up — the engine is operational",
+  "headline": "All five checkpoints pass. Next: produce your first approval card in LIVE_PREVIEW, then go LIVE when ready.",
+  "progress": {
+    "project_state": "operational",
+    "done": 5,
+    "total": 5,
+    "checkpoints": [
+      {
+        "id": "C0",
+        "label": "prove the engine runs",
+        "status": "done"
+      },
+      {
+        "id": "C1",
+        "label": "private folder + approval surface",
+        "status": "done"
+      },
+      {
+        "id": "C2",
+        "label": "brand + voice",
+        "status": "done"
+      },
+      {
+        "id": "C3",
+        "label": "calibrate (quality gate)",
+        "status": "done"
+      },
+      {
+        "id": "C4",
+        "label": "calendar + library",
+        "status": "done"
+      }
+    ]
+  },
+  "body": [
+    "Every checkpoint passes and your project is operational. Here is the safe on-ramp from here:",
+    "",
+    "  1. Set mode to LIVE_PREVIEW and run a slot — this produces a REAL approval card in your",
+    "     content-review channel, but never publishes. It is the first-approval-card milestone.",
+    "  2. When you are happy, stand up the publisher (Postiz), set mode LIVE, and approve a card —",
+    "     the engine hands off a DRAFT you publish yourself. Nothing auto-publishes by default.",
+    "",
+    "Use `engine status` any time to see mode, queue, what ran today, failures, and spend."
+  ],
+  "todo": [],
+  "satisfied": [],
+  "skipped": [],
+  "actions": [
+    {
+      "id": "status",
+      "type": "run",
+      "label": "See the operational dashboard",
+      "help": "Mode, queue, today’s produced/published/failed, and spend — one command.",
+      "command": "node bin/engine.js status"
+    },
+    {
+      "id": "live-preview",
+      "type": "input",
+      "label": "Produce your first card (LIVE_PREVIEW)",
+      "help": "Set mode LIVE_PREVIEW in config/system.json, then run a slot. Produces a real card; never publishes.",
+      "command": "node bin/engine.js run-slot <SLOT_ID> --mode LIVE_PREVIEW"
+    },
+    {
+      "id": "finish",
+      "type": "finish",
+      "label": "Done",
+      "help": "Setup is complete."
+    }
+  ],
+  "next_command": "node bin/engine.js status",
+  "just_passed": [],
+  "doc": "docs/setup/quick-start.md",
+  "note": null,
+  "media_models": {
+    "summary": "media models: vision — not set · image-gen — not set · video — optional, not set",
+    "any_configured": false,
+    "visual": {
+      "capability": "visual",
+      "configured": false,
+      "kind": null,
+      "model": null,
+      "endpoint_env": null,
+      "source": null
+    },
+    "image_gen": {
+      "capability": "image_gen",
+      "configured": false,
+      "kind": null,
+      "model": null,
+      "endpoint_env": null,
+      "source": null
+    },
+    "video": {
+      "capability": "video",
+      "configured": false,
+      "kind": null,
+      "model": null,
+      "endpoint_env": null,
+      "source": null
+    }
+  }
+}

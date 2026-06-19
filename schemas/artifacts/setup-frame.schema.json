@@ -73,9 +73,35 @@
     "note": {
       "description": "An optional advisory (e.g. CONTENT_HOME-unset progress-not-saved notice), or null.",
       "type": ["string", "null"]
+    },
+    "media_models": {
+      "description": "OPTIONAL media-model detection (attached to the C4/media frame and the done frame): which §12.5 provider seams (vision / image-gen / video) are configured. All optional; absent ones degrade to skip. Never carries a credential value — only the env-var NAME.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "any_configured", "visual", "image_gen", "video"],
+      "properties": {
+        "summary": { "type": "string" },
+        "any_configured": { "type": "boolean" },
+        "visual": { "$ref": "#/$defs/providerStatus" },
+        "image_gen": { "$ref": "#/$defs/providerStatus" },
+        "video": { "$ref": "#/$defs/providerStatus" }
+      }
     }
   },
   "$defs": {
+    "providerStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["configured"],
+      "properties": {
+        "capability": { "type": "string", "enum": ["visual", "image_gen", "video"] },
+        "configured": { "type": "boolean" },
+        "kind": { "type": ["string", "null"], "enum": ["cli", "http", null] },
+        "model": { "type": ["string", "null"] },
+        "endpoint_env": { "type": ["string", "null"] },
+        "source": { "type": ["string", "null"] }
+      }
+    },
     "progress": {
       "type": "object",
       "additionalProperties": false,
