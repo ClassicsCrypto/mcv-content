@@ -12,6 +12,13 @@ This is written agent-first: an agent runs the commands; you read along and make
 > first — it walks an absolute beginner from a clean clone to a working engine, then back here (or to
 > an AI assistant) for the rest.
 
+> **Want a guided driver instead of reading along?** Run **`engine setup`** (`node bin/engine.js
+> setup`). It detects where you are on the C0–C4 ladder, prints the single next action with its exact
+> command, refuses to surface a later step until the current one verifies, and self-advances when you
+> re-run it. It never spends or posts. This page is the command-by-command detail behind that driver;
+> `engine setup --json` is the same flow as a frame a host-runtime/Discord adapter can render as
+> buttons (see [`../../agent.md`](../../agent.md)).
+
 ## C0 — prove the engine runs (zero keys)
 
 ```

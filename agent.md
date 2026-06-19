@@ -124,6 +124,16 @@ publishing access.
 
 ## 4. Setup — the C0–C4 state machine (§2)
 
+**The driver: `engine setup`.** Rather than walking the steps below by hand, run `engine setup`
+(`node bin/engine.js setup`) — it is the strict, resumable driver over this exact state machine. It
+computes the current step from the resume point, prints the single next action with its literal
+command, refuses to surface a later step until the current one verifies, and self-advances when you
+re-run it. It never spends or posts; metered steps are surfaced as actions you confirm. Drive it and
+do what each step says — the C0–C4 detail below is the reference behind it. `engine setup --json`
+emits the same flow as a **frame** (`schemas/artifacts/setup-frame.schema.json`) — the published
+contract a host-runtime adapter (e.g. a Discord component renderer) consumes to draw the setup menu
+as buttons. The engine owns no Discord connection or token; it emits the frame, a surface renders it.
+
 Setup is **idempotent and resumable**. Progress is recorded per-step in
 `$CONTENT_HOME/setup-state.json`; re-running resumes from the first incomplete checkpoint and never
 duplicates channels, re-bills scrapes/indexing, or overwrites Brand DNA. After each step, run the

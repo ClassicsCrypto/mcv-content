@@ -357,6 +357,11 @@ function buildBindings() {
     { test: (p) => /^fixtures\/library-acme\/.+\.meta\.json$/.test(p), skip: true, reason: 'per-asset sidecar metadata marker (indexer merge input, not a shipped artifact shape)' },
     { test: (p) => /^fixtures\/library-acme\/character-markers\/.+\.character\.json$/.test(p), skip: true, reason: 'existing-character-sheet marker (indexer control input, not a shipped artifact shape)' },
 
+    // setup-frame fixtures (SETUP-DRIVER): the guided-setup frame contract a host-runtime/Discord
+    // adapter renders. Each *.frame.json binds to the published setup-frame schema (the adapter
+    // contract — schemas/artifacts/setup-frame.schema.json).
+    { test: (p) => /^fixtures\/setup-frame\/.+\.frame\.json$/.test(p), schema: S('artifacts/setup-frame.schema.json'), mode: 'single' },
+
     // recorded stage outputs (the fixture-run replay set).
     { test: (p) => p === 'fixtures/stage-outputs/brief.json', schema: S('inputs/brief.schema.json'), mode: 'single' },
     { test: (p) => p === 'fixtures/stage-outputs/draft.json', schema: S('inputs/draft.schema.json'), mode: 'single' },

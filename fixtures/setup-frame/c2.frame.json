@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "generated_for": "C2",
+  "done": false,
+  "title": "Register a brand and give it a voice",
+  "headline": "Tell the engine who it is writing as — then either feed it your content or start cold.",
+  "progress": {
+    "project_state": "uninitialized",
+    "done": 2,
+    "total": 5,
+    "checkpoints": [
+      {
+        "id": "C0",
+        "label": "prove the engine runs",
+        "status": "done"
+      },
+      {
+        "id": "C1",
+        "label": "private folder + approval surface",
+        "status": "done"
+      },
+      {
+        "id": "C2",
+        "label": "brand + voice",
+        "status": "active"
+      },
+      {
+        "id": "C3",
+        "label": "calibrate (quality gate)",
+        "status": "locked"
+      },
+      {
+        "id": "C4",
+        "label": "calendar + library",
+        "status": "locked"
+      }
+    ]
+  },
+  "body": [
+    "A \"brand\" is the account the engine writes for. Register at least one, then give it a Brand DNA:",
+    "the voice, the rules, the facts it must never get wrong.",
+    "",
+    "Two honest paths, both fully supported:",
+    "  • Have existing content? Point the engine at your files/exports, or auto-fetch from your public",
+    "    account, and it will analyze your real voice and draft the DNA for you.",
+    "  • Starting fresh? Use the cold-start path — fill the authoring template by hand. No content, no",
+    "    scraping, no spend required. Onboarding is never blocked by a lack of history."
+  ],
+  "todo": [
+    {
+      "name": "brand_registered",
+      "detail": "no brands/<id>/brand.json found",
+      "remediation": "Register at least one brand: write brands/<id>/brand.json from the template (§2.4 step 1, DD-10)."
+    }
+  ],
+  "satisfied": [],
+  "skipped": [],
+  "actions": [
+    {
+      "id": "register-brand",
+      "type": "input",
+      "label": "Register a brand",
+      "help": "Create brands/<id>/brand.json from the template: an id, a display name, account class, and one platform.",
+      "command": "cp templates/brand/brand.json.template $CONTENT_HOME/brands/<BRAND_ID>/brand.json   # then edit it",
+      "inputs": [
+        {
+          "name": "brand",
+          "label": "A short id for this brand (e.g. my-brand)",
+          "kind": "id",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "content-source",
+      "type": "choice",
+      "label": "Where does this brand’s existing content come from?",
+      "help": "Pick how the engine learns the voice. (Phase 2 makes these one-click; today each option is a command.)",
+      "options": [
+        {
+          "id": "files",
+          "label": "I have files / official exports — point to them",
+          "help": "Import an export or a folder of posts, then build the DNA from it (free; no scraping).",
+          "command": "node bin/engine.js ingest-brand --brand <BRAND_ID> --manual"
+        },
+        {
+          "id": "apify",
+          "label": "Auto-fetch from my public account (Apify)",
+          "help": "Bring-your-own scraper adapter pulls recent posts, then builds the DNA. Metered — shows a cost estimate first.",
+          "command": "node bin/engine.js ingest-brand --brand <BRAND_ID>   # then confirm with --yes",
+          "spends": true
+        },
+        {
+          "id": "cold-start",
+          "label": "Start cold — no content yet",
+          "help": "Author the Brand DNA by hand from the template and set cold_start:true. Always works, zero spend.",
+          "command": "cp templates/brand/brand-dna-authoring.md $CONTENT_HOME/brands/<BRAND_ID>/brand-dna.md   # then fill it in; set cold_start:true in brand.json"
+        }
+      ]
+    },
+    {
+      "id": "verify",
+      "type": "verify",
+      "label": "Check this step",
+      "help": "Re-runs the checker for this step. When it passes, re-run `engine setup` to move on.",
+      "command": "node bin/engine.js verify --setup c2"
+    }
+  ],
+  "next_command": "cp templates/brand/brand.json.template $CONTENT_HOME/brands/<BRAND_ID>/brand.json   # then edit it",
+  "just_passed": [
+    "C0",
+    "C1"
+  ],
+  "doc": "docs/setup/cold-start.md",
+  "note": null
+}
