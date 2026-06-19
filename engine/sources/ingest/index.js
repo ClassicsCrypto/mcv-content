@@ -66,6 +66,10 @@ module.exports = {
   TRUST_CLASS: source.TRUST_CLASS,
   RETENTION_CLASS: source.RETENTION_CLASS,
   ACCOUNT_CLASS: source.ACCOUNT_CLASS,
+  TEXT_MODE: source.TEXT_MODE,
+  VALID_TEXT_MODE: source.VALID_TEXT_MODE,
+  stripText: source.stripText,
+  resolveTextMode: source.resolveTextMode,
 
   // Config gate (off by default for the scraper path) + cost estimate (DD-18).
   ingestConfig: source.ingestConfig,

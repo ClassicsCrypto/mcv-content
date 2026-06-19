@@ -301,6 +301,7 @@ function ingestConfig(config = {}) {
     platform: typeof i.platform === 'string' && i.platform.trim() ? i.platform.trim() : 'twitter',
     max_per_account: Number.isFinite(i.max_per_account) && i.max_per_account > 0 ? Math.floor(i.max_per_account) : null,
     retention_class: VALID_RETENTION.has(i.retention_class) ? i.retention_class : RETENTION_CLASS.STANDARD,
+    text_mode: resolveTextMode(i.text_mode),
     private_terms: Array.isArray(i.private_terms)
       ? i.private_terms.filter((s) => typeof s === 'string' && s.trim())
       : [],
@@ -366,6 +367,35 @@ function coerceMediaRefs(value) {
   return value.map((m) => (typeof m === 'string' ? m : (m && (m.ref || m.url || m.key)) || '')).filter(Boolean);
 }
 
+/** Corpus text-storage modes (the C2 "keep as raw or stripped" intake choice). */
+const TEXT_MODE = Object.freeze({
+  RAW: 'raw',        // store the post text verbatim (default) — the fullest signal for voice analysis.
+  STRIPPED: 'stripped', // store a cleaned, smaller form: URLs removed, whitespace collapsed.
+});
+const VALID_TEXT_MODE = Object.freeze(new Set(Object.values(TEXT_MODE)));
+
+/**
+ * DETERMINISTIC text cleanup for the `stripped` intake mode — shrink stored corpus text without
+ * touching voice: drop URLs (noise for voice analysis), collapse whitespace/newline runs to single
+ * spaces, strip zero-width characters, and trim. NEVER summarizes or paraphrases (that is the LLM
+ * DNA-synthesis step, not this) and never changes word choice — it only removes non-voice bulk so the
+ * corpus is smaller/cheaper to keep. Pure + lossless-for-voice. Returns '' only if the input was
+ * URL/whitespace-only (the caller falls back to the trimmed original so an item is never lost here).
+ */
+function stripText(text) {
+  return String(text == null ? '' : text)
+    .replace(/https?:\/\/\S+/giu, ' ') // URLs → space (noise for voice)
+    .replace(/\bwww\.\S+/giu, ' ')
+    .replace(/[​-‍﻿]/gu, '') // zero-width chars
+    .replace(/\s+/gu, ' ') // collapse all whitespace/newline runs
+    .trim();
+}
+
+/** Resolve a text_mode token to a valid mode (default RAW; anything unknown falls back to RAW). */
+function resolveTextMode(value) {
+  return VALID_TEXT_MODE.has(value) ? value : TEXT_MODE.RAW;
+}
+
 /**
  * Normalize one RAW adapter item into a schemas/inputs/corpus-item.schema.json item. FORCES the
  * Zone-U trust class (never trusting the adapter to self-promote — model §8 defense in depth),
@@ -408,10 +438,15 @@ function normalizeItem(raw, ctx = {}) {
 
   // The schema item — additionalProperties:false, so ONLY the allowed keys. Optional keys are
   // omitted (not nulled) when absent — the schema wants a string when present, and absence validates.
+  // Intake text mode (C2 "raw vs stripped"): `stripped` stores a cleaned, smaller form; if stripping
+  // would empty an otherwise-textful item (URL-only post), keep the trimmed original — never drop here.
+  const textMode = resolveTextMode(ctx.textMode);
+  const finalText = textMode === TEXT_MODE.STRIPPED ? (stripText(text) || text.trim()) : text.trim();
+
   const item = {
     source: validSource,
     captured_at: capturedAt,
-    text: text.trim(),
+    text: finalText,
     // FORCED Zone U — ingestion never self-promotes; operator attestation (a later, explicit action)
     // is the only path to operator-curated (RD-8). attestation is therefore absent here.
     trust_class: TRUST_CLASS.UNTRUSTED_SCRAPED,
@@ -585,6 +620,7 @@ function ingestRawItems(rawItems, ctx = {}) {
       source: ctx.source,
       retention_class: ctx.retention_class,
       accountClass: ctx.accountClass,
+      textMode: ctx.textMode,
       nowMs,
     });
     if (!norm) {
@@ -701,11 +737,13 @@ async function ingestCorpus(opts = {}) {
   const raw = await adapter.fetch(fetchArgs);
   const rawItems = Array.isArray(raw) ? raw : raw == null ? [] : [raw];
 
+  const textMode = resolveTextMode(opts.textMode != null ? opts.textMode : cfg.text_mode);
   const result = ingestRawItems(rawItems, {
     env,
     brand: opts.brand,
     source: SOURCE.PLATFORM, // adapter pulls are `platform`-sourced
     retention_class: retentionClass,
+    textMode,
     accountClass: null, // each item self-labels own/competitor; unlabeled => competitor (conservative)
     privateTerms: cfg.private_terms,
     write: opts.write,
@@ -732,6 +770,10 @@ module.exports = {
   VALID_RETENTION,
   ACCOUNT_CLASS,
   VALID_ACCOUNT_CLASS,
+  TEXT_MODE,
+  VALID_TEXT_MODE,
+  stripText,
+  resolveTextMode,
   DEFAULT_PER_ITEM_USD,
   // Config gate (off by default for the scraper path).
   ingestConfig,

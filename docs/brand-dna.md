@@ -99,6 +99,16 @@ In order of preference:
    class key); the repo ships the **adapter interface and a reference adapter**, but **no bundled
    scraping credentials and no hosted scraping service.**
 
+> ### How ingested text is stored — `raw` vs `stripped` (`--store` / `ingestion.text_mode`)
+>
+> Scraped corpus text is stored **`raw`** (verbatim) by default — the fullest signal for voice
+> analysis. Set `ingestion.text_mode: "stripped"` (or pass `engine ingest-brand --store stripped`) to
+> store a **deterministically cleaned, smaller** form instead: URLs removed and whitespace/newlines
+> collapsed. Stripping **never summarizes, paraphrases, or changes word choice** — that distillation is
+> the LLM **DNA-synthesis** step, which produces `brand-dna.md` from the corpus regardless of mode. To
+> keep as little raw corpus as possible, pair `stripped` with a short `retention_class: "transient"` so
+> the corpus ages out fast under `engine purge-corpora`.
+
 > ### Scraping posture (RD-9) — the operator is the data controller
 >
 > - **Manual submission and official exports are the first-class paths.** Scraping is BYO: you supply

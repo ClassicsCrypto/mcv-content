@@ -49,6 +49,7 @@ const util = require('./util');
 const indexer = require('../library/indexer');
 const organize = require('../library/organize');
 const charSheets = require('../library/character-sheets');
+const validate = require('../library/validate');
 
 const HELP = `engine index-library [options]
 
@@ -62,6 +63,11 @@ spend (DD-18). Incremental + idempotent: already-indexed assets are skipped and 
   --estimate-only    print the cost estimate + item count and exit (no spend).
   --force            re-index every asset (a deliberate, confirmed re-spend).
   --no-hash          fingerprint by path+size+mtime instead of a content hash (faster scan).
+
+SCAN/VALIDATE — read-only library doctor: point at your library and check it's in the right shape
+(correct media types, no empty/dead folders, no unreadable files, indexed-or-not) BEFORE you spend on
+indexing. Never moves, writes, indexes, or spends.
+  --check            scan the library and report format issues, empty folders, and index health.
 
 FOLDER-SORT — sort media into Images / Videos / AI-generated template folders (no spend; pure FS).
   --organize         plan the folder-sort (DRY-RUN — changes nothing).
@@ -134,6 +140,29 @@ function runOrganize(env, flags, brand) {
     summary: res.summary,
     detail,
     data: { action: 'organize', brand: brand || null, ...res },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Sub-action: SCAN/VALIDATE (--check) — engine/library/validate.js (read-only doctor)
+// ---------------------------------------------------------------------------
+
+function runCheck(env, brand) {
+  const res = validate.validateLibrary({ env });
+  const detail = [res.summary];
+  for (const i of res.issues) detail.push(`  ${i.level === 'error' ? '✗' : '~'} [${i.code}] ${i.detail}`);
+  if (res.exists && res.ok && res.issues.length === 0) detail.push('  ✓ library is clean and in the right shape.');
+  if (res.counts.unindexed > 0 || (!res.index.present && res.counts.files > 0)) {
+    detail.push('Next: `engine index-library` (estimate-and-confirm) to index the media for reuse.');
+  }
+  // A scan that finds only warnings (or is clean) is a successful read-only report (exit 0). Genuine
+  // errors (unreadable files, stale index entries) are a verb-level failure the operator must fix.
+  return {
+    ok: res.ok,
+    exitCode: res.ok ? 0 : 1,
+    summary: res.summary,
+    detail,
+    data: { action: 'check', brand: brand || null, ...res },
   };
 }
 
@@ -323,19 +352,22 @@ async function run(ctx = {}) {
   const env = ctx.env || process.env;
   const brand = typeof flags.brand === 'string' && flags.brand.trim() ? flags.brand.trim() : null;
 
-  // Exactly ONE sub-action. organize and character-sheets are mutually exclusive with each other and
-  // with the index path; reject a contradictory combination rather than silently picking one (§6.1).
+  // Exactly ONE sub-action. check, organize, and character-sheets are mutually exclusive with each
+  // other and with the index path; reject a contradictory combination rather than silently picking
+  // one (§6.1).
+  const wantCheck = util.flagOn(flags.check);
   const wantOrganize = util.flagOn(flags.organize);
   const wantSheets = util.flagOn(flags['character-sheets']);
-  if (wantOrganize && wantSheets) {
+  if ([wantCheck, wantOrganize, wantSheets].filter(Boolean).length > 1) {
     return {
       ok: false,
       exitCode: 2,
-      summary: 'pick ONE sub-action: --organize OR --character-sheets (not both)',
-      detail: ['Run the folder-sort and the character-sheet pass as separate invocations.'],
+      summary: 'pick ONE sub-action: --check OR --organize OR --character-sheets (not more than one)',
+      detail: ['Run the scan, the folder-sort, and the character-sheet pass as separate invocations.'],
     };
   }
 
+  if (wantCheck) return runCheck(env, brand);
   if (wantOrganize) return runOrganize(env, flags, brand);
   if (wantSheets) return runCharacterSheets(env, flags, brand);
   return runIndex(env, flags, brand);
