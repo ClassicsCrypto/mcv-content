@@ -97,6 +97,10 @@ it's almost always a missing or outdated Node install.)*
 > posts, and never spends money on its own. If you're using an AI assistant (below), tell it to
 > *"drive `engine setup` and do what each step says."* This is the front door; everything below is the
 > longer-form detail behind it.
+>
+> **Prefer clicking buttons in Discord?** The same flow runs as a `/startup` button menu — see the
+> reference adapter at [`../../adapters/discord/`](../../adapters/discord/README.md). If you already
+> run a bot (e.g. OpenClaw), wire `/startup` into it; you don't need a second bot.
 
 This engine is **designed to be set up and run by an AI assistant**, with you answering simple
 questions. Two choices:
