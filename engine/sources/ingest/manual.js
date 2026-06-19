@@ -158,6 +158,7 @@ function importManualSubmission(opts = {}) {
     brand: opts.brand,
     source: SOURCE.MANUAL,
     retention_class: retentionClass,
+    textMode: source.resolveTextMode(opts.text_mode),
     accountClass,
     privateTerms: opts.private_terms || [],
     write: opts.write,
@@ -280,6 +281,7 @@ function importAccountExport(opts = {}) {
     brand: opts.brand,
     source: SOURCE.EXPORT,
     retention_class: retentionClass,
+    textMode: source.resolveTextMode(opts.text_mode),
     accountClass: ACCOUNT_CLASS.OWN, // an official export is the operator's own history
     privateTerms: opts.private_terms || [],
     write: opts.write,

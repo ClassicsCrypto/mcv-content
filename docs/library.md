@@ -9,8 +9,12 @@
 
 The library is your store of operator-owned media — images, video, animated GIFs — that the chain can
 **retrieve** instead of generating from scratch. `engine index-library` is the one verb that manages
-it, with three sub-actions:
+it, with four sub-actions:
 
+- **Scan / validate** (`--check`) — a **read-only** doctor: point it at your library and it reports
+  media counts by type, empty folders, stray non-media files, and index health (unindexed or
+  dead-reference entries). Never moves, writes, indexes, or spends — the safe first action on an
+  unknown library, before you commit to indexing.
 - **Auto-index** (default) — visual-tag every asset so retrieval can find it.
 - **Folder auto-sort** (`--organize`) — sort loose media into `Images / Videos / AI-generated`.
 - **Character sheets** (`--character-sheets`) — detect which roster characters have a reference sheet,

@@ -49,7 +49,7 @@ const BOOLEAN_FLAGS = new Set([
   'manual',
   // index-library sub-actions + modifiers (LIB-CLI): each is a presence flag that never
   // consumes the following token (so `engine index-library --organize --apply` parses cleanly).
-  'organize', 'character-sheets', 'generate', 'no-hash',
+  'organize', 'character-sheets', 'generate', 'no-hash', 'check',
   // improvement-sharing (IS-CLI): `engine share` --prepare/--refuse-residual and
   // `engine evaluate-contribution` --skip-gate-regression are presence flags that never consume the
   // following token (so `engine share --record r1 --prepare --yes` parses cleanly). --operator,

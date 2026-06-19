@@ -326,6 +326,12 @@
           "type": "string",
           "enum": ["transient", "standard", "retained"],
           "default": "standard"
+        },
+        "text_mode": {
+          "description": "How ingested corpus text is STORED (the C2 intake choice). 'raw' (default) keeps post text verbatim — the fullest signal for voice analysis. 'stripped' stores a deterministically cleaned, smaller form (URLs removed, whitespace/newlines collapsed) — no summarizing or paraphrasing (that is the LLM DNA-synthesis step). Overridable per run with `engine ingest-brand --store`.",
+          "type": "string",
+          "enum": ["raw", "stripped"],
+          "default": "raw"
         }
       }
     },

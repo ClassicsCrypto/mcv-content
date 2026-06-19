@@ -71,6 +71,9 @@ content informs PATTERNS only and is never reproduced verbatim (RD-9).
   --account <handle>    override the configured own-account handle for the scrape.
   --since <iso>     only ingest items captured on/after this ISO date (scrape lower bound).
   --max <n>         per-account scrape cap (else the configured max_items_per_handle).
+  --store <mode>    how to store scraped corpus text: raw (verbatim, default) | stripped (cleaned for
+                    size: URLs removed, whitespace collapsed). Overrides ingestion.text_mode for this
+                    run. (DNA synthesis summarizes the voice from the corpus either way.)
   --force           regenerate brand-dna.md even if it already exists (idempotent otherwise).
   --json            emit the structured result.
   -h, --help        show this help.
@@ -115,6 +118,9 @@ function resolveConfig(env, brandId) {
       ? Math.floor(Number(scraper.max_items_per_handle))
       : undefined,
     retention_class: typeof brandIngestion.retention_class === 'string' ? brandIngestion.retention_class : undefined,
+    // C2 intake text mode (raw|stripped) — per-brand ingestion.text_mode; source.ingestConfig
+    // resolves/defaults it (raw). A --store flag overrides it for one run (see run()).
+    text_mode: typeof brandIngestion.text_mode === 'string' ? brandIngestion.text_mode : undefined,
     private_terms: mergePrivateTerms(brandDna.private_terms),
   };
 
@@ -215,6 +221,20 @@ async function run(ctx = {}) {
   const force = util.flagOn(flags.force);
 
   const cfg = resolveConfig(env, brand);
+
+  // --store raw|stripped overrides the brand's ingestion.text_mode for this run (C2 intake choice).
+  if (flags.store != null && flags.store !== true) {
+    const store = String(flags.store).trim().toLowerCase();
+    if (!ingestMod.VALID_TEXT_MODE.has(store)) {
+      return {
+        ok: false,
+        exitCode: 2,
+        summary: `invalid --store "${store}" — use raw | stripped`,
+        detail: ['raw stores corpus text verbatim (default); stripped stores a cleaned, smaller form (URLs removed, whitespace collapsed).'],
+      };
+    }
+    cfg.ingestConfigBlock.text_mode = store;
+  }
 
   // Resolve the ingest targets: --competitors / --account overrides win over the brand config (DD-10).
   const account = (typeof flags.account === 'string' && flags.account.trim())

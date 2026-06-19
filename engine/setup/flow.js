@@ -160,7 +160,7 @@ const STEP_GUIDE = Object.freeze({
         id: 'content-source',
         type: 'choice',
         label: 'Where does this brand’s existing content come from?',
-        help: 'Pick how the engine learns the voice. (Phase 2 makes these one-click; today each option is a command.)',
+        help: 'Pick how the engine learns the voice. Each option is a command today; in Discord these are buttons.',
         options: [
           {
             id: 'files',
@@ -180,6 +180,32 @@ const STEP_GUIDE = Object.freeze({
             label: 'Start cold — no content yet',
             help: 'Author the Brand DNA by hand from the template and set cold_start:true. Always works, zero spend.',
             command: 'cp templates/brand/brand-dna-authoring.md $CONTENT_HOME/brands/<BRAND_ID>/brand-dna.md   # then fill it in; set cold_start:true in brand.json',
+          },
+        ],
+      },
+      {
+        id: 'store-mode',
+        type: 'choice',
+        label: 'How should the imported text be kept?',
+        help: 'Applies to the files/Apify paths. The DNA-synthesis step summarizes your voice from the corpus either way.',
+        options: [
+          {
+            id: 'raw',
+            label: 'Raw — keep posts verbatim (default)',
+            help: 'The fullest signal for voice analysis. Use unless storage size matters.',
+            command: 'node bin/engine.js ingest-brand --brand <BRAND_ID> --store raw',
+          },
+          {
+            id: 'stripped',
+            label: 'Stripped — cleaned for size',
+            help: 'Deterministically removes URLs and collapses whitespace. Smaller corpus; voice/word-choice unchanged. No summarizing.',
+            command: 'node bin/engine.js ingest-brand --brand <BRAND_ID> --store stripped',
+          },
+          {
+            id: 'summarize',
+            label: 'Summarize — DNA only, keep little',
+            help: 'DNA synthesis distills your voice into brand-dna.md; pair with a short retention so the raw corpus ages out fast.',
+            command: 'node bin/engine.js ingest-brand --brand <BRAND_ID> --store stripped   # then set ingestion.retention_class: transient',
           },
         ],
       },
@@ -251,21 +277,20 @@ const STEP_GUIDE = Object.freeze({
         id: 'library',
         type: 'choice',
         label: 'Do you have a media library?',
-        help: 'Optional. (Phase 2 makes the organize/scan/index path one-click; today each option is a command.)',
+        help: 'Optional. Each option is a command today; in Discord these are buttons.',
         options: [
           {
             id: 'organize',
             label: 'Help me organize + index a folder',
-            help: 'Sort a media folder into Images/Videos/AI-generated, then index it for reuse. Indexing is metered.',
+            help: 'Sort a messy media folder into Images/Videos/AI-generated, then index it for reuse. Indexing is metered.',
             command: 'node bin/engine.js index-library --organize --apply   # then: index-library --yes',
             spends: true,
           },
           {
             id: 'have',
-            label: 'I have one — scan, validate, and index it',
-            help: 'Check the library is in the right shape, then index it (estimate-and-confirm).',
-            command: 'node bin/engine.js index-library   # shows the estimate; then --yes to index',
-            spends: true,
+            label: 'I have one — scan it first, then index',
+            help: 'Read-only scan (no spend): checks the library is in the right shape and flags empty folders, stray files, and index health. Fix anything flagged, then index.',
+            command: 'node bin/engine.js index-library --check   # read-only; then index-library --yes to index',
           },
           {
             id: 'none',
