@@ -111,6 +111,20 @@ function renderFrame(frame) {
     for (const s of frame.satisfied) lines.push(`  ✓ ${s.name}${s.detail ? ` — ${s.detail}` : ''}`);
   }
 
+  // Media-model detection (C4 / done frames): which generation/vision providers are wired.
+  if (frame.media_models) {
+    const mm = frame.media_models;
+    lines.push('');
+    lines.push('Media models (all optional):');
+    const row = (label, p) => {
+      const mark = p.configured ? `✓ ${p.kind}${p.model ? ` (${p.model})` : ''}` : '— not set';
+      lines.push(`  ${p.configured ? '✓' : '·'} ${label}: ${mark}`);
+    };
+    row('vision (reads images)', mm.visual);
+    row('image generation', mm.image_gen);
+    row('video generation', mm.video);
+  }
+
   // The numbered next actions.
   if (Array.isArray(frame.actions) && frame.actions.length) {
     lines.push('');
