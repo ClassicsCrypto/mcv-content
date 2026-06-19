@@ -83,6 +83,21 @@ it's almost always a missing or outdated Node install.)*
 
 ## Step 3 — finish setup (pick the easy way)
 
+> ### ⭐ The simplest path of all: `engine setup`
+>
+> There is one command that **walks you through the rest, one step at a time, and won't let you skip
+> ahead or get lost.** Run it any time:
+>
+> ```
+> node bin/engine.js setup
+> ```
+>
+> It shows you exactly where you are, the **single next thing** to do (with the exact command), and
+> what's still missing — checking your work and moving you forward each time you re-run it. It never
+> posts, and never spends money on its own. If you're using an AI assistant (below), tell it to
+> *"drive `engine setup` and do what each step says."* This is the front door; everything below is the
+> longer-form detail behind it.
+
 This engine is **designed to be set up and run by an AI assistant**, with you answering simple
 questions. Two choices:
 
@@ -104,9 +119,10 @@ Do this in order:
    README.md and docs/setup/quick-start.md.
 2. Run the zero-key proof first: npm ci, then node bin/engine.js fixture-run.
    Do not go further until that passes.
-3. Walk me through setup one checkpoint at a time (C0 to C4). Whenever you need a
-   secret, an ID, a brand fact, or a decision, STOP and ask me in plain language —
-   never guess or make anything up.
+3. Then DRIVE the guided setup: run `node bin/engine.js setup`, do exactly what the
+   current step says, and re-run it after each step to advance (C0 to C4). Whenever
+   it needs a secret, an ID, a brand fact, or a decision, STOP and ask me in plain
+   language — never guess or make anything up.
 4. Keep it in SAFE mode (draft-only) the whole time. Before anything that costs
    money, show me the estimated cost and wait for me to say yes.
 

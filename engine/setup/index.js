@@ -18,12 +18,18 @@
 const init = require('./init');
 const checkpoints = require('./checkpoints');
 const setupState = require('./setup-state');
+const flow = require('./flow');
 
 module.exports = {
   // primary contract (batch-named)
   initHome: init.initHome,
   verifyCheckpoint: checkpoints.verifyCheckpoint,
   readSetupState: setupState.readSetupState,
+
+  // guided-setup driver (§2.1): the frame the CLI verb + any host-runtime adapter render
+  computeFrame: flow.computeFrame,
+  FRAME_SCHEMA_VERSION: flow.FRAME_SCHEMA_VERSION,
+  STEP_GUIDE: flow.STEP_GUIDE,
 
   // init
   UnsafeContentHomeError: init.UnsafeContentHomeError,

@@ -56,6 +56,8 @@ const PKG_VERSION = (() => {
  * (await of a non-promise is a no-op), so the dispatch loop is uniform.
  */
 const VERBS = {
+  // The guided front door (§2.1): the strict, resumable driver that renders the current setup frame.
+  setup: { mod: require('../engine/cli/setup'), fn: 'run' },
   init: { mod: require('../engine/cli/init'), fn: 'run' },
   verify: { mod: require('../engine/cli/verify'), fn: 'run' },
   'fixture-run': { mod: require('../engine/cli/fixture-run'), fn: 'run' },
@@ -86,10 +88,11 @@ const VERBS = {
   'voice-calibrate': { mod: require('../engine/cli/voice-calibrate'), fn: 'run' },
 };
 
-const VERB_ORDER = ['init', 'verify', 'fixture-run', 'run-slot', 'kickoff', 'poll-trends', 'dispatch', 'status', 'calibrate', 'ingest-brand', 'generate-dna', 'index-library', 'purge-corpora', 'improve', 'rollback', 'share', 'evaluate-contribution', 'pause', 'resume', 'competitor-scan', 'voice-calibrate'];
+const VERB_ORDER = ['setup', 'init', 'verify', 'fixture-run', 'run-slot', 'kickoff', 'poll-trends', 'dispatch', 'status', 'calibrate', 'ingest-brand', 'generate-dna', 'index-library', 'purge-corpora', 'improve', 'rollback', 'share', 'evaluate-contribution', 'pause', 'resume', 'competitor-scan', 'voice-calibrate'];
 
 /** One-line summary per verb for the top-level help (kept short; --help <verb> has the full text). */
 const VERB_SUMMARY = {
+  setup: 'guided, strict, resumable setup driver — the single front door (§2.1)',
   init: 'scaffold $CONTENT_HOME (CONTENT_HOME-free)',
   verify: 'run the C0–C4 setup gate',
   'fixture-run': 'zero-key deterministic end-to-end proof (CONTENT_HOME-free)',
