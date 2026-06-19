@@ -131,8 +131,10 @@ command, refuses to surface a later step until the current one verifies, and sel
 re-run it. It never spends or posts; metered steps are surfaced as actions you confirm. Drive it and
 do what each step says — the C0–C4 detail below is the reference behind it. `engine setup --json`
 emits the same flow as a **frame** (`schemas/artifacts/setup-frame.schema.json`) — the published
-contract a host-runtime adapter (e.g. a Discord component renderer) consumes to draw the setup menu
-as buttons. The engine owns no Discord connection or token; it emits the frame, a surface renders it.
+contract a host-runtime adapter consumes to draw the setup menu as buttons. A **reference Discord
+adapter ships at [`adapters/discord/`](adapters/discord/README.md)** (a `/startup` changing-button
+menu; reuse its dependency-free `render.js` + `route.js`, or wire it into the bot you already run).
+The engine owns no Discord connection or token; it emits the frame, a surface renders it.
 
 Setup is **idempotent and resumable**. Progress is recorded per-step in
 `$CONTENT_HOME/setup-state.json`; re-running resumes from the first incomplete checkpoint and never
