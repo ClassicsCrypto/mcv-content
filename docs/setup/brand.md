@@ -73,6 +73,17 @@ config block, and the no-verbatim check: [`../brand-dna.md`](../brand-dna.md).
 deterministic analysis, then fills `templates/brand/brand-dna-authoring.md` directly. This is the
 path for a history-less brand and the always-available fallback.
 
+If the operator has not provided canonical brand files but has provided a downloaded brand corpus,
+the agent should offer to deduce a provisional Brand DNA from that corpus and confirm it with the
+operator before use. Treat inferred facts, voice rules, forbidden claims, and approval gates as
+unconfirmed until the operator approves or corrects them.
+
+Content priorities are per-brand, not global defaults. Draft them from historical own-brand content,
+available performance signals, and current competitor/comparator patterns, then confirm the priority
+map with the operator before it drives calendars, briefs, or calibration. Competitor content can
+shape patterns and whitespace only; it must never be copied into the brand voice or treated as a
+source of brand facts.
+
 Either way the output is `brands/<id>/brand-dna.md` plus an `archetypes/` catalog, and the authoring
 template captures identity, tone, voice rules, audience, taboos, the drama/dial preference (matching
 the `brand.json` `drama_dial`), and an example bank. Its frontmatter is schema-validated. The same

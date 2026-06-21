@@ -107,6 +107,10 @@ Do this in order:
 3. Walk me through setup one checkpoint at a time (C0 to C4). Whenever you need a
    secret, an ID, a brand fact, or a decision, STOP and ask me in plain language —
    never guess or make anything up.
+   If I do not have brand files ready but I have provided a downloaded corpus,
+   offer to deduce provisional brand facts, voice rules, competitors, and
+   per-brand content priorities from that corpus, then ask me to confirm or
+   correct them before using them.
 4. Keep it in SAFE mode (draft-only) the whole time. Before anything that costs
    money, show me the estimated cost and wait for me to say yes.
 

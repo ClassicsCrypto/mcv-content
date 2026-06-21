@@ -89,8 +89,11 @@ must enforce it. `docs/runtimes/<runtime>.md` states how for your runtime.
 ## 3.5 Operator onboarding questions - ask before C1
 
 Do not treat startup as complete just because the engine passes the zero-key proof. Before writing
-real config, ask the operator for the operating context that the repository cannot infer. Record each
-answer in `$CONTENT_HOME` or the host runtime's durable notes before you proceed.
+real config, walk the operator through the operating context that the repository cannot infer. Ask
+for existing files first; if the operator does not have them ready but has provided a downloaded brand
+corpus, offer to deduce a draft map from that corpus, then confirm it with the operator before using
+it. Record each confirmed answer in `$CONTENT_HOME` or the host runtime's durable notes before you
+proceed.
 
 Ask for:
 
@@ -116,9 +119,16 @@ Default first-run questions:
 4. What tools or channels can I access for publishing, review, analytics, and approvals?
 5. What should I avoid touching, scraping, saying, or spending against until you approve it?
 
-If the operator cannot answer yet, continue only with the zero-key and SAFE-mode setup steps that do
-not require the missing context. Do not invent brand facts, competitor lists, approval rules, or
-publishing access.
+If the operator cannot answer yet and no corpus exists, continue only with the zero-key and SAFE-mode
+setup steps that do not require the missing context. Do not invent brand facts, competitor lists,
+approval rules, or publishing access. If corpus exists, infer only provisional notes from source
+material, label them as unconfirmed, and ask the operator to approve or correct them before routing
+real content.
+
+For content priorities, do not assume one global priority stack. Deduce a per-brand draft from the
+brand's historical content, observed engagement/performance where available, and current
+competitor/comparator patterns. Confirm that per-brand priority map with the operator before it
+drives calendars, briefs, or calibration.
 
 ---
 
