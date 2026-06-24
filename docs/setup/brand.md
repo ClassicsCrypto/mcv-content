@@ -36,10 +36,14 @@ Set `CONTENT_HOME` in your process environment afterward (the scheduler recipes 
 
 ## Register a brand (C2, step 1)
 
-Write one `brands/<brand-id>/brand.json` per brand from `templates/brand/brand.json.template`. Every
+Write one `brands/<brand-id>/brand.json` per account/brand from `templates/brand/brand.json.template`. Every
 field is documented in [`../configuration.md`](../configuration.md#4-brandsidbrandjson-brand-scope).
 Minimum: `id`, `display_name`, `account_class` (`operator` or `brand`), and at least one
 `platforms[]` entry with a `platform` and a `publisher` (`postiz` / `giphy` / `manual`).
+
+If an install has more than one account/brand, calibration is per account/brand by default. Do not
+calibrate one account and treat the rest as covered: `jay`, `mcv`, `bp`, and `mtzk` each need their
+own Brand DNA, archetypes/cold-start state, and C3 calibration result.
 
 **Account connection** is deferrable exactly as long as publishing is: for each platform you will
 publish on, connect the brand's account in the publisher and record the resulting integration id as
@@ -115,6 +119,9 @@ cold-start at any time by adding corpus and archetypes and re-running calibratio
 engine calibrate --brand <id> --estimate-only     # see the cost first
 engine calibrate --brand <id> --yes                # confirm and run
 ```
+
+Run this once per registered account/brand. The C3 verifier reads every `brands/<id>/brand.json` and
+requires a passing calibration for each one before the project advances to `calibrated`.
 
 Calibration is your first real spend, so it is protected by **estimate-and-confirm**: the runner
 presents a pre-run cost estimate (N samples × the per-sample band; indicative, see

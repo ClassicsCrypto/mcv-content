@@ -101,6 +101,8 @@ engine calibrate --brand <id> --yes               # confirm, then run
 
 Calibration is the **mandatory gate** and your first real engine-metered spend, so it is
 estimate-and-confirm: the runner shows a pre-run estimate and will not spend without `--yes`.
+Repeat C3 for every registered account/brand; a multi-account install is not calibrated until each
+`brands/<id>/brand.json` has its own passing calibration result.
 Generation runs through your host runtime; record the host-reported input/output tokens for the run
 alongside any runtime-known cost. Record the judged result, then verify:
 

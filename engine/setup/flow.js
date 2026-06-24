@@ -218,8 +218,9 @@ const STEP_GUIDE = Object.freeze({
     headline: 'Generate a small sample batch, judge it, and prove the voice is good enough to go live.',
     body: [
       'Calibration is the one mandatory gate. The engine generates a small batch of sample posts in your',
-      'brand voice; you judge them against the rubric. The project cannot become operational until enough',
-      'samples clear the gate, enough read as on-voice, and zero contain fabricated facts.',
+      'brand voice; you judge them against the rubric. In a multi-account setup, run this separately',
+      'for every registered account/brand. The project cannot become operational until each account/brand',
+      'has enough samples clear the gate, enough read as on-voice, and zero contain fabricated facts.',
       '',
       'This is your first real engine-metered spend, so it is estimate-and-confirm: you always see the',
       'cost band first and nothing spends without your explicit --yes. If the batch falls short, tune the',

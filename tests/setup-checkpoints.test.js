@@ -212,6 +212,43 @@ test('C3 reads the recorded calibration detail from setup-state when no explicit
   assert.equal(res.passed, true);
 });
 
+test('C3 requires a passing calibration for every registered brand/account', () => {
+  const env = freshInstance();
+  for (const id of ['jay', 'bp']) {
+    writeBrand(env, id, {
+      id,
+      display_name: id.toUpperCase(),
+      account_class: id === 'jay' ? 'operator' : 'brand',
+      platforms: [{ platform: 'twitter', publisher: 'postiz' }],
+      cold_start: true,
+    });
+    fs.writeFileSync(path.join(paths.brandDir(id, env), 'brand-dna.md'), '# DNA\n', 'utf8');
+  }
+
+  const oneBrand = checkpoints.verifyC3({
+    env,
+    calibration: {
+      by_brand: {
+        jay: { sample_count: 10, gate_clear: 9, on_voice: 7, fabrication_codes: 0 },
+      },
+    },
+  });
+  assert.equal(oneBrand.passed, false);
+  assert.equal(findCheck(oneBrand, 'brand:jay:gate_clear').status, 'pass');
+  assert.equal(findCheck(oneBrand, 'brand:bp:calibration').status, 'fail');
+
+  const allBrands = checkpoints.verifyC3({
+    env,
+    calibration: {
+      by_brand: {
+        jay: { sample_count: 10, gate_clear: 9, on_voice: 7, fabrication_codes: 0 },
+        bp: { sample_count: 10, gate_clear: 8, on_voice: 6, fabrication_codes: 0 },
+      },
+    },
+  });
+  assert.equal(allBrands.passed, true, JSON.stringify(allBrands, null, 2));
+});
+
 // --------------------------------------------------------------------------- C4
 
 test('C4 passes with a calendar slot + empty-library mode; operational only AFTER C3', () => {
