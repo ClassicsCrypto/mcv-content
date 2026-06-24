@@ -473,6 +473,19 @@ function verifyC2(opts = {}) {
   return result('C2', checks, allBrandsOk ? LIFECYCLE.INGESTED : LIFECYCLE.UNINITIALIZED);
 }
 
+/** Return registered brand/account ids from CONTENT_HOME (brands/<id>/brand.json). */
+function registeredBrandIds(env) {
+  const brandsDir = paths.brandsDir(env);
+  try {
+    return fs.readdirSync(brandsDir).filter((name) => {
+      const dir = path.join(brandsDir, name);
+      return fs.existsSync(path.join(dir, 'brand.json'));
+    });
+  } catch {
+    return [];
+  }
+}
+
 /** Walk each brand's corpora dir; fail if any *.json corpus item lacks a trust_class (RD-8). */
 function verifyCorporaTrustTagged(env, brandIds) {
   const untagged = [];
@@ -540,6 +553,7 @@ function verifyC3(opts = {}) {
   const checks = [];
 
   const criteria = { ...DEFAULT_CALIBRATION_CRITERIA, ...(loadCalibrationCriteria(env) || {}) };
+  let brandIds = registeredBrandIds(env);
 
   // Source the calibration result: explicit opts.calibration, else the recorded C3 detail.
   let cal = opts.calibration;
@@ -559,6 +573,46 @@ function verifyC3(opts = {}) {
     return result('C3', checks, LIFECYCLE.INGESTED);
   }
 
+  const byBrand = cal.by_brand && typeof cal.by_brand === 'object' ? cal.by_brand : null;
+  if (brandIds.length > 1 || byBrand) {
+    if (brandIds.length === 0 && byBrand) {
+      brandIds = Object.keys(byBrand);
+    }
+    if (brandIds.length === 0) {
+      checks.push(
+        fail(
+          'calibration_scope',
+          'no registered brands found to calibrate',
+          'Complete C2 first: register brands/<id>/brand.json, then run `engine calibrate --brand <id>` for each one.',
+        ),
+      );
+      return result('C3', checks, LIFECYCLE.INGESTED);
+    }
+    for (const id of brandIds) {
+      const brandCal = byBrand && byBrand[id];
+      if (!brandCal) {
+        checks.push(
+          fail(
+            `brand:${id}:calibration`,
+            'no calibration result recorded for this brand/account',
+            `Run \`engine calibrate --brand ${id}\` and record a passing judged result before C3.`,
+          ),
+        );
+        continue;
+      }
+      checks.push(...gradeCalibrationCheckList(brandCal, criteria, `brand:${id}:`));
+    }
+    const passed = checks.every((c) => c.status !== 'fail');
+    return result('C3', checks, passed ? LIFECYCLE.CALIBRATED : LIFECYCLE.INGESTED);
+  }
+
+  checks.push(...gradeCalibrationCheckList(cal, criteria));
+  const passed = checks.every((c) => c.status !== 'fail');
+  return result('C3', checks, passed ? LIFECYCLE.CALIBRATED : LIFECYCLE.INGESTED);
+}
+
+function gradeCalibrationChecks(cal, criteria, prefix = '') {
+  const checks = [];
   const sampleCount = Number(cal.sample_count ?? cal.samples ?? 0);
   const gateClear = Number(cal.gate_clear ?? cal.cleared ?? 0);
   const onVoice = Number(cal.on_voice ?? 0);
@@ -593,6 +647,28 @@ function verifyC3(opts = {}) {
 function loadCalibrationCriteria(env) {
   const sys = readJsonIfExists(paths.systemConfig(env));
   return sys && typeof sys.calibration === 'object' ? sys.calibration : null;
+}
+
+function gradeCalibrationCheckList(cal, criteria, prefix = '') {
+  const sampleCount = Number(cal.sample_count ?? cal.samples ?? 0);
+  const gateClear = Number(cal.gate_clear ?? cal.cleared ?? 0);
+  const onVoice = Number(cal.on_voice ?? 0);
+  const fabrication = Number(cal.fabrication_codes ?? cal.fabrication ?? 0);
+
+  return [
+    sampleCount >= criteria.sample_count
+      ? pass(`${prefix}sample_count`, `${sampleCount} samples (>= ${criteria.sample_count})`)
+      : fail(`${prefix}sample_count`, `only ${sampleCount} samples (< ${criteria.sample_count})`, `Re-run calibration with at least ${criteria.sample_count} samples (C3).`),
+    gateClear >= criteria.min_gate_clear
+      ? pass(`${prefix}gate_clear`, `${gateClear} samples cleared the gate with zero hard fails (>= ${criteria.min_gate_clear})`)
+      : fail(`${prefix}gate_clear`, `${gateClear} cleared the gate (< ${criteria.min_gate_clear})`, 'Remediation loop: adjust DNA/rules and re-run `engine calibrate`.'),
+    onVoice >= criteria.min_on_voice
+      ? pass(`${prefix}on_voice`, `operator judged ${onVoice} samples on-voice (>= ${criteria.min_on_voice})`)
+      : fail(`${prefix}on_voice`, `${onVoice} judged on-voice (< ${criteria.min_on_voice})`, 'Tune the Brand DNA / voice rules and re-run calibration.'),
+    fabrication <= criteria.max_fabrication
+      ? pass(`${prefix}fabrication`, `${fabrication} fabrication-class codes (<= ${criteria.max_fabrication})`)
+      : fail(`${prefix}fabrication`, `${fabrication} fabrication-class codes (> ${criteria.max_fabrication})`, 'Fabrication-class codes are a hard block; tighten claims-safety rules and re-run.'),
+  ];
 }
 
 // ---------------------------------------------------------------------------
@@ -729,4 +805,5 @@ module.exports = {
   verifyC4,
   verifyCheckpoint,
   normalizeCheckpointId,
+  registeredBrandIds,
 };

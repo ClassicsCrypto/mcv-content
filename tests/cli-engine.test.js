@@ -32,6 +32,7 @@ const calibrateVerb = require('../engine/cli/calibrate.js');
 const runSlotVerb = require('../engine/cli/run-slot.js');
 
 const paths = require('../engine/shared/paths.js');
+const setupState = require('../engine/setup/setup-state.js');
 
 function tempHome() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'oce-cli-'));
@@ -291,6 +292,35 @@ test('calibrate --result grades against the C3 criteria and records C3 (a passin
   const bad = await calibrateVerb.run({ flags: { brand: 'acme', yes: true, result: failing }, env });
   assert.equal(bad.ok, false);
   assert.match(bad.summary, /calibration FAILED/);
+});
+
+test('calibrate --result records per-brand results without replacing prior brands', async () => {
+  const home = tempHome();
+  const target = path.join(home, 'i');
+  initVerb.run({ flags: { home: target, 'no-git': true }, env: { ...process.env } });
+  const env = { ...process.env, CONTENT_HOME: target };
+
+  for (const id of ['jay', 'bp']) {
+    fs.mkdirSync(paths.brandDir(id, env), { recursive: true });
+    fs.writeFileSync(paths.brandConfig(id, env), JSON.stringify({
+      id,
+      display_name: id.toUpperCase(),
+      account_class: id === 'jay' ? 'operator' : 'brand',
+      platforms: [{ platform: 'twitter', publisher: 'postiz' }],
+      cold_start: true,
+    }, null, 2));
+  }
+
+  const passing = JSON.stringify({ sample_count: 10, gate_clear: 9, on_voice: 7, fabrication_codes: 0 });
+  const jay = await calibrateVerb.run({ flags: { brand: 'jay', yes: true, result: passing }, env });
+  assert.equal(jay.ok, false, 'project is not calibrated until bp is calibrated too');
+
+  const bp = await calibrateVerb.run({ flags: { brand: 'bp', yes: true, result: passing }, env });
+  assert.equal(bp.ok, true, JSON.stringify(bp, null, 2));
+
+  const state = setupState.readSetupState(env);
+  assert.ok(state.checkpoints.C3.detail.by_brand.jay);
+  assert.ok(state.checkpoints.C3.detail.by_brand.bp);
 });
 
 // ---------------------------------------------------------------------------

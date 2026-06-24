@@ -213,10 +213,13 @@ function recordAndGrade(brand, result, env) {
     judged_at: new Date().toISOString(),
   };
   // Grade with the verifier (shares DEFAULT_CALIBRATION_CRITERIA — §2.5).
-  const graded = setup.verifyCheckpoint('C3', { env, calibration: cal });
+  const state = setupState.readSetupState(env);
+  const previous = state.checkpoints.C3 && state.checkpoints.C3.detail;
+  const calibrationSet = mergeBrandCalibration(previous, brand, cal);
+  const graded = setup.verifyCheckpoint('C3', { env, calibration: calibrationSet });
   // Record into setup-state C3 detail so the resumable flow + `engine status` see it.
   try {
-    setupState.setCheckpoint('C3', graded.passed, { detail: cal, env });
+    setupState.setCheckpoint('C3', graded.passed, { detail: calibrationSet, env });
   } catch (err) {
     return { ok: false, exitCode: 1, summary: 'could not record calibration result', detail: util.describeError(err) };
   }
@@ -230,8 +233,22 @@ function recordAndGrade(brand, result, env) {
       ? `calibration PASSED for ${brand} (${cal.gate_clear}/${cal.sample_count} cleared, ${cal.on_voice} on-voice) — project → calibrated`
       : `calibration FAILED for ${brand} — ${graded.remediation || 'criteria not met'}`,
     detail: graded.checks.map((c) => `${c.status === 'pass' ? '✓' : c.status === 'skip' ? '~' : '✗'} ${c.name}: ${c.detail || c.status}`).concat(baselineNote),
-    data: { result: cal, graded, passed: graded.passed },
+    data: { result: cal, calibration_set: calibrationSet, graded, passed: graded.passed },
   };
 }
 
-module.exports = { run, HELP, estimate, criteriaFor };
+function mergeBrandCalibration(previous, brand, cal) {
+  const byBrand = {};
+  if (previous && previous.by_brand && typeof previous.by_brand === 'object') {
+    Object.assign(byBrand, previous.by_brand);
+  } else if (previous && typeof previous.brand === 'string') {
+    byBrand[previous.brand] = previous;
+  }
+  byBrand[brand] = cal;
+  return {
+    by_brand: byBrand,
+    updated_at: cal.judged_at,
+  };
+}
+
+module.exports = { run, HELP, estimate, criteriaFor, mergeBrandCalibration };
