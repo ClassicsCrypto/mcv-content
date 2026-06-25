@@ -125,6 +125,11 @@ In order of preference:
 > their input shape — `field_map` + `handles_as_search` + a static `input` template adapt to any of
 > them; an absent token or `actor_id` degrades to the manual/export path (never a broken setup).
 >
+> **Don't have a competitor list yet?** Use the **free manual-Grok kit** instead of guessing: run
+> `engine suggest prompt competitors`, paste the prompt into your own Grok/X account (no API spend),
+> then `engine suggest apply --file <reply> --brand <id> --yes` adds the confirmed handles to
+> `ingestion.competitors`. See [`../templates/grok-prompts/README.md`](../templates/grok-prompts/README.md).
+
 > **Output verification (always on for `ingest-brand`).** Every Apify-backed pull is verified: did it
 > run and return data (a requested-but-**empty** pull is a hard failure, not a silent no-op — usually a
 > wrong actor input or an auth problem surfacing as an empty dataset), and is every written item

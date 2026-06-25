@@ -367,6 +367,10 @@ function buildBindings() {
     // skip, never silently dropped.
     { test: (p) => /^fixtures\/apify-acme\/recorded\/.+\.json$/.test(p), skip: true, reason: 'recorded Apify dataset rows keyed by group (fake-fetch input map for the adapter test, not a shipped artifact shape)' },
 
+    // suggestions fixtures (GROK-SUGGEST): the manual-Grok paste-back contract. Each *.suggestion.json
+    // binds to the published suggestion-set schema (the format the grok-prompts ask Grok to emit).
+    { test: (p) => /^fixtures\/suggestions\/.+\.suggestion\.json$/.test(p), schema: S('inputs/suggestion-set.schema.json'), mode: 'single' },
+
     // recorded stage outputs (the fixture-run replay set).
     { test: (p) => p === 'fixtures/stage-outputs/brief.json', schema: S('inputs/brief.schema.json'), mode: 'single' },
     { test: (p) => p === 'fixtures/stage-outputs/draft.json', schema: S('inputs/draft.schema.json'), mode: 'single' },

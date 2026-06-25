@@ -68,6 +68,8 @@ const VERBS = {
   status: { mod: require('../engine/cli/status'), fn: 'run' },
   calibrate: { mod: require('../engine/cli/calibrate'), fn: 'run' },
   'ingest-brand': { mod: require('../engine/cli/ingest-brand'), fn: 'run' },
+  // The FREE manual-Grok suggestion path: print a prompt, then parse the pasted result into config.
+  suggest: { mod: require('../engine/cli/suggest'), fn: 'run' },
   'generate-dna': { mod: require('../engine/cli/generate-dna'), fn: 'run' },
   'index-library': { mod: require('../engine/cli/index-library'), fn: 'run' },
   'purge-corpora': { mod: require('../engine/cli/purge-corpora'), fn: 'run' },
@@ -88,7 +90,7 @@ const VERBS = {
   'voice-calibrate': { mod: require('../engine/cli/voice-calibrate'), fn: 'run' },
 };
 
-const VERB_ORDER = ['setup', 'init', 'verify', 'fixture-run', 'run-slot', 'kickoff', 'poll-trends', 'dispatch', 'status', 'calibrate', 'ingest-brand', 'generate-dna', 'index-library', 'purge-corpora', 'improve', 'rollback', 'share', 'evaluate-contribution', 'pause', 'resume', 'competitor-scan', 'voice-calibrate'];
+const VERB_ORDER = ['setup', 'init', 'verify', 'fixture-run', 'run-slot', 'kickoff', 'poll-trends', 'dispatch', 'status', 'calibrate', 'ingest-brand', 'suggest', 'generate-dna', 'index-library', 'purge-corpora', 'improve', 'rollback', 'share', 'evaluate-contribution', 'pause', 'resume', 'competitor-scan', 'voice-calibrate'];
 
 /** One-line summary per verb for the top-level help (kept short; --help <verb> has the full text). */
 const VERB_SUMMARY = {
@@ -103,6 +105,7 @@ const VERB_SUMMARY = {
   status: 'the one-command operational surface (§13.1)',
   calibrate: 'the C3 calibration runner (estimate-and-confirm)',
   'ingest-brand': 'one-command brand onboarding: ingest -> analyze -> generate DNA (estimate-and-confirm)',
+  suggest: 'FREE manual-Grok suggestions: print a prompt; parse the pasted result into config',
   'generate-dna': 'generate Brand DNA + archetypes from the ingested corpus (estimate-and-confirm)',
   'index-library': 'index/sort the media library + character sheets (estimate-and-confirm)',
   'purge-corpora': 'enforce corpus retention windows (RD-9)',
