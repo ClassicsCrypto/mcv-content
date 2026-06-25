@@ -40,6 +40,7 @@ const manual = require('./manual');
 // Self-register the shipped adapters (each calls source.register on require).
 const referenceAdapter = require('./reference-adapter');
 const fixtureAdapter = require('./fixture-adapter');
+const apifyAdapter = require('./apify-adapter');
 
 module.exports = {
   // The orchestration entry point (the LAW: export ingestCorpus).
@@ -88,7 +89,8 @@ module.exports = {
   IngestNotConfirmedError: source.IngestNotConfirmedError,
   IngestAdapterNotRegisteredError: source.IngestAdapterNotRegisteredError,
 
-  // The shipped adapters (also registered under "reference" / "fixture").
+  // The shipped adapters (also registered under "reference" / "fixture" / "apify").
   referenceAdapter,
   fixtureAdapter,
+  apifyAdapter,
 };

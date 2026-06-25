@@ -310,9 +310,9 @@
           "properties": {
             "adapter": {
               "type": "string",
-              "description": "Registered scraper-adapter name for this brand (overrides system default). The manual/export path needs no adapter.",
+              "description": "Registered scraper-adapter name for this brand (overrides system default; shipped: 'apify' for the BYO Apify actor scraper, 'reference' for a generic BYO HTTP provider, 'fixture' for zero-key tests). The manual/export path needs no adapter.",
               "minLength": 1,
-              "examples": ["reference", "fixture"]
+              "examples": ["apify", "reference", "fixture"]
             },
             "provider": {
               "type": "object",

@@ -224,9 +224,9 @@
           "properties": {
             "adapter": {
               "type": "string",
-              "description": "Registered scraper-adapter name (shipped: 'reference' for a BYO provider, 'fixture' for zero-key tests; or an operator-registered adapter). The manual-submission/export path needs no adapter.",
+              "description": "Registered scraper-adapter name (shipped: 'apify' for the BYO Apify actor scraper, 'reference' for a generic BYO HTTP provider, 'fixture' for zero-key tests; or an operator-registered adapter). The manual-submission/export path needs no adapter.",
               "minLength": 1,
-              "examples": ["reference", "fixture"]
+              "examples": ["apify", "reference", "fixture"]
             },
             "provider": {
               "type": "object",
@@ -683,9 +683,9 @@
         },
         "adapter": {
           "type": "string",
-          "description": "OPTIONAL registered scraper-adapter name to poll for competitor corpus (shipped: 'reference' for a BYO provider, 'fixture' for zero-key tests; or an operator-registered adapter). Absent means manual/export corpus only — the first-class non-scraped path (RD-9). When present, a DD-18 cost estimate is presented before any metered scrape.",
+          "description": "OPTIONAL registered scraper-adapter name to poll for competitor corpus (shipped: 'apify' for the BYO Apify actor scraper, 'reference' for a generic BYO HTTP provider, 'fixture' for zero-key tests; or an operator-registered adapter). Absent means manual/export corpus only — the first-class non-scraped path (RD-9). When present, a DD-18 cost estimate is presented before any metered scrape.",
           "minLength": 1,
-          "examples": ["reference", "fixture"]
+          "examples": ["apify", "reference", "fixture"]
         },
         "provider": {
           "type": "object",

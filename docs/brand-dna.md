@@ -96,8 +96,40 @@ In order of preference:
 2. **Official-account export — first-class.** Your platform's official archive/export, run through a
    shipped converter (`twitter` / `generic`, or a BYO `convert` function). No scraping involved.
 3. **BYO scraper adapter — opt-in, off by default.** You bring the provider access (an Apify-/xAI-
-   class key); the repo ships the **adapter interface and a reference adapter**, but **no bundled
-   scraping credentials and no hosted scraping service.**
+   class key); the repo ships the **adapter interface and two reference adapters** (`apify`, the
+   generic `reference`), but **no bundled scraping credentials and no hosted scraping service.**
+
+> ### Wiring the `apify` adapter (the cheap bulk-pull path)
+>
+> The shipped **`apify`** scraper adapter runs an Apify Twitter/X actor and pulls the brand's full
+> history + the competitors' corpus (incl. public engagement counts → the highest-engagement timeline).
+> Set the credential by **name** in `$CONTENT_HOME/.env` (`APIFY_API_KEY=…`) and point the adapter at
+> your actor in `brand_dna.scraper` (or per-brand `ingestion.scraper`):
+>
+> ```jsonc
+> "scraper": {
+>   "adapter": "apify",
+>   "provider": {
+>     "actor_id": "apidojo/tweet-scraper",   // the "username/actor-name" you want to run
+>     "key_env": "APIFY_API_KEY",            // resolved BY NAME — never a value in config
+>     "handles_as_search": true,             // fold handles into searchTerms as from:<handle> (default)
+>     "field_map": { "search": "searchTerms", "maxItems": "maxItems", "since": "start" },
+>     "input": { "sort": "Latest" },          // static actor knobs merged underneath
+>     "dataset_limit": 5000                   // optional cap on items returned
+>   }
+> }
+> ```
+>
+> The adapter resolves the token by name, builds the actor input from your handles/keywords/date-range,
+> runs it (Apify's run-sync-get-dataset-items), and maps each row to a corpus item. Actors differ in
+> their input shape — `field_map` + `handles_as_search` + a static `input` template adapt to any of
+> them; an absent token or `actor_id` degrades to the manual/export path (never a broken setup).
+>
+> **Output verification (always on for `ingest-brand`).** Every Apify-backed pull is verified: did it
+> run and return data (a requested-but-**empty** pull is a hard failure, not a silent no-op — usually a
+> wrong actor input or an auth problem surfacing as an empty dataset), and is every written item
+> **filtered to only the corpus-item variables** (the actor's extra fields are dropped, not stored).
+> The verification line prints under the ingest stage; `--json` carries the full report.
 
 > ### How ingested text is stored — `raw` vs `stripped` (`--store` / `ingestion.text_mode`)
 >

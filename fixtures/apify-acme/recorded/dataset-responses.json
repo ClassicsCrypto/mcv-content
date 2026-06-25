@@ -1,0 +1,42 @@
+{
+  "_comment": "Recorded Apify dataset rows for the Apify ingest adapter test (zero-key, RD-12). Keyed by group; the fake fetchImpl returns the matching array. Rows mirror common Twitter/X actor field names (text/full_text, author{userName}, createdAt, likeCount/replyCount/retweetCount/viewCount) plus an intentional junk field the source layer must FILTER OUT. Synthetic 'Acme Cosmos' data — no real handles.",
+  "own": [
+    {
+      "text": "Launch day. The new build ships tonight. https://t.co/acme1",
+      "createdAt": "2026-01-02T10:00:00.000Z",
+      "author": { "userName": "acmecosmos" },
+      "url": "https://x.com/acmecosmos/status/1",
+      "likeCount": 1240,
+      "replyCount": 38,
+      "retweetCount": 210,
+      "bookmarkCount": 95,
+      "viewCount": 88000,
+      "conversationId": "DROP-ME",
+      "isRetweet": false
+    },
+    {
+      "text": "Behind the scenes of the build process — a thread.",
+      "createdAt": "2026-01-04T14:30:00.000Z",
+      "username": "acmecosmos",
+      "twitterUrl": "https://x.com/acmecosmos/status/2",
+      "likeCount": 320,
+      "replyCount": 12,
+      "retweetCount": 40,
+      "viewCount": 21000,
+      "lang": "en"
+    }
+  ],
+  "competitor": [
+    {
+      "full_text": "Our competitor-style post about the same space.",
+      "created_at": "2026-01-03T09:15:00.000Z",
+      "author": { "username": "rivalcosmos" },
+      "twitterUrl": "https://x.com/rivalcosmos/status/9",
+      "favoriteCount": 870,
+      "reply_count": 21,
+      "retweet_count": 140,
+      "view_count": 60000,
+      "internalScore": "DROP-ME-TOO"
+    }
+  ]
+}
