@@ -156,10 +156,76 @@ function stripInternal(entry) {
   return schemaItem;
 }
 
+// ---------------------------------------------------------------------------
+// Trend output verification (the daily/hourly tracking pull)
+// ---------------------------------------------------------------------------
+
+/** The trend-report topic field set (trend-report.schema.json topic items, additionalProperties:false). */
+const ALLOWED_TOPIC_KEYS = Object.freeze(new Set(['topic', 'source_links', 'suggested_angles']));
+
+/**
+ * Verify a trend poll result (the Apify/BYO daily-hourly tracking feed). Confirms the poll ran +
+ * produced reports when tracking targets were requested (zero = hard failure, not a silent no-op),
+ * and that every topic is filtered to ONLY the trend-report topic variables with a non-empty topic
+ * label. Read-only; never writes or spends.
+ *
+ * @param {object} result   the return of source.pollTrends: { reports:object[], invalid?:Array, written?:string[] }.
+ * @param {object} [opts]
+ * @param {object} [opts.requested]  { tracked_accounts?:string[], keywords?:string[] } — so an
+ *                                   expected-but-empty poll is a hard failure.
+ * @returns {{ ok:boolean, counts:{reports:number, topics:number, invalid:number}, field_check:{ok:boolean, offending:Array}, warnings:string[], errors:string[], summary:string }}
+ */
+function verifyTrendOutput(result = {}, opts = {}) {
+  const reports = Array.isArray(result.reports) ? result.reports : [];
+  const invalid = Array.isArray(result.invalid) ? result.invalid : [];
+  const requested = opts.requested || {};
+  const targets =
+    (Array.isArray(requested.tracked_accounts) ? requested.tracked_accounts.length : 0) +
+    (Array.isArray(requested.keywords) ? requested.keywords.length : 0);
+  const warnings = [];
+  const errors = [];
+
+  let topicCount = 0;
+  const offending = [];
+  reports.forEach((report, ri) => {
+    const topics = Array.isArray(report.topics) ? report.topics : [];
+    topics.forEach((topic, ti) => {
+      topicCount += 1;
+      const problems = [];
+      if (!topic || typeof topic !== 'object') problems.push('topic is not an object');
+      else {
+        for (const k of Object.keys(topic)) if (!ALLOWED_TOPIC_KEYS.has(k)) problems.push(`extra key "${k}"`);
+        if (typeof topic.topic !== 'string' || !topic.topic.trim()) problems.push('topic.topic is missing/empty');
+        if (topic.source_links != null && !Array.isArray(topic.source_links)) problems.push('source_links is not an array');
+      }
+      if (problems.length) offending.push({ report: ri, topic: ti, problems });
+    });
+  });
+
+  if (targets > 0 && topicCount === 0) {
+    errors.push('tracking targets were configured but the poll produced NO topics — check the actor input, the handles/keywords, and the credential.');
+  }
+  if (invalid.length) warnings.push(`${invalid.length} report(s) were dropped as malformed (not written).`);
+  const fieldOk = offending.length === 0;
+  if (!fieldOk) errors.push(`${offending.length} topic(s) carried fields outside the trend-report contract.`);
+
+  const ok = errors.length === 0;
+  return {
+    ok,
+    counts: { reports: reports.length, topics: topicCount, invalid: invalid.length },
+    field_check: { ok: fieldOk, offending: offending.slice(0, 20) },
+    warnings,
+    errors,
+    summary: `trend verify: ${ok ? 'OK' : 'FAILED'} — ${reports.length} report(s), ${topicCount} topic(s)${invalid.length ? `, ${invalid.length} dropped` : ''}; fields ${fieldOk ? 'clean' : `OFFENDING ${offending.length}`}.`,
+  };
+}
+
 module.exports = {
   ALLOWED_ITEM_KEYS,
   REQUIRED_ITEM_KEYS,
   KNOWN_METRIC_KEYS,
+  ALLOWED_TOPIC_KEYS,
   checkItemFields,
   verifyIngestOutput,
+  verifyTrendOutput,
 };

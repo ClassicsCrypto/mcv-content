@@ -35,8 +35,8 @@ RESERVED \`trend\` calendar slot (never out-of-calendar). The host runtime runs 
 approval card (§2.4). OFF BY DEFAULT — set config trends.enabled=true + trends.adapter first.
 
   --brand <id>     brand the reports/reserved trend slots are for (scopes the pass).
-  --adapter <name> adapter override (reference | fixture | operator's; else config trends.adapter).
-  --cadence <c>    2h | 4h | 8h | 12h override (else config trends.cadence; the report freshness basis).
+  --adapter <name> adapter override (apify | reference | fixture | operator's; else config trends.adapter).
+  --cadence <c>    1h | 2h | 4h | 8h | 12h | 24h override (else config trends.cadence; the report freshness basis).
   --content-form <f>  standalone | quote-retweet (DD-16; default standalone).
   --mode <M>       SAFE | LIVE_PREVIEW | LIVE override (default config/SAFE — §8.3/RD-16f).
   --force          run even when trends.enabled is false (explicit operator opt-in).
@@ -91,6 +91,9 @@ async function run(ctx = {}) {
     summary: `trend pass (${result.adapter}/${result.cadence}): ${result.reports} report(s), ${result.dispatched} dispatched, ${result.unslotted} unslotted, ${result.stale} stale, ${result.skipped} dedup-skipped, ${result.failed} failed (mode ${result.mode})${halted ? ' — HALTED (kill switch/budget)' : ''}`,
     detail: [
       modeVerdict.notice ? `mode: ${modeVerdict.mode} — ${modeVerdict.notice}` : null,
+      result.verification ? `verify: ${result.verification.summary}` : null,
+      ...(result.verification && result.verification.errors ? result.verification.errors.map((e) => `  ✗ verify: ${e}`) : []),
+      ...(result.verification && result.verification.warnings ? result.verification.warnings.map((w) => `  ~ verify: ${w}`) : []),
       result.readout_post && result.readout_post.posted === false ? `trend-readout: ${result.readout_post.reason || 'not posted (host delivers it)'}` : null,
       '--- readout (angles only) ---',
       result.readout,
