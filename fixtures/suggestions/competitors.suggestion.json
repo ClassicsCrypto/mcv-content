@@ -1,0 +1,10 @@
+{
+  "kind": "competitors",
+  "brand": "acme",
+  "generated_at": "2026-01-15",
+  "note": "Synthetic example suggestion set for schema validation + parser tests — no real handles.",
+  "items": [
+    { "handle": "@rivalcosmos", "name": "Rival Cosmos", "category": "competitor", "why": "direct competitor in the same niche; similar cadence" },
+    { "handle": "@nebulaworks", "name": "Nebula Works", "category": "competitor", "why": "overlapping audience; aspirational comparator" }
+  ]
+}

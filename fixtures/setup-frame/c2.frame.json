@@ -72,6 +72,13 @@
       ]
     },
     {
+      "id": "suggest-competitors",
+      "type": "run",
+      "label": "Get ≥5 competitors (free — manual Grok)",
+      "help": "Prints a copy-paste Grok prompt; run it on your own Grok/X account (no API spend), then paste the result into `engine suggest apply` to add competitors. Apify then pulls their corpus.",
+      "command": "node bin/engine.js suggest prompt competitors   # then: suggest apply --file <reply> --brand <BRAND_ID> --yes"
+    },
+    {
       "id": "content-source",
       "type": "choice",
       "label": "Where does this brand’s existing content come from?",
