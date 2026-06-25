@@ -114,11 +114,16 @@ The project cannot advance without a C3 pass. Detail + pass criteria:
 
 ## C4 (minimal) — a small calendar, empty library
 
-Generate a small calendar (e.g. a 3-slot/week Twitter cadence) from `templates/calendar.template.md`;
-at least one slot needs a clock time. Use **empty-library mode** — leave the library disabled;
-retrieval returns generate-only decisions. *(Deferrable: campaigns, character sheets, the media
-library — when you do add media, `engine index-library` visual-tags it; see
-[`../library.md`](../library.md).)*
+Generate a small calendar from `templates/calendar.template.md`; at least one slot needs a clock
+time. Before writing it, have the agent suggest the baseline cadence from the account class,
+own-account downloaded/published content, comparator/competitor patterns, proof/media supply,
+approval bandwidth, and platform availability. Operator accounts can usually run more often than
+brand accounts. If proof or media is missing, keep the slot dormant or record a capture request
+instead of filling the calendar.
+
+Use **empty-library mode** — leave the library disabled; retrieval returns generate-only decisions.
+*(Deferrable: campaigns, character sheets, the media library — when you do add media,
+`engine index-library` visual-tags it; see [`../library.md`](../library.md).)*
 
 ```
 engine verify --setup c4

@@ -212,8 +212,26 @@ Order is fixed (DD-5): **integration/agents → ingestion → calibration → ca
   repo). Project state → `calibrated`.
 
 ### C4 — Calendar and library
-1. **Calendar:** agent-assisted from `templates/calendar.template.md` + operator cadence; calendar
-   generation assigns clock times to slots (DD-22).
+1. **Calendar:** agent-assisted from `templates/calendar.template.md`, operator cadence, own-account
+   content downloads, and comparator/competitor analysis; calendar generation assigns clock times to
+   slots (DD-22). Before writing or activating the calendar, suggest a baseline cadence for each
+   account from the variables below. Operator accounts should usually carry a higher cadence than
+   brand accounts.
+   - `account_class`: operator or brand.
+   - `active_platforms`: connected platforms and publisher availability.
+   - `approval_gate`: approval required, approval waived, preview only, or dormant.
+   - `operator_capacity`: how many previews the operator can realistically review per day.
+   - `proof_supply`: current verified proof/events/assets available per pillar.
+   - `media_supply`: reusable approved visuals/video/GIFs, cooldowns, and capture gaps.
+   - `own_corpus_mix`: top own-account archetypes, days, and formats from downloaded/published content.
+   - `comparator_set`: active handles per account plus hard exclusions.
+   - `comparator_mix`: archetype, media, day, and cadence patterns from comparator corpus.
+   - `account_pillar_mix`: target weekly balance for pillars and event anchors.
+   - `platform_cadence_cap`: daily/weekly cap by platform and account.
+   - `anti_repetition_windows`: asset, angle, proof/stat, and campaign cooldowns.
+   - `event_spine`: fixed recurring events, live windows, pre/live/recap responsibilities.
+   - `dormant_reasons`: missing platform, missing proof, missing media, or pending approval.
+   If proof/media is missing, mark the slot dormant or as a capture request instead of filling space.
 2. **Campaigns (optional):** addable any time.
 3. **Library (optional / deferrable):** point config at the media library and index it with
    `engine index-library` — it visual-tags each asset (description + tags + type, plus a duration for

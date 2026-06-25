@@ -8,6 +8,22 @@ The calendar OWNS the clock time assigned to each slot. Times are interpreted in
 timezone configured in `config/system.json` `scheduler.timezone` (default UTC). Rows
 that do not parse are skipped, never fatal — but a well-formed table avoids surprises.
 
+## Baseline Inputs
+
+Before filling the `## Slots` table, suggest the baseline cadence from:
+
+- account class: operator accounts usually carry more frequent commentary than brand accounts;
+- own-account content downloads and published history: archetypes, formats, days, proof density,
+  and repetition risks;
+- current comparator/competitor content: active handles, hard exclusions, observed cadence,
+  archetype mix, media mix, and timing patterns;
+- approval capacity, platform availability, proof/media supply, and event cadence;
+- cooldowns for reused assets, repeated angles, repeated proof/stat hooks, and campaign beats.
+
+Record enough of that reasoning in setup notes that a later operator can see why each slot exists.
+If a lane lacks proof, media, platform access, or approval bandwidth, keep its slot dormant and put
+the reason in `notes`.
+
 ## Timezone
 
 - Slot times below are 24-hour `HH:MM` in your `scheduler.timezone`.
