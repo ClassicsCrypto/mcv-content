@@ -367,6 +367,48 @@ function coerceMediaRefs(value) {
   return value.map((m) => (typeof m === 'string' ? m : (m && (m.ref || m.url || m.key)) || '')).filter(Boolean);
 }
 
+/**
+ * Map common engagement-count fields (or a pre-built `metrics` object) into the corpus-item.schema
+ * `metrics` shape ({ likes, replies, reposts, bookmarks, impressions, … }, all non-negative numbers).
+ * These public counts are what the ingestion analyzer uses to compute per-archetype engagement lift
+ * and the highest-engagement timeline (release-spec §1.1/§1.2). Tolerant of provider field naming
+ * (Apify/X variants); only numeric, non-negative values are kept; absent ⇒ undefined (item stays
+ * text-only and the analyzer falls back to structural stats). The author/handle are NOT metrics.
+ *
+ * @param {object} raw  a loose provider item.
+ * @returns {object|undefined} a metrics object, or undefined when no usable counts were found.
+ */
+function coerceMetrics(raw) {
+  const num = (...keys) => {
+    for (const k of keys) {
+      const v = raw[k];
+      if (typeof v === 'number' && Number.isFinite(v) && v >= 0) return v;
+      if (typeof v === 'string' && v.trim() !== '' && Number.isFinite(Number(v)) && Number(v) >= 0) return Number(v);
+    }
+    return undefined;
+  };
+  const pre = (raw && typeof raw.metrics === 'object' && raw.metrics) || {};
+  const preNum = (...keys) => {
+    for (const k of keys) {
+      const v = pre[k];
+      if (typeof v === 'number' && Number.isFinite(v) && v >= 0) return v;
+    }
+    return undefined;
+  };
+  const out = {};
+  const likes = preNum('likes') ?? num('likeCount', 'favoriteCount', 'favorite_count', 'likes', 'like_count');
+  const replies = preNum('replies') ?? num('replyCount', 'reply_count', 'replies');
+  const reposts = preNum('reposts') ?? num('retweetCount', 'retweet_count', 'reposts', 'repostCount');
+  const bookmarks = preNum('bookmarks') ?? num('bookmarkCount', 'bookmark_count', 'bookmarks');
+  const impressions = preNum('impressions') ?? num('viewCount', 'view_count', 'views', 'impressions', 'impression_count');
+  if (likes != null) out.likes = likes;
+  if (replies != null) out.replies = replies;
+  if (reposts != null) out.reposts = reposts;
+  if (bookmarks != null) out.bookmarks = bookmarks;
+  if (impressions != null) out.impressions = impressions;
+  return Object.keys(out).length ? out : undefined;
+}
+
 /** Corpus text-storage modes (the C2 "keep as raw or stripped" intake choice). */
 const TEXT_MODE = Object.freeze({
   RAW: 'raw',        // store the post text verbatim (default) — the fullest signal for voice analysis.
@@ -461,6 +503,11 @@ function normalizeItem(raw, ctx = {}) {
 
   const mediaRefs = coerceMediaRefs(pick(raw, ['media_refs', 'media', 'media_keys', 'attachments']));
   if (mediaRefs.length) item.media_refs = mediaRefs;
+
+  // Public engagement counts (likes/replies/reposts/bookmarks/impressions) — the signal the
+  // analyzer uses for per-archetype lift + the highest-engagement timeline (§1.1/§1.2). Optional.
+  const metrics = coerceMetrics(raw);
+  if (metrics) item.metrics = metrics;
 
   return { item, accountClass };
 }
@@ -794,6 +841,7 @@ module.exports = {
   estimateScrapeCost,
   // Normalize / validate / write (under CONTENT_HOME via paths.js).
   normalizeItem,
+  coerceMetrics,
   validateItem,
   corpusDir,
   writeItem,

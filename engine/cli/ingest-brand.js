@@ -54,6 +54,7 @@
 
 const util = require('./util');
 const ingest = require('../sources/ingest');
+const { verifyIngestOutput } = require('../sources/verify-output');
 const generator = require('../brand-dna/generate');
 
 const HELP = `engine ingest-brand --brand <id> [options]
@@ -315,6 +316,12 @@ async function run(ctx = {}) {
         confirmed: true, // --yes is the DD-18 confirmation for the scrape
         fetchImpl: ctx.fetchImpl, // injectable provider call (RD-12); adapter defaults to global fetch
       });
+      // Verify the pull ran properly + the written corpus is filtered to ONLY the corpus-item
+      // variables (the "make sure it ran + output is properly filtered" gate). Read-only; surfaced
+      // on the stage and (loudly) in detail. A zero-when-expected pull is a verification failure.
+      const verification = verifyIngestOutput(ingestResult, {
+        requested: { account: account || null, competitors },
+      });
       stages.push({
         stage: 'ingest',
         ran: true,
@@ -322,6 +329,7 @@ async function run(ctx = {}) {
         by_class: ingestResult.by_class,
         invalid: ingestResult.invalid.length,
         adapter: ingestResult.adapter,
+        verification,
       });
     } catch (err) {
       // A configured-but-unregistered adapter on a CONFIRMED scrape is a genuinely absent dependency
@@ -451,8 +459,14 @@ function estimatePreface(cfg, scrapeWanted, scrapeEstimate, dnaEstimate, manual)
 function describeStage(s) {
   if (s.stage === 'ingest') {
     if (s.ran) {
-      return `ingest: ${s.written} item(s) written (own ${s.by_class.own || 0} / competitor ${s.by_class.competitor || 0}` +
+      const base = `ingest: ${s.written} item(s) written (own ${s.by_class.own || 0} / competitor ${s.by_class.competitor || 0}` +
         `${s.invalid ? `, ${s.invalid} invalid` : ''}) via "${s.adapter}".`;
+      const v = s.verification;
+      if (!v) return base;
+      const vline = `  ↳ ${v.summary}`;
+      const errs = (v.errors || []).map((e) => `  ✗ verify: ${e}`);
+      const warns = (v.warnings || []).map((w) => `  ~ verify: ${w}`);
+      return [base, vline, ...errs, ...warns].join('\n');
     }
     if (s.skipped) return `ingest: skipped — ${s.reason}.`;
     return `ingest: did not run — ${s.error || 'unknown'} (continuing from on-disk corpus, DD-21).`;

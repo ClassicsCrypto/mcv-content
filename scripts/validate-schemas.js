@@ -362,6 +362,11 @@ function buildBindings() {
     // contract — schemas/artifacts/setup-frame.schema.json).
     { test: (p) => /^fixtures\/setup-frame\/.+\.frame\.json$/.test(p), schema: S('artifacts/setup-frame.schema.json'), mode: 'single' },
 
+    // apify-acme fixtures (APIFY-INGEST): recorded Apify dataset rows keyed by group (own/competitor)
+    // — a fake-fetch input map for the zero-key adapter test, not a shipped artifact shape. Documented
+    // skip, never silently dropped.
+    { test: (p) => /^fixtures\/apify-acme\/recorded\/.+\.json$/.test(p), skip: true, reason: 'recorded Apify dataset rows keyed by group (fake-fetch input map for the adapter test, not a shipped artifact shape)' },
+
     // recorded stage outputs (the fixture-run replay set).
     { test: (p) => p === 'fixtures/stage-outputs/brief.json', schema: S('inputs/brief.schema.json'), mode: 'single' },
     { test: (p) => p === 'fixtures/stage-outputs/draft.json', schema: S('inputs/draft.schema.json'), mode: 'single' },
