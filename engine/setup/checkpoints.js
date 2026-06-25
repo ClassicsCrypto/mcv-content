@@ -648,7 +648,7 @@ function verifyC4(opts = {}) {
       : fail(
           'calendar',
           calFiles.length === 0 ? 'no calendar file found' : 'calendar file present but no slots detected',
-          'Generate a calendar from templates/calendar.template.md with at least one slot and clock time (§2.6 step 1, DD-22).',
+          'Generate a calendar from templates/calendar.template.md with at least one slot and clock time (C4). Base the suggested cadence on account class, own-account content downloads, comparator/competitor patterns, proof/media supply, platform availability, and approval capacity. Use dormant slots when proof/media is missing.',
         ),
   );
 

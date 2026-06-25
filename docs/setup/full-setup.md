@@ -116,7 +116,12 @@ re-run. Full detail and the criteria block:
 ## C4 — calendar (required) + library (optional)
 
 - **Calendar (required):** agent-assisted generation from `templates/calendar.template.md`; the C4
-  verifier needs at least one slot with a clock time.
+  verifier needs at least one slot with a clock time. Before writing or activating the calendar, the
+  agent should suggest a baseline calendar from account class, own-account content downloads,
+  existing published/downloaded corpus patterns, current comparator/competitor content, approval
+  bandwidth, proof/media supply, platform availability, and anti-repetition windows. Operator
+  accounts can usually sustain a higher cadence than brand accounts. If proof or media is missing,
+  use dormant slots or capture requests instead of filling space.
 - **Library (optional):** **library indexing is available** — `engine index-library` visual-tags
   assets (estimate-and-confirm, incremental, never re-billing an already-indexed asset). Use
   **empty-library mode** (default; retrieval returns generate-only), **auto-indexing**
