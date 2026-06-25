@@ -180,18 +180,28 @@
         },
         "adapter": {
           "type": "string",
-          "description": "Registered trend-source adapter name to poll (shipped: 'reference' for a BYO provider, 'fixture' for zero-key tests; or an operator-registered adapter). Required when enabled to poll an adapter; the manual-submission path (a trend-report file dropped into $CONTENT_HOME/trends/) needs no adapter.",
+          "description": "Registered trend-source adapter name to poll (shipped: 'apify' for the BYO Apify daily/hourly tracking pull, 'reference' for a generic BYO HTTP provider, 'fixture' for zero-key tests; or an operator-registered adapter). Required when enabled to poll an adapter; the manual-submission path (a trend-report file dropped into $CONTENT_HOME/trends/) needs no adapter.",
           "minLength": 1,
-          "examples": ["reference", "fixture"]
+          "examples": ["apify", "reference", "fixture"]
         },
         "cadence": {
           "$ref": "#/$defs/trend_cadence",
-          "description": "How often the scheduler recipe invokes the trend pass. Carried into the adapter poll and used as the report freshness-window basis (DD-15). Default 12h (the most conservative).",
+          "description": "How often the scheduler recipe invokes the trend pass. Carried into the adapter poll and used as the report freshness-window basis (DD-15). Default 12h (the most conservative); 1h/2h for hourly tracking, 24h for a daily pass.",
           "default": "12h"
         },
         "themes": {
           "type": "array",
-          "description": "Optional theme/topic hints passed to the adapter to focus the poll.",
+          "description": "Optional theme/topic hints passed to the adapter to focus the poll (the Apify adapter folds these in as keywords).",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "tracked_accounts": {
+          "type": "array",
+          "description": "Specific accounts to track on each trend pass (the daily/hourly 'watch these handles' targets the Apify trend adapter pulls recent posts from). Suggested by the manual-Grok kit and operator-CONFIRMED — never auto-added. Public handles, never secrets.",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "keywords": {
+          "type": "array",
+          "description": "Keywords/hashtags to track on each trend pass (the Apify trend adapter searches these and groups matched posts into topics). Suggested by the manual-Grok kit and operator-CONFIRMED.",
           "items": { "type": "string", "minLength": 1 }
         },
         "provider": {
@@ -830,8 +840,8 @@
     },
     "trend_cadence": {
       "type": "string",
-      "description": "Trend-poll cadence token (§8.8). One of the supported polling intervals; off-list values are rejected fail-closed by the engine.",
-      "enum": ["2h", "4h", "8h", "12h"]
+      "description": "Trend-poll cadence token (§8.8). One of the supported polling intervals; off-list values are rejected fail-closed by the engine. 1h/2h support hourly tracking; 24h a daily pass.",
+      "enum": ["1h", "2h", "4h", "8h", "12h", "24h"]
     },
     "private_terms": {
       "description": "A private-term deny list: PUBLIC anti-targets (terms NOT to print, e.g. partner names / codenames / unreleased feature names). NEVER secret VALUES — those are stripped by redaction. Either a flat string array, or a { terms, secret_literals } object (both forbidden-to-print). NOTE: the shape is governed ENTIRELY by the oneOf below (flat-array OR {terms, secret_literals} object); there is intentionally NO top-level `type` here — a top-level `type:\"array\"` would contradict the object branch and reject the documented {terms, secret_literals} form.",

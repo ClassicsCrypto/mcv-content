@@ -55,6 +55,7 @@ const fs = require('fs');
 const path = require('path');
 
 const trendSource = require('../sources/trends');
+const { verifyTrendOutput } = require('../sources/verify-output');
 const seed = require('../sources/seed');
 const dispatch = require('./dispatch');
 const runLock = require('./run-lock');
@@ -235,6 +236,15 @@ async function runTrendPass(opts = {}) {
 
     const reports = poll.reports || [];
 
+    // 1b. VERIFY the poll output: did it run + produce topics when tracking targets were configured,
+    //     and is every topic filtered to only the trend-report variables? Read-only; surfaced on the
+    //     result (and the CLI). An expected-but-empty poll is flagged, never a silent no-op.
+    const tcfg = trendSource.trendsConfig(pollConfig);
+    const verification = verifyTrendOutput(
+      { reports, invalid: poll.invalid || [] },
+      { requested: { tracked_accounts: tcfg.tracked_accounts, keywords: tcfg.keywords } },
+    );
+
     // 2. Build the readout (angles-only) and post it to the trend-readout channel via the injected
     //    mechanism (default no-op returns the text; a host wires the real Discord/Slack poster).
     const readout = buildReadout(reports, { brand });
@@ -266,6 +276,7 @@ async function runTrendPass(opts = {}) {
       reports: reports.length,
       written: poll.written || [],
       invalid: poll.invalid || [],
+      verification,
       readout,
       readout_post: readoutPost,
       dispatched: 0,

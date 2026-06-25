@@ -57,20 +57,29 @@ const { redact } = require('../../shared/redact');
  * default freshness window. Off-list cadences are rejected fail-closed.
  */
 const CADENCE = Object.freeze({
+  H1: '1h',
   H2: '2h',
   H4: '4h',
   H8: '8h',
   H12: '12h',
+  D1: '24h',
 });
 
 const VALID_CADENCES = Object.freeze(new Set(Object.values(CADENCE)));
 
 /** Map a cadence token to milliseconds (for the default freshness window). */
 const CADENCE_MS = Object.freeze({
+  '1h': 1 * 60 * 60 * 1000,
   '2h': 2 * 60 * 60 * 1000,
   '4h': 4 * 60 * 60 * 1000,
   '8h': 8 * 60 * 60 * 1000,
   '12h': 12 * 60 * 60 * 1000,
+  '24h': 24 * 60 * 60 * 1000,
+});
+
+/** ISO-8601 duration token for a cadence (the trend-report freshness_window basis). */
+const CADENCE_DURATION = Object.freeze({
+  '1h': 'PT1H', '2h': 'PT2H', '4h': 'PT4H', '8h': 'PT8H', '12h': 'PT12H', '24h': 'PT24H',
 });
 
 /**
@@ -213,15 +222,18 @@ function unregister(name) {
  */
 function trendsConfig(config = {}) {
   const t = (config && config.trends) || {};
+  const cleanList = (v) => (Array.isArray(v) ? v.filter((s) => typeof s === 'string' && s.trim()).map((s) => s.trim()) : []);
   return {
     enabled: t.enabled === true, // strictly boolean true — anything else is OFF (fail-closed)
     adapter: typeof t.adapter === 'string' && t.adapter.trim() ? t.adapter.trim() : null,
     cadence: VALID_CADENCES.has(t.cadence) ? t.cadence : CADENCE.H12,
-    themes: Array.isArray(t.themes) ? t.themes.filter((s) => typeof s === 'string' && s.trim()) : [],
+    themes: cleanList(t.themes),
+    // Tracked accounts + keywords (suggested by the manual-Grok kit, operator-CONFIRMED). The
+    // daily/hourly tracking targets the Apify trend adapter pulls; ignored by adapters that don't use them.
+    tracked_accounts: cleanList(t.tracked_accounts),
+    keywords: cleanList(t.keywords),
     provider: (t.provider && typeof t.provider === 'object') ? t.provider : {},
-    private_terms: Array.isArray(t.private_terms)
-      ? t.private_terms.filter((s) => typeof s === 'string' && s.trim())
-      : [],
+    private_terms: cleanList(t.private_terms),
   };
 }
 
@@ -336,7 +348,7 @@ function normalizeReport(report, ctx = {}) {
   if (!out.freshness_window || typeof out.freshness_window !== 'object') {
     const ms = CADENCE_MS[cadence] || CADENCE_MS['12h'];
     out.freshness_window = {
-      duration: cadence === '2h' ? 'PT2H' : cadence === '4h' ? 'PT4H' : cadence === '8h' ? 'PT8H' : 'PT12H',
+      duration: CADENCE_DURATION[cadence] || 'PT12H',
       expires_at: new Date(nowMs + ms).toISOString(),
     };
   }
@@ -443,6 +455,9 @@ async function pollTrends(opts = {}) {
   const pollArgs = {
     cadence,
     themes,
+    // Tracking targets — passed to adapters that use them (the Apify trend adapter); others ignore them.
+    tracked_accounts: Array.isArray(opts.tracked_accounts) ? opts.tracked_accounts : cfg.tracked_accounts,
+    keywords: Array.isArray(opts.keywords) ? opts.keywords : cfg.keywords,
     brand: opts.brand || null,
     provider: cfg.provider,
     env,
@@ -488,6 +503,7 @@ module.exports = {
   CADENCE,
   VALID_CADENCES,
   CADENCE_MS,
+  CADENCE_DURATION,
   trendsConfig,
   isEnabled,
   resolveCadence,

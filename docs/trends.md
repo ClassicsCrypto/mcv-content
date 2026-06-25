@@ -93,28 +93,37 @@ pathway OFF.
 ```jsonc
 "trends": {
   "enabled": true,                 // the OFF-by-default gate — strictly true to opt in
-  "adapter": "reference",          // a registered adapter name: "reference" | "fixture" | your own
-  "cadence": "12h",                // "2h" | "4h" | "8h" | "12h" — default "12h" (most conservative)
-  "themes": ["space", "exploration"],  // optional topic hints passed to the provider
+  "adapter": "apify",              // a registered adapter name: "apify" | "reference" | "fixture" | your own
+  "cadence": "1h",                 // "1h" | "2h" | "4h" | "8h" | "12h" | "24h" — 1h/2h hourly, 24h daily
+  "tracked_accounts": ["@acompetitor", "@anindustrycreator"],  // CONFIRMED handles to watch each pass
+  "keywords": ["ai agents", "#web3gaming"],  // CONFIRMED keywords/hashtags to search each pass
+  "themes": ["space", "exploration"],  // optional extra topic hints (the apify adapter folds these in as keywords)
   "private_terms": ["<a confidential term>"],  // extra redaction deny-list terms (privacy, §13.3)
   "provider": {                    // adapter-specific provider config (BYO) — see §4
-    "kind": "apify",
-    "endpoint": "https://<your-provider-endpoint>",
+    "actor_id": "apidojo/tweet-scraper",  // the Apify "username/actor-name" to run
     "key_env": "APIFY_API_KEY",    // the .env variable NAME the credential lives under (never the value)
     "platform": "twitter",
+    "max_items": 100,              // per-pass cap (a tracking poll is a small recent window, not an archive)
     "timeout_ms": 60000
   }
 }
 ```
+
+> `tracked_accounts` and `keywords` are **suggested by the manual-Grok kit and operator-CONFIRMED** —
+> never auto-added. The `apify` adapter pulls recent posts for each, groups them into volume-labeled,
+> source-linked topics, and **fabricates no angles** (the §1.4 no-drafted-text principle). Every pass
+> is **verified**: a configured-but-empty poll is flagged (not a silent no-op), and every topic is
+> checked to carry only the trend-report variables.
 
 When `enabled` is not `true`, `engine` and the source refuse to run the pathway and raise
 `TrendsDisabledError` — **no provider is contacted and no credential is read.**
 
 ### Cadences
 
-A cadence is **how often your scheduler invokes the poll** — `2h`, `4h`, `8h`, or `12h`. It is
-carried into the adapter so a provider can window its query, and it sets the report's **default
-freshness window** when the adapter does not supply one. An off-list cadence is rejected fail-closed.
+A cadence is **how often your scheduler invokes the poll** — `1h`, `2h`, `4h`, `8h`, `12h`, or `24h`
+(`1h`/`2h` for hourly tracking, `24h` for a daily pass). It is carried into the adapter so a provider
+can window its query, and it sets the report's **default freshness window** when the adapter does not
+supply one. An off-list cadence is rejected fail-closed.
 Pick the **slowest cadence that meets your needs** — every poll is a metered provider call
 ([`cost.md`](cost.md)).
 

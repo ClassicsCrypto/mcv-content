@@ -29,6 +29,7 @@ const source = require('./source');
 // Self-register the shipped adapters (each calls source.register on require).
 const referenceAdapter = require('./reference-adapter');
 const fixtureAdapter = require('./fixture-adapter');
+const apifyAdapter = require('./apify-adapter');
 
 module.exports = {
   // The orchestration entry point (the LAW: export pollTrends).
@@ -61,7 +62,8 @@ module.exports = {
   TrendsDisabledError: source.TrendsDisabledError,
   TrendSourceNotRegisteredError: source.TrendSourceNotRegisteredError,
 
-  // The shipped adapters (also registered under "reference" / "fixture").
+  // The shipped adapters (also registered under "reference" / "fixture" / "apify").
   referenceAdapter,
   fixtureAdapter,
+  apifyAdapter,
 };
