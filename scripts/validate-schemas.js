@@ -371,6 +371,10 @@ function buildBindings() {
     // binds to the published suggestion-set schema (the format the grok-prompts ask Grok to emit).
     { test: (p) => /^fixtures\/suggestions\/.+\.suggestion\.json$/.test(p), schema: S('inputs/suggestion-set.schema.json'), mode: 'single' },
 
+    // engagement-timeline fixtures (ENGAGEMENT-TIMELINE): each *.timeline.json binds to the published
+    // engagement-timeline artifact schema (the deterministic highest-engagement + project-facts output).
+    { test: (p) => /^fixtures\/engagement-timeline\/.+\.timeline\.json$/.test(p), schema: S('artifacts/engagement-timeline.schema.json'), mode: 'single' },
+
     // recorded stage outputs (the fixture-run replay set).
     { test: (p) => p === 'fixtures/stage-outputs/brief.json', schema: S('inputs/brief.schema.json'), mode: 'single' },
     { test: (p) => p === 'fixtures/stage-outputs/draft.json', schema: S('inputs/draft.schema.json'), mode: 'single' },

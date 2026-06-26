@@ -40,7 +40,7 @@ const mode = require('../orchestrator/mode');
  */
 const BOOLEAN_FLAGS = new Set([
   'help', 'json', 'now', 'force', 'dry-run', 'apply', 'yes', 'estimate-only',
-  'dispatch-only', 'no-git', 'keep',
+  'dispatch-only', 'no-git', 'keep', 'no-write',
   // rollback (SI-CLI): --last is a presence flag (one-step revert) that never consumes the following
   // token; --to-baseline / --record DO take a value, so they are intentionally NOT boolean here.
   'last',

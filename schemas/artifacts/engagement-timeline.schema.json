@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-content-engine.example/schemas/artifacts/engagement-timeline.schema.json",
+  "title": "Engagement Timeline",
+  "description": "The deterministic engagement-timeline + project-facts artifact built from a brand's OWN ingested history (release-spec §1.1/§1.2). Produced by engine/brand-dna/engagement-timeline.js (NO LLM) and written by `engine engagement-timeline` under $CONTENT_HOME. Carries a chronological per-period timeline, the highest-engagement posts, and a project-facts summary (window, totals, peak period, media lift, engagement rate). Engagement is a documented composite score (amplification + deeper engagement weighted above a passive like); impressions are reach, surfaced separately, never folded into the score.",
+  "x-stability": "experimental",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["artifact", "generated_with", "granularity", "window", "totals", "engagement_basis", "summary", "top_posts", "timeline", "notes"],
+  "properties": {
+    "artifact": { "const": "engagement-timeline" },
+    "generated_with": { "const": "deterministic-no-llm" },
+    "brand": { "type": ["string", "null"] },
+    "generated_at": { "type": ["string", "null"] },
+    "granularity": { "type": "string", "enum": ["month", "week"] },
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": { "type": ["string", "null"] },
+        "end": { "type": ["string", "null"] }
+      }
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["posts", "posts_with_metrics", "posts_without_metrics", "with_media"],
+      "properties": {
+        "posts": { "type": "integer", "minimum": 0 },
+        "posts_with_metrics": { "type": "integer", "minimum": 0 },
+        "posts_without_metrics": { "type": "integer", "minimum": 0 },
+        "with_media": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "engagement_basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["score_formula", "weights"],
+      "properties": {
+        "score_formula": { "type": "string" },
+        "weights": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "likes": { "type": "number" },
+            "replies": { "type": "number" },
+            "reposts": { "type": "number" },
+            "bookmarks": { "type": "number" }
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total_engagement", "avg_score", "median_score"],
+      "properties": {
+        "total_engagement": { "type": "number" },
+        "avg_score": { "type": "number" },
+        "median_score": { "type": "number" },
+        "peak_period": { "$ref": "#/$defs/periodSummaryOrNull" },
+        "busiest_period": { "$ref": "#/$defs/busiestOrNull" },
+        "media_lift": { "$ref": "#/$defs/mediaLiftOrNull" },
+        "avg_engagement_rate": { "type": ["number", "null"] }
+      }
+    },
+    "top_posts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["rank", "score", "text_excerpt", "has_media"],
+        "properties": {
+          "rank": { "type": "integer", "minimum": 1 },
+          "captured_at": { "type": ["string", "null"] },
+          "score": { "type": "number" },
+          "metrics": { "$ref": "#/$defs/metricsOrNull" },
+          "has_media": { "type": "boolean" },
+          "text_excerpt": { "type": "string" },
+          "url": { "type": ["string", "null"] },
+          "author": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "timeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["period", "posts", "posts_with_metrics", "total_engagement", "avg_score", "median_score"],
+        "properties": {
+          "period": { "type": "string", "minLength": 1 },
+          "posts": { "type": "integer", "minimum": 0 },
+          "posts_with_metrics": { "type": "integer", "minimum": 0 },
+          "total_engagement": { "type": "number" },
+          "avg_score": { "type": "number" },
+          "median_score": { "type": "number" },
+          "top_post": { "$ref": "#/$defs/topPostOrNull" }
+        }
+      }
+    },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "metricsOrNull": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "likes": { "type": "number" },
+        "replies": { "type": "number" },
+        "reposts": { "type": "number" },
+        "impressions": { "type": "number" },
+        "bookmarks": { "type": "number" }
+      }
+    },
+    "periodSummaryOrNull": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "period": { "type": "string" },
+        "posts": { "type": "integer", "minimum": 0 },
+        "total_engagement": { "type": "number" },
+        "avg_score": { "type": "number" }
+      }
+    },
+    "busiestOrNull": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "period": { "type": "string" },
+        "posts": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "mediaLiftOrNull": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "with_media_avg": { "type": "number" },
+        "without_media_avg": { "type": "number" },
+        "lift_ratio": { "type": ["number", "null"] }
+      }
+    },
+    "topPostOrNull": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "score": { "type": "number" },
+        "captured_at": { "type": ["string", "null"] },
+        "text_excerpt": { "type": "string" },
+        "url": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

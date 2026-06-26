@@ -71,6 +71,8 @@ const VERBS = {
   // The FREE manual-Grok suggestion path: print a prompt, then parse the pasted result into config.
   suggest: { mod: require('../engine/cli/suggest'), fn: 'run' },
   'generate-dna': { mod: require('../engine/cli/generate-dna'), fn: 'run' },
+  // The deterministic engagement-timeline + project-facts artifact from the brand's own history.
+  'engagement-timeline': { mod: require('../engine/cli/engagement-timeline'), fn: 'run' },
   'index-library': { mod: require('../engine/cli/index-library'), fn: 'run' },
   'purge-corpora': { mod: require('../engine/cli/purge-corpora'), fn: 'run' },
   // The GOVERNED self-improvement loop (SI-CLI / DD-6 / §8.9): improve runs the governed pass (dry-run
@@ -90,7 +92,7 @@ const VERBS = {
   'voice-calibrate': { mod: require('../engine/cli/voice-calibrate'), fn: 'run' },
 };
 
-const VERB_ORDER = ['setup', 'init', 'verify', 'fixture-run', 'run-slot', 'kickoff', 'poll-trends', 'dispatch', 'status', 'calibrate', 'ingest-brand', 'suggest', 'generate-dna', 'index-library', 'purge-corpora', 'improve', 'rollback', 'share', 'evaluate-contribution', 'pause', 'resume', 'competitor-scan', 'voice-calibrate'];
+const VERB_ORDER = ['setup', 'init', 'verify', 'fixture-run', 'run-slot', 'kickoff', 'poll-trends', 'dispatch', 'status', 'calibrate', 'ingest-brand', 'suggest', 'generate-dna', 'engagement-timeline', 'index-library', 'purge-corpora', 'improve', 'rollback', 'share', 'evaluate-contribution', 'pause', 'resume', 'competitor-scan', 'voice-calibrate'];
 
 /** One-line summary per verb for the top-level help (kept short; --help <verb> has the full text). */
 const VERB_SUMMARY = {
@@ -107,6 +109,7 @@ const VERB_SUMMARY = {
   'ingest-brand': 'one-command brand onboarding: ingest -> analyze -> generate DNA (estimate-and-confirm)',
   suggest: 'FREE manual-Grok suggestions: print a prompt; parse the pasted result into config',
   'generate-dna': 'generate Brand DNA + archetypes from the ingested corpus (estimate-and-confirm)',
+  'engagement-timeline': 'build the engagement-timeline + project-facts artifact from own history (deterministic, free)',
   'index-library': 'index/sort the media library + character sheets (estimate-and-confirm)',
   'purge-corpora': 'enforce corpus retention windows (RD-9)',
   improve: 'run the governed self-improvement loop (dry-run default; --apply; DD-6 / §8.9)',
