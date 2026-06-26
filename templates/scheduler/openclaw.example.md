@@ -32,19 +32,22 @@ and adjust the cron `schedule` to your preferred local run time.
 
 If you enable the trend pathway (`trends.enabled: true` + a `trends.adapter` +
 `trends.cadence` in `config/system.json`; release-spec §8.8), add a SECOND job that
-runs `engine poll-trends` on the SAME interval as your cadence. It dispatches trend
+runs `engine poll-trends` on the SAME interval as your cadence — `0 * * * *` for hourly
+(`1h`), `0 */4 * * *` for 4h, `0 9 * * *` for a daily (`24h`) pass. It dispatches trend
 seeds into RESERVED `trend` calendar slots (DD-16 — never out-of-calendar; nothing
-auto-publishes) and posts an angles-only readout to the `trend-readout` channel.
+auto-publishes) and posts an angles-only readout to the `trend-readout` channel. For the
+`apify` adapter, set the operator-confirmed `trends.tracked_accounts` + `trends.keywords`
+(suggest them free with `engine suggest prompt tracked_accounts` / `keywords`).
 
 ```json
 {
   "id": "content-engine-trend-poll",
-  "schedule": "0 */4 * * *",
+  "schedule": "0 * * * *",
   "command": "node <ENGINE_DIR>/bin/engine.js poll-trends",
   "env": {
     "CONTENT_HOME": "<CONTENT_HOME>"
   },
-  "description": "Open Content Engine trend pass — 4h cadence (release-spec section 8.8). OFF unless trends.enabled."
+  "description": "Open Content Engine trend pass — hourly (1h) cadence; use 0 */4 * * * for 4h or 0 9 * * * for a daily 24h pass (release-spec section 8.8). OFF unless trends.enabled."
 }
 ```
 
@@ -81,6 +84,29 @@ with explicit `engine voice-calibrate --apply --consent` when you are ready. **V
 calibration is HUMAN-ONLY — the machine writes a proposal and stops; the operator consents
 and applies.** The scan is idempotent per (brand, calendar month): a second fire in the same
 month is skipped safely.
+
+## Optional: the monthly breakout-discovery reminder (free, manual Grok)
+
+Breakout discovery (new competitors + breakout keyword trends) is the FREE manual-Grok path
+(no API spend) — a HUMAN task, so there is nothing to auto-run. Schedule a monthly job that
+PRINTS the ready-to-use prompt (e.g. into a reminder channel via your host's command output
+routing) so the manual step never slips. `engine suggest prompt breakout` is read-only and
+never spends.
+
+```json
+{
+  "id": "content-engine-breakout-reminder",
+  "schedule": "0 8 1 * *",
+  "command": "node <ENGINE_DIR>/bin/engine.js suggest prompt breakout",
+  "env": {
+    "CONTENT_HOME": "<CONTENT_HOME>"
+  },
+  "description": "Monthly reminder: prints the free manual-Grok breakout-discovery prompt. Paste the result into engine suggest apply --brand <id> --yes to APPEND confirmed competitors/keywords."
+}
+```
+
+(In OpenClaw you can route this job's output to a DM or a data-ingest channel so the prompt
+lands where you'll see it; the engine owns no channel — that wiring is the host's.)
 
 ## Notes
 

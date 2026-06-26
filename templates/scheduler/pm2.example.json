@@ -1,9 +1,10 @@
 {
-  "//": "PM2 ecosystem recipe for the daily kickoff. PM2 runs the kickoff as a process",
-  "//2": "restarted on a cron schedule, then exits (autorestart:false). Install with:",
-  "//3": "  pm2 start pm2.example.json   then   pm2 save",
-  "//4": "Replace <CONTENT_HOME>, <ENGINE_DIR>, and cron_restart. CONTENT_HOME is set in",
-  "//5": "env here (the section 4.1 placement rule), NOT in $CONTENT_HOME/.env.",
+  "//": "PM2 ecosystem recipe. Each app runs a verb on a cron schedule and exits",
+  "//2": "(autorestart:false). Install with:  pm2 start pm2.example.json   then   pm2 save",
+  "//3": "Replace <CONTENT_HOME>, <ENGINE_DIR>, <brand-id>, and the cron_restart times.",
+  "//4": "CONTENT_HOME is set in env here (the section 4.1 placement rule), NOT in",
+  "//5": "$CONTENT_HOME/.env. The kickoff is the only app you need to start; the rest are",
+  "//6": "OPTIONAL — start one only when you enable its pathway in config/system.json.",
   "apps": [
     {
       "name": "content-engine-kickoff",
@@ -13,6 +14,51 @@
       "interpreter": "node",
       "autorestart": false,
       "cron_restart": "30 8 * * *",
+      "env": {
+        "CONTENT_HOME": "<CONTENT_HOME>"
+      }
+    },
+    {
+      "//": "OPTIONAL — trend pass (config-gated: trends.enabled; release-spec 8.8). cron_restart",
+      "//2": "matches your trends.cadence: '0 * * * *' hourly (1h), '0 */4 * * *' 4h, '0 9 * * *' daily (24h).",
+      "//3": "For the apify adapter, set the confirmed trends.tracked_accounts + trends.keywords in config.",
+      "name": "content-engine-trend-poll",
+      "script": "bin/engine.js",
+      "args": "poll-trends",
+      "cwd": "<ENGINE_DIR>",
+      "interpreter": "node",
+      "autorestart": false,
+      "cron_restart": "0 * * * *",
+      "env": {
+        "CONTENT_HOME": "<CONTENT_HOME>"
+      }
+    },
+    {
+      "//": "OPTIONAL — monthly competitor scan (config-gated: competitor_scan.enabled; roadmap #5).",
+      "//2": "One app per brand (set --brand). --yes confirms the DD-18 scrape gate. After each run,",
+      "//3": "apply the proposal with `engine voice-calibrate --apply --consent` (HUMAN-ONLY).",
+      "name": "content-engine-competitor-scan",
+      "script": "bin/engine.js",
+      "args": "competitor-scan --brand <brand-id> --yes",
+      "cwd": "<ENGINE_DIR>",
+      "interpreter": "node",
+      "autorestart": false,
+      "cron_restart": "0 7 1 * *",
+      "env": {
+        "CONTENT_HOME": "<CONTENT_HOME>"
+      }
+    },
+    {
+      "//": "OPTIONAL — monthly breakout-discovery reminder (free, manual Grok). Prints the prompt",
+      "//2": "(read-only, no spend) so the manual step never slips; see it in `pm2 logs`. Then run",
+      "//3": "`engine suggest apply --file <reply> --brand <brand-id> --yes` to APPEND confirmed items.",
+      "name": "content-engine-breakout-reminder",
+      "script": "bin/engine.js",
+      "args": "suggest prompt breakout",
+      "cwd": "<ENGINE_DIR>",
+      "interpreter": "node",
+      "autorestart": false,
+      "cron_restart": "0 8 1 * *",
       "env": {
         "CONTENT_HOME": "<CONTENT_HOME>"
       }

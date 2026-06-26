@@ -43,17 +43,23 @@ fills RESERVED `trend` calendar slots with seeds that run the SAME chain to a hu
 approval card (DD-16 — never out-of-calendar; nothing auto-publishes). It ships
 **disabled**. To use it:
 
-1. Set `trends.enabled: true`, a `trends.adapter` (e.g. `reference` for a BYO provider,
-   or `fixture` for a zero-key smoke test), and a `trends.cadence` of `2h` / `4h` /
-   `8h` / `12h` in `config/system.json`.
+1. Set `trends.enabled: true`, a `trends.adapter` (e.g. `apify` for the BYO Apify
+   tracking pull, `reference` for a generic BYO provider, or `fixture` for a zero-key
+   smoke test), and a `trends.cadence` of `1h` / `2h` / `4h` / `8h` / `12h` / `24h` in
+   `config/system.json` — **`1h`/`2h` for hourly tracking, `24h` for a daily pass.**
+   For the `apify` adapter, add the operator-CONFIRMED `trends.tracked_accounts` +
+   `trends.keywords` (see [`docs/trends.md`](../../docs/trends.md); suggest them free
+   with `engine suggest prompt tracked_accounts` / `keywords`).
 2. Reserve one or more `slot_type: trend` slots in your calendar (the seeds fill these).
 3. Optionally bind a `trend-readout` channel under
    `approval_surface.channels` to receive the angles-only readout.
-4. Schedule **`engine poll-trends`** on the SAME interval as your cadence. Example
-   crontab line for a 4h cadence (set `CONTENT_HOME` as in the recipes):
+4. Schedule **`engine poll-trends`** on the SAME interval as your cadence. Examples
+   (set `CONTENT_HOME` as in the recipes):
 
    ```
-   0 */4 * * *  CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js poll-trends
+   0 * * * *    CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js poll-trends   # hourly (1h)
+   0 */4 * * *  CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js poll-trends   # every 4h
+   0 9 * * *    CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js poll-trends   # daily (24h) at 09:00
    ```
 
    The pass runs under the same single-runner lock as the kickoff (overlaps skip
@@ -87,6 +93,23 @@ over the four voice axes (`drama_dial`, `archetype_emphasis`, `hook_preferences`
    path; the machine stops at the proposal and never auto-applies). See
    [`docs/voice-calibration.md`](../../docs/voice-calibration.md) for the full walkthrough.
 
+## Optional: the monthly breakout-discovery reminder (free, manual Grok)
+
+The monthly **breakout discovery** — find NEW competitors and breakout keyword trends — is the
+FREE manual-Grok path (no API spend): you run a prompt on your own Grok/X account and paste the
+result back (`engine suggest`, see [`../grok-prompts/README.md`](../grok-prompts/README.md)). It is
+a HUMAN task, so there is nothing to auto-run — but you can schedule a monthly REMINDER that prints
+the ready-to-use prompt to your log (or a channel) so it never slips:
+
+```
+0 8 1 * *  CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js suggest prompt breakout >> <CONTENT_HOME>/logs/breakout-reminder.log 2>&1
+```
+
+When it fires, copy the printed prompt into Grok, then `engine suggest apply --file <reply> --brand
+<id> --yes` to APPEND the confirmed new competitors (→ `ingestion.competitors`) and breakout
+keywords (→ `trends.keywords`). Nothing is added without your confirm. `engine suggest` is read-only
+and never spends, so this reminder is always safe to schedule.
+
 ## Optional: the daily work-recap option (config-gated, OFF by default)
 
 The work-recap / build-in-public pathway (release-spec §3.3) is the daily option the
@@ -106,11 +129,15 @@ needs **no extra scheduler entry** — the daily `engine kickoff` runs it. To us
 
 ## Recipes in this directory
 
-- `cron.example`            — Unix/Linux/macOS crontab line.
-- `systemd.example`         — systemd service + timer (Linux).
-- `windows-task-scheduler.example.xml` — Windows Task Scheduler task definition.
-- `pm2.example.json`        — PM2 ecosystem file with a cron restart.
-- `openclaw.example.md`     — OpenClaw scheduled-job example (one supported host runtime).
+Each recipe ships the **daily kickoff** plus COMMENTED/optional entries for the **trend poll**
+(hourly/daily) and the **monthly** triggers (competitor scan + the breakout-discovery reminder) —
+uncomment the ones you enable in `config/system.json`:
+
+- `cron.example`            — Unix/Linux/macOS crontab lines.
+- `systemd.example`         — systemd service + timer units (Linux).
+- `windows-task-scheduler.example.xml` — Windows Task Scheduler task definitions.
+- `pm2.example.json`        — PM2 ecosystem file with cron restarts.
+- `openclaw.example.md`     — OpenClaw scheduled-job examples (one supported host runtime).
 
 Verify your recipe by running the command by hand FIRST (with `CONTENT_HOME` set):
 
