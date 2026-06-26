@@ -1,0 +1,158 @@
+{
+  "artifact": "engagement-timeline",
+  "generated_with": "deterministic-no-llm",
+  "brand": "acme",
+  "generated_at": "2026-02-01T00:00:00.000Z",
+  "granularity": "month",
+  "window": {
+    "start": "2025-11-02T10:00:00.000Z",
+    "end": "2026-01-20T10:00:00.000Z"
+  },
+  "totals": {
+    "posts": 4,
+    "posts_with_metrics": 4,
+    "posts_without_metrics": 0,
+    "with_media": 2
+  },
+  "engagement_basis": {
+    "score_formula": "1·likes + 2·replies + 3·reposts + 2·bookmarks (impressions excluded — reach, not engagement)",
+    "weights": {
+      "likes": 1,
+      "replies": 2,
+      "reposts": 3,
+      "bookmarks": 2
+    }
+  },
+  "summary": {
+    "total_engagement": 7098,
+    "avg_score": 1774.5,
+    "median_score": 1700,
+    "peak_period": {
+      "period": "2026-01",
+      "posts": 2,
+      "total_engagement": 3698,
+      "avg_score": 1849
+    },
+    "busiest_period": {
+      "period": "2026-01",
+      "posts": 2
+    },
+    "media_lift": {
+      "with_media_avg": 2920,
+      "without_media_avg": 629,
+      "lift_ratio": 4.64
+    },
+    "avg_engagement_rate": 0.03
+  },
+  "top_posts": [
+    {
+      "rank": 1,
+      "captured_at": "2026-01-15T10:00:00Z",
+      "score": 3660,
+      "metrics": {
+        "likes": 2000,
+        "replies": 80,
+        "reposts": 500,
+        "impressions": 100000,
+        "bookmarks": 0
+      },
+      "has_media": true,
+      "text_excerpt": "January roadmap drop",
+      "url": "https://x.com/acmecosmos/3",
+      "author": null
+    },
+    {
+      "rank": 2,
+      "captured_at": "2025-11-02T10:00:00Z",
+      "score": 2180,
+      "metrics": {
+        "likes": 1200,
+        "replies": 40,
+        "reposts": 300,
+        "impressions": 60000,
+        "bookmarks": 0
+      },
+      "has_media": true,
+      "text_excerpt": "November launch announcement",
+      "url": "https://x.com/acmecosmos/1",
+      "author": null
+    },
+    {
+      "rank": 3,
+      "captured_at": "2025-12-05T10:00:00Z",
+      "score": 1220,
+      "metrics": {
+        "likes": 800,
+        "replies": 30,
+        "reposts": 120,
+        "impressions": 40000,
+        "bookmarks": 0
+      },
+      "has_media": false,
+      "text_excerpt": "December recap thread",
+      "url": "https://x.com/acmecosmos/2",
+      "author": null
+    },
+    {
+      "rank": 4,
+      "captured_at": "2026-01-20T10:00:00Z",
+      "score": 38,
+      "metrics": {
+        "likes": 30,
+        "replies": 1,
+        "reposts": 2,
+        "impressions": 1500,
+        "bookmarks": 0
+      },
+      "has_media": false,
+      "text_excerpt": "January text-only note",
+      "url": "https://x.com/acmecosmos/4",
+      "author": null
+    }
+  ],
+  "timeline": [
+    {
+      "period": "2025-11",
+      "posts": 1,
+      "posts_with_metrics": 1,
+      "total_engagement": 2180,
+      "avg_score": 2180,
+      "median_score": 2180,
+      "top_post": {
+        "score": 2180,
+        "captured_at": "2025-11-02T10:00:00Z",
+        "text_excerpt": "November launch announcement",
+        "url": "https://x.com/acmecosmos/1"
+      }
+    },
+    {
+      "period": "2025-12",
+      "posts": 1,
+      "posts_with_metrics": 1,
+      "total_engagement": 1220,
+      "avg_score": 1220,
+      "median_score": 1220,
+      "top_post": {
+        "score": 1220,
+        "captured_at": "2025-12-05T10:00:00Z",
+        "text_excerpt": "December recap thread",
+        "url": "https://x.com/acmecosmos/2"
+      }
+    },
+    {
+      "period": "2026-01",
+      "posts": 2,
+      "posts_with_metrics": 2,
+      "total_engagement": 3698,
+      "avg_score": 1849,
+      "median_score": 1849,
+      "top_post": {
+        "score": 3660,
+        "captured_at": "2026-01-15T10:00:00Z",
+        "text_excerpt": "January roadmap drop",
+        "url": "https://x.com/acmecosmos/3"
+      }
+    }
+  ],
+  "notes": []
+}

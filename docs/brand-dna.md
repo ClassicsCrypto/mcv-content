@@ -183,6 +183,34 @@ In every case the manual authoring path remains available, and the cold-start br
 supported (see [`setup/cold-start.md`](setup/cold-start.md)). The flow is **idempotent**: an existing
 `brand-dna.md` is left in place (no spend, no overwrite) unless you pass `--force`.
 
+## The engagement timeline + project facts (`engine engagement-timeline`)
+
+Separate from the voice analysis, the deterministic **engagement timeline** turns the brand's OWN
+ingested history into a *project-facts* artifact — the "when did we have our biggest moments, and what
+worked" view. It is **free, deterministic (no LLM), and read-only** on the corpus:
+
+```
+engine engagement-timeline --brand <id>          # writes the artifact + a human markdown
+engine engagement-timeline --brand <id> --top 20 --period week   # more posts, weekly buckets
+engine engagement-timeline --brand <id> --no-write               # preview only
+```
+
+It reads the **own** slice only (competitor corpus is excluded) and computes, from the public
+engagement `metrics` the [Apify ingest](#wiring-the-apify-adapter-the-cheap-bulk-pull-path) carries:
+
+- a chronological **timeline** (monthly by default) — posts, total/avg/median engagement, and the top
+  post per period;
+- the **highest-engagement posts** overall, ranked by a documented composite score
+  (`1·likes + 2·replies + 3·reposts + 2·bookmarks`; impressions are reach, reported separately);
+- a **project-facts summary**: history window, totals, **peak period**, **busiest period**, **media
+  lift** (does media drive engagement), and average engagement rate.
+
+It writes two files under `brands/<id>/`: `engagement-timeline.json` (schema-validated —
+`schemas/artifacts/engagement-timeline.schema.json`) and `engagement-timeline.md` (a readable
+project-facts doc). A corpus with no metrics still gets a volume-by-period timeline plus a note to
+re-ingest with a metrics-bearing adapter; an empty corpus is a clean no-op (DD-21). Nothing is
+fabricated — the artifact only reports what the corpus actually contains.
+
 ## No-verbatim enforcement (RD-9)
 
 Because the synthesis seat is shown competitor material (so a capable seat can study mechanics), the
