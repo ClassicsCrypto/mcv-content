@@ -32,3 +32,89 @@ Persistent=true
 
 [Install]
 WantedBy=timers.target
+
+
+# ===========================================================================
+# OPTIONAL units — install only the pathways you enable in config/system.json.
+# Each is a oneshot service + a timer, installed the same way as the kickoff pair.
+# ===========================================================================
+
+# ----- OPTIONAL: trend pass (config-gated; trends.enabled — release-spec §8.8) -----
+# Cadence is set in config (trends.cadence: 1h/2h/.../24h); the timer fires the poll on
+# the SAME interval. The OnCalendar below is HOURLY — use *-*-* 09:00:00 for a daily 24h
+# pass, or *-*-* 00/04/08/12/16/20:00:00 for a 4h cadence. For the apify adapter, set the
+# operator-confirmed trends.tracked_accounts + trends.keywords.
+
+# ===== content-engine-trend-poll.service =====
+[Unit]
+Description=Open Content Engine trend pass (poll-trends)
+
+[Service]
+Type=oneshot
+Environment=CONTENT_HOME=<CONTENT_HOME>
+ExecStart=<NODE_BIN> <ENGINE_DIR>/bin/engine.js poll-trends
+
+# ===== content-engine-trend-poll.timer =====
+[Unit]
+Description=Run the Open Content Engine trend pass on the configured cadence
+
+[Timer]
+# HOURLY (1h). Daily: OnCalendar=*-*-* 09:00:00. 4h: OnCalendar=*-*-* 00/04/08/12/16/20:00:00
+OnCalendar=*-*-* *:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+
+
+# ----- OPTIONAL: monthly competitor scan (config-gated; competitor_scan.enabled — roadmap #5) -----
+# One service per brand (set --brand). --yes confirms the DD-18 metered-scrape gate. After each
+# run, review with `engine voice-calibrate --show` and apply with `--apply --consent` (HUMAN-ONLY).
+
+# ===== content-engine-competitor-scan.service =====
+[Unit]
+Description=Open Content Engine monthly competitor scan
+
+[Service]
+Type=oneshot
+Environment=CONTENT_HOME=<CONTENT_HOME>
+ExecStart=<NODE_BIN> <ENGINE_DIR>/bin/engine.js competitor-scan --brand <brand-id> --yes
+
+# ===== content-engine-competitor-scan.timer =====
+[Unit]
+Description=Run the Open Content Engine competitor scan monthly
+
+[Timer]
+# 1st of each month at 07:00 host-local time.
+OnCalendar=*-*-01 07:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+
+
+# ----- OPTIONAL: monthly breakout-discovery reminder (free, manual Grok) -----
+# Nothing to auto-run — this PRINTS the breakout prompt (read-only, no spend) so the manual
+# step never slips. Route the service's stdout where you'll see it (journalctl, or a drop-in
+# StandardOutput=). Then run `engine suggest apply --file <reply> --brand <id> --yes`.
+
+# ===== content-engine-breakout-reminder.service =====
+[Unit]
+Description=Open Content Engine monthly breakout-discovery reminder (prints the manual-Grok prompt)
+
+[Service]
+Type=oneshot
+Environment=CONTENT_HOME=<CONTENT_HOME>
+ExecStart=<NODE_BIN> <ENGINE_DIR>/bin/engine.js suggest prompt breakout
+
+# ===== content-engine-breakout-reminder.timer =====
+[Unit]
+Description=Print the breakout-discovery prompt monthly
+
+[Timer]
+# 1st of each month at 08:00 host-local time.
+OnCalendar=*-*-01 08:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

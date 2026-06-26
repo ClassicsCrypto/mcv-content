@@ -16,10 +16,14 @@
 # OPTIONAL — the config-gated trend pass (release-spec section 8.8; OFF by default).
 # Enable trends.enabled + trends.adapter + trends.cadence in config/system.json, reserve
 # slot_type:trend calendar slots, then schedule poll-trends on the SAME interval as your
-# cadence. Example for a 4h cadence (the daily work-recap option needs NO extra line — the
-# kickoff above fills it when work_recap.enabled is true):
+# cadence (1h/2h hourly, 24h daily). For the apify adapter, add the operator-confirmed
+# trends.tracked_accounts + trends.keywords (suggest them free: engine suggest prompt
+# tracked_accounts / keywords). The daily work-recap option needs NO extra line — the
+# kickoff above fills it when work_recap.enabled is true. Uncomment ONE that matches your cadence:
 #
-# 0 */4 * * *  CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js poll-trends >> <CONTENT_HOME>/logs/trend-poll.cron.log 2>&1
+# 0 * * * *    CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js poll-trends >> <CONTENT_HOME>/logs/trend-poll.cron.log 2>&1   # hourly (1h)
+# 0 */4 * * *  CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js poll-trends >> <CONTENT_HOME>/logs/trend-poll.cron.log 2>&1   # every 4h
+# 0 9 * * *    CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js poll-trends >> <CONTENT_HOME>/logs/trend-poll.cron.log 2>&1   # daily (24h) at 09:00
 
 # OPTIONAL — the config-gated MONTHLY COMPETITOR SCAN (roadmap #5; OFF by default).
 # Enable competitor_scan.enabled + competitor_scan.adapter (or "fixture" for zero-key)
@@ -31,6 +35,15 @@
 # the proposal and engine voice-calibrate --apply --consent to apply with consent.
 #
 # 0 7 1 * *  CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js competitor-scan --brand <brand-id> --yes >> <CONTENT_HOME>/logs/competitor-scan.cron.log 2>&1
+
+# OPTIONAL — the MONTHLY BREAKOUT-DISCOVERY REMINDER (free, manual Grok; nothing to auto-run).
+# Breakout discovery (new competitors + breakout keyword trends) is the FREE manual-Grok path:
+# you run a prompt on your own Grok/X account and paste the result back. This line just PRINTS
+# the ready-to-use prompt to a log on the 1st of each month so the manual step never slips; it
+# spends nothing and writes no config. When it fires, copy the prompt into Grok, then run
+# engine suggest apply --file <reply> --brand <brand-id> --yes to APPEND the confirmed items.
+#
+# 0 8 1 * *  CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js suggest prompt breakout >> <CONTENT_HOME>/logs/breakout-reminder.log 2>&1
 
 # Notes:
 #   - Logs append to $CONTENT_HOME/logs/kickoff.cron.log; the engine redacts secrets at
