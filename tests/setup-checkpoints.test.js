@@ -212,6 +212,25 @@ test('C3 reads the recorded calibration detail from setup-state when no explicit
   assert.equal(res.passed, true);
 });
 
+test('C3 survives a later verify-record that overwrites detail (calibration-clobber regression)', () => {
+  const env = freshInstance();
+  // 1) `engine calibrate` records the operator-supplied scores in the durable `calibration` field.
+  setupState.setCheckpoint('C3', true, {
+    env,
+    calibration: { sample_count: 10, gate_clear: 9, on_voice: 7, fabrication_codes: 0 },
+  });
+  assert.equal(checkpoints.verifyC3({ env }).passed, true);
+  // 2) `engine verify --setup c3` (and the resumable-flow record path) write a generic check SUMMARY
+  //    into detail — exactly what runOne()/computeFrame do. This must NOT wipe the scores.
+  setupState.setCheckpoint('C3', true, {
+    env,
+    detail: { passed: true, checks: [{ name: 'sample_count', status: 'pass' }] },
+  });
+  // 3) Re-verifying C3 must still pass — before the fix this falsely failed with "only 0 samples".
+  const reverified = checkpoints.verifyC3({ env });
+  assert.equal(reverified.passed, true, JSON.stringify(reverified, null, 2));
+});
+
 // --------------------------------------------------------------------------- C4
 
 test('C4 passes with a calendar slot + empty-library mode; operational only AFTER C3', () => {

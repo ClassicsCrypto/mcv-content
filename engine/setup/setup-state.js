@@ -83,6 +83,11 @@ function normalize(raw) {
         at: typeof cp.at === 'string' ? cp.at : null,
         detail: cp.detail ?? null,
       };
+      // `calibration` is the operator-supplied C3 result the verifier grades — durable INPUT, not a
+      // recomputable check summary — so it is preserved when present (only set on C3 today).
+      if (cp.calibration !== undefined && cp.calibration !== null) {
+        base.checkpoints[id].calibration = cp.calibration;
+      }
     }
   }
   base.paused = raw.paused === true;
@@ -153,9 +158,15 @@ function writeSetupState(state, env = process.env) {
  * @param {string} id      one of CHECKPOINTS (C0..C4).
  * @param {boolean} passed
  * @param {object} [opts]
- * @param {*}        [opts.detail] small structured detail (e.g. calibration scores) — kept tiny;
- *                                 never instance bulk (§18.2(6) run-residue stays out of the repo,
- *                                 but setup-state lives in $CONTENT_HOME so this is allowed there).
+ * @param {*}        [opts.detail] small structured detail (a transient verifier check summary) —
+ *                                 kept tiny; never instance bulk (§18.2(6) run-residue stays out of
+ *                                 the repo, but setup-state lives in $CONTENT_HOME so this is allowed
+ *                                 there). REPLACED on every write.
+ * @param {*}        [opts.calibration] the operator-supplied C3 calibration result the verifier
+ *                                 grades (its INPUT, not a recomputable summary). Set by
+ *                                 `engine calibrate`; PRESERVED across later detail-only writes so a
+ *                                 generic record (e.g. `verify --setup c3` writing its check summary)
+ *                                 can never clobber the scores the C3 gate reads back.
  * @param {object}   [opts.env]
  * @returns {object} the updated, normalized, persisted record.
  */
@@ -165,11 +176,16 @@ function setCheckpoint(id, passed, opts = {}) {
   }
   const env = opts.env || process.env;
   const state = readSetupState(env);
-  state.checkpoints[id] = {
+  const prev = state.checkpoints[id] || {};
+  const entry = {
     passed: passed === true,
     at: nowIso(),
     detail: opts.detail ?? null,
   };
+  // Carry the durable calibration result forward unless this call explicitly re-sets it.
+  const calibration = opts.calibration !== undefined ? opts.calibration : prev.calibration;
+  if (calibration !== undefined && calibration !== null) entry.calibration = calibration;
+  state.checkpoints[id] = entry;
   return writeSetupState(state, env);
 }
 
