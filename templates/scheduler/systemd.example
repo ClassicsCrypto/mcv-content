@@ -39,6 +39,31 @@ WantedBy=timers.target
 # Each is a oneshot service + a timer, installed the same way as the kickoff pair.
 # ===========================================================================
 
+# ----- OPTIONAL: intra-day calendar tick (config-gated; scheduler.tick_enabled — release-spec §8.4) -----
+# Clock-precise firing on top of the date-granular daily kickoff. Run on a sub-daily cadence (e.g.
+# every 15m). Shares the kickoff dedup state + single-runner lock, so a slot never doubles.
+
+# ===== content-engine-tick.service =====
+[Unit]
+Description=Open Content Engine intra-day calendar tick
+
+[Service]
+Type=oneshot
+Environment=CONTENT_HOME=<CONTENT_HOME>
+ExecStart=<NODE_BIN> <ENGINE_DIR>/bin/engine.js tick
+
+# ===== content-engine-tick.timer =====
+[Unit]
+Description=Run the Open Content Engine calendar tick every 15 minutes
+
+[Timer]
+OnCalendar=*:0/15
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+
+
 # ----- OPTIONAL: trend pass (config-gated; trends.enabled — release-spec §8.8) -----
 # Cadence is set in config (trends.cadence: 1h/2h/.../24h); the timer fires the poll on
 # the SAME interval. The OnCalendar below is HOURLY — use *-*-* 09:00:00 for a daily 24h

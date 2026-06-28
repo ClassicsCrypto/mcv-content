@@ -28,13 +28,26 @@ Replace these in every recipe:
 - `<NODE_BIN>` — absolute path to your `node` binary (or just `node` if on PATH).
 - `HH:MM` — the daily run time, in the scheduler host's local time.
 
-## Optional: the intra-day tick
+## Optional: the intra-day tick (`engine tick`)
 
-The optional calendar TICK (intra-day precision) is OFF by default. To use it, set
-`scheduler.tick_enabled: true` in `config/system.json` and schedule
-`engine kickoff` (or the tick verb, if your build exposes it) more often than daily.
-The kickoff and tick share dedup state, so a slot dispatched by either is not
-re-dispatched. Until you enable it, the daily kickoff is the only trigger you need.
+The daily kickoff is **date-granular** — it dispatches the whole day's eligible slots when it runs.
+The optional calendar **tick** adds **clock-time precision**: it dispatches each slot near its actual
+`time` instead of all at the morning run. It is **OFF by default**. To use it:
+
+1. Set `scheduler.tick_enabled: true` in `config/system.json` (optionally tune
+   `scheduler.lookahead_minutes` (default 120), `min_gap_minutes` (default 30), and
+   `utc_offset_minutes` (default 0, i.e. calendar times read as UTC)).
+2. Schedule **`engine tick`** on a sub-daily cadence — every 15–30 min is typical. Example crontab
+   line (set `CONTENT_HOME` as in the recipes):
+
+   ```
+   */15 * * * *  CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js tick >> <CONTENT_HOME>/logs/tick.cron.log 2>&1
+   ```
+
+`engine tick` runs under the **same single-runner lock** as the kickoff + executor (overlaps skip
+safely) and **shares the kickoff's dedup state**, so a slot dispatched today by *either* trigger is
+never re-dispatched. Run it by hand once with `--dry-run` (or `--force` while still off) to see what
+it would fire. Until you enable it, **the daily kickoff is the only trigger you need.**
 
 ## Optional: the trend pass (config-gated, OFF by default)
 

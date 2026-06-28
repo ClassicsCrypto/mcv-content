@@ -28,6 +28,24 @@ the kickoff command. Two things must be true:
 Replace `<ENGINE_DIR>` (this checkout) and `<CONTENT_HOME>` (your instance directory),
 and adjust the cron `schedule` to your preferred local run time.
 
+## Optional: the intra-day tick (config-gated, OFF by default)
+
+The daily kickoff is date-granular. The **tick** (`engine tick`) adds clock-time precision — enable
+`scheduler.tick_enabled: true` and add a job on a sub-daily cadence (e.g. every 15 min). It shares
+the kickoff's dedup state + single-runner lock, so a slot is never dispatched twice.
+
+```json
+{
+  "id": "content-engine-tick",
+  "schedule": "*/15 * * * *",
+  "command": "node <ENGINE_DIR>/bin/engine.js tick",
+  "env": {
+    "CONTENT_HOME": "<CONTENT_HOME>"
+  },
+  "description": "Open Content Engine intra-day calendar tick (release-spec §8.4). OFF unless scheduler.tick_enabled."
+}
+```
+
 ## Optional: the trend pass (config-gated, OFF by default)
 
 If you enable the trend pathway (`trends.enabled: true` + a `trends.adapter` +

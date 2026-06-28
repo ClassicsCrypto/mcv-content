@@ -19,6 +19,21 @@
       }
     },
     {
+      "//": "OPTIONAL — intra-day calendar tick (config-gated: scheduler.tick_enabled; release-spec 8.4).",
+      "//2": "Clock-precise firing on top of the daily kickoff; run on a sub-daily cadence (e.g. every 15m).",
+      "//3": "Shares the kickoff dedup state + single-runner lock, so the same (date,slot) never doubles.",
+      "name": "content-engine-tick",
+      "script": "bin/engine.js",
+      "args": "tick",
+      "cwd": "<ENGINE_DIR>",
+      "interpreter": "node",
+      "autorestart": false,
+      "cron_restart": "*/15 * * * *",
+      "env": {
+        "CONTENT_HOME": "<CONTENT_HOME>"
+      }
+    },
+    {
       "//": "OPTIONAL — trend pass (config-gated: trends.enabled; release-spec 8.8). cron_restart",
       "//2": "matches your trends.cadence: '0 * * * *' hourly (1h), '0 */4 * * *' 4h, '0 9 * * *' daily (24h).",
       "//3": "For the apify adapter, set the confirmed trends.tracked_accounts + trends.keywords in config.",
