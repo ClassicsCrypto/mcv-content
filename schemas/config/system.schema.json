@@ -162,8 +162,36 @@
         },
         "tick_enabled": {
           "type": "boolean",
-          "description": "Enable the optional fine-grained calendar-tick trigger. Ships off by default; the daily kickoff is the canonical trigger.",
+          "description": "Enable the optional fine-grained calendar-tick trigger (run via `engine tick` on a sub-daily cadence). Ships off by default; the daily kickoff is the canonical trigger.",
           "default": false
+        },
+        "lookahead_minutes": {
+          "type": "integer",
+          "description": "Calendar-tick look-ahead window in minutes: the tick dispatches slots whose next clock time falls within [now-30m, now+lookahead]. Only consulted by `engine tick`.",
+          "minimum": 1,
+          "default": 120
+        },
+        "min_gap_minutes": {
+          "type": "integer",
+          "description": "Minimum minutes between dispatches for the same brand+platform within one calendar tick (anti-burst). Only consulted by `engine tick`.",
+          "minimum": 0,
+          "default": 30
+        },
+        "utc_offset_minutes": {
+          "type": "integer",
+          "description": "Fixed offset (minutes) the calendar tick uses to interpret slot clock times as wall-clock for a timezone (default 0 = treat calendar times as UTC). The tick is 30-min granular, so a sub-hour DST drift is tolerable; precise tz/DST is a roadmap refinement.",
+          "default": 0
+        },
+        "daily_max": {
+          "type": "integer",
+          "description": "Maximum slots the daily kickoff dispatches in one run (the kickoff bound; `--max` overrides per run). Default 4.",
+          "minimum": 1,
+          "default": 4
+        },
+        "timezone": {
+          "type": "string",
+          "description": "IANA timezone the daily kickoff resolves \"today\" in (e.g. \"America/Toronto\"). Defaults to UTC. Align your host scheduler's cron time with this.",
+          "minLength": 1
         }
       }
     },

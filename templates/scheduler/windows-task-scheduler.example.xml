@@ -21,6 +21,10 @@
   needed). Run each only when you enable its pathway in config/system.json.
   Replace <CONTENT_HOME>, <NODE_BIN>, <ENGINE_DIR>, <brand-id>.
 
+  Intra-day calendar tick (config-gated: scheduler.tick_enabled; §8.4) — clock-precise firing on
+  top of the daily kickoff; run sub-daily (e.g. every 15 min). Shares the kickoff dedup + lock.
+    schtasks /Create /TN "ContentEngineTick" /SC MINUTE /MO 15 /TR "cmd /c set \"CONTENT_HOME=<CONTENT_HOME>\" && \"<NODE_BIN>\" \"<ENGINE_DIR>\bin\engine.js\" tick >> \"<CONTENT_HOME>\logs\tick.task.log\" 2>&1"
+
   Trend pass (config-gated: trends.enabled; §8.8) — HOURLY (1h); use /SC DAILY /ST 09:00
   for a 24h pass, or /SC HOURLY /MO 4 for a 4h cadence. For the apify adapter set the
   confirmed trends.tracked_accounts + trends.keywords first.

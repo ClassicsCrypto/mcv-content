@@ -25,6 +25,14 @@
 # 0 */4 * * *  CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js poll-trends >> <CONTENT_HOME>/logs/trend-poll.cron.log 2>&1   # every 4h
 # 0 9 * * *    CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js poll-trends >> <CONTENT_HOME>/logs/trend-poll.cron.log 2>&1   # daily (24h) at 09:00
 
+# OPTIONAL — the intra-day CALENDAR TICK (release-spec §8.4; OFF by default).
+# The daily kickoff above is date-granular (fires the whole day's slots at once). The tick adds
+# clock-time precision (fires each slot near its `time`). Enable scheduler.tick_enabled=true in
+# config/system.json, then schedule `engine tick` on a sub-daily cadence (every 15-30m). It shares
+# the kickoff dedup state + single-runner lock, so the same (date,slot) is never dispatched twice.
+#
+# */15 * * * *  CONTENT_HOME=<CONTENT_HOME> <NODE_BIN> <ENGINE_DIR>/bin/engine.js tick >> <CONTENT_HOME>/logs/tick.cron.log 2>&1
+
 # OPTIONAL — the config-gated MONTHLY COMPETITOR SCAN (roadmap #5; OFF by default).
 # Enable competitor_scan.enabled + competitor_scan.adapter (or "fixture" for zero-key)
 # + competitor_scan.voice_calibration.enabled (if you also want proposal generation) in

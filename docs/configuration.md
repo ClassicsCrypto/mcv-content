@@ -157,10 +157,16 @@ them.
 ### `scheduler`
 
 `{ kickoff_time (required, HH:MM), executor_interval_minutes (5), analytics_interval_minutes (240),
-ttl_sweep_interval_minutes (60), tick_enabled (false) }`. The daily kickoff is the canonical
-trigger; `tick_enabled` turns on the optional fine-grained calendar tick. **Safety posture never
-lives in scheduler wrappers** — it lives here in declared config. See
-[`setup/platforms.md`](setup/platforms.md) and `templates/scheduler/` for installing the triggers.
+ttl_sweep_interval_minutes (60), tick_enabled (false), lookahead_minutes (120), min_gap_minutes (30),
+utc_offset_minutes (0), daily_max (4), timezone }`. The daily **kickoff** (`engine kickoff`) is the
+canonical trigger — date-granular, bounded by `daily_max`, resolving "today" in `timezone` (default
+UTC). The optional **tick** (`engine tick`, off until `tick_enabled: true`) adds clock-time precision
+on a sub-daily cadence; it reads `lookahead_minutes` (its due-window), `min_gap_minutes` (per-brand
+anti-burst), and `utc_offset_minutes` (how it reads calendar clock times), and it **shares the
+kickoff's dedup state + single-runner lock** so a slot is never dispatched twice. **Safety posture
+never lives in scheduler wrappers** — it lives here in declared config. See
+[`setup/platforms.md`](setup/platforms.md) and `templates/scheduler/` (incl. the intra-day tick
+recipe) for installing the triggers.
 
 ### `cooldown`, `card_ttl`, `retention`, `observability`
 

@@ -20,6 +20,7 @@
  *   fixture-run    zero-key deterministic E2E        (fixtures/run.js — P4)           — CONTENT_HOME-free
  *   run-slot       on-demand single-slot run         (orchestrator dispatch + pipelines)
  *   kickoff        the canonical daily batch         (orchestrator runKickoff)
+ *   tick           optional intra-day calendar tick  (orchestrator runTick, off by default — RD-14)
  *   poll-trends    config-gated trend pass (off)     (orchestrator runTrendPass, §8.8/DD-16)
  *   dispatch       write one slot-run task record    (orchestrator dispatchTask, RD-18)
  *   status         the §13.1 operational surface     (queue + ledger + mode + spend scope)
@@ -63,6 +64,9 @@ const VERBS = {
   'fixture-run': { mod: require('../engine/cli/fixture-run'), fn: 'run' },
   'run-slot': { mod: require('../engine/cli/run-slot'), fn: 'run' },
   kickoff: { mod: require('../engine/cli/kickoff'), fn: 'run' },
+  // The optional, off-by-default intra-day calendar tick (scheduler.tick_enabled) — clock-precise
+  // firing on top of the canonical daily kickoff; shares the kickoff dedup state + single-runner lock.
+  tick: { mod: require('../engine/cli/tick'), fn: 'run' },
   'poll-trends': { mod: require('../engine/cli/poll-trends'), fn: 'run' },
   dispatch: { mod: require('../engine/cli/dispatch'), fn: 'run' },
   status: { mod: require('../engine/cli/status'), fn: 'run' },
@@ -92,7 +96,7 @@ const VERBS = {
   'voice-calibrate': { mod: require('../engine/cli/voice-calibrate'), fn: 'run' },
 };
 
-const VERB_ORDER = ['setup', 'init', 'verify', 'fixture-run', 'run-slot', 'kickoff', 'poll-trends', 'dispatch', 'status', 'calibrate', 'ingest-brand', 'suggest', 'generate-dna', 'engagement-timeline', 'index-library', 'purge-corpora', 'improve', 'rollback', 'share', 'evaluate-contribution', 'pause', 'resume', 'competitor-scan', 'voice-calibrate'];
+const VERB_ORDER = ['setup', 'init', 'verify', 'fixture-run', 'run-slot', 'kickoff', 'tick', 'poll-trends', 'dispatch', 'status', 'calibrate', 'ingest-brand', 'suggest', 'generate-dna', 'engagement-timeline', 'index-library', 'purge-corpora', 'improve', 'rollback', 'share', 'evaluate-contribution', 'pause', 'resume', 'competitor-scan', 'voice-calibrate'];
 
 /** One-line summary per verb for the top-level help (kept short; --help <verb> has the full text). */
 const VERB_SUMMARY = {
@@ -102,6 +106,7 @@ const VERB_SUMMARY = {
   'fixture-run': 'zero-key deterministic end-to-end proof (CONTENT_HOME-free)',
   'run-slot': 'run one calendar slot on demand',
   kickoff: 'run the canonical daily kickoff batch (--now)',
+  tick: 'run the optional intra-day calendar tick (off by default; scheduler.tick_enabled)',
   'poll-trends': 'run a config-gated trend pass into reserved trend slots (§8.8, off by default)',
   dispatch: 'write one pending slot-run task record (RD-18)',
   status: 'the one-command operational surface (§13.1)',
