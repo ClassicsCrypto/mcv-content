@@ -541,11 +541,15 @@ function verifyC3(opts = {}) {
 
   const criteria = { ...DEFAULT_CALIBRATION_CRITERIA, ...(loadCalibrationCriteria(env) || {}) };
 
-  // Source the calibration result: explicit opts.calibration, else the recorded C3 detail.
+  // Source the calibration result: explicit opts.calibration, else the recorded C3 record. Prefer
+  // the dedicated, durable `calibration` field; fall back to legacy `detail` for instances
+  // calibrated before that field existed. (The durable field is preserved across later detail-only
+  // writes, so re-running `verify --setup c3` no longer wipes the scores — see setup-state.js.)
   let cal = opts.calibration;
   if (!cal) {
     const state = setupState.readSetupState(env);
-    cal = state.checkpoints.C3 && state.checkpoints.C3.detail;
+    const c3 = state.checkpoints.C3;
+    cal = (c3 && c3.calibration) || (c3 && c3.detail);
   }
 
   if (!cal || typeof cal !== 'object') {

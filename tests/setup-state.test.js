@@ -111,3 +111,14 @@ test('setCheckpoint stores a small structured detail (e.g. calibration scores)',
   const cp = setupState.readSetupState(env).checkpoints.C3;
   assert.equal(cp.detail.gate_clear, 9);
 });
+
+test('setCheckpoint preserves the durable calibration result across a detail-only re-write', () => {
+  const env = tempHome();
+  // `engine calibrate` records the operator-supplied scores in the durable `calibration` field.
+  setupState.setCheckpoint('C3', true, { env, calibration: { sample_count: 10, gate_clear: 9, on_voice: 7, fabrication_codes: 0 } });
+  // A later detail-only write (e.g. `verify --setup c3` recording its check summary) must NOT wipe it.
+  setupState.setCheckpoint('C3', true, { env, detail: { passed: true, checks: [] } });
+  const cp = setupState.readSetupState(env).checkpoints.C3;
+  assert.equal(cp.calibration.gate_clear, 9);
+  assert.equal(cp.detail.passed, true);
+});

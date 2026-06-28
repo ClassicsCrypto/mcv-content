@@ -214,9 +214,11 @@ function recordAndGrade(brand, result, env) {
   };
   // Grade with the verifier (shares DEFAULT_CALIBRATION_CRITERIA — §2.5).
   const graded = setup.verifyCheckpoint('C3', { env, calibration: cal });
-  // Record into setup-state C3 detail so the resumable flow + `engine status` see it.
+  // Record into setup-state so the resumable flow + `engine status` see it. The scores go in the
+  // durable `calibration` field (the verifier's INPUT, preserved across later detail-only writes);
+  // `detail` carries a copy too for back-compat readers.
   try {
-    setupState.setCheckpoint('C3', graded.passed, { detail: cal, env });
+    setupState.setCheckpoint('C3', graded.passed, { calibration: cal, detail: cal, env });
   } catch (err) {
     return { ok: false, exitCode: 1, summary: 'could not record calibration result', detail: util.describeError(err) };
   }
